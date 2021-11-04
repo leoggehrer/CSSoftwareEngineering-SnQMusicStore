@@ -1,0 +1,65 @@
+@*@CodeCopy*@
+@{
+    @using SnQMusicStore.AspMvc.Modules.Handler
+    @using SnQMusicStore.AspMvc.Modules.Language
+    @using SnQMusicStore.AspMvc.Modules.Session
+    @using SnQMusicStore.AspMvc.Models.Modules.View
+    @model IEnumerable<SnQMusicStore.AspMvc.Models.IdentityModel>
+
+    var sessionWrapper = new SessionWrapper(Context.Session);
+    var controller = ViewContext.RouteData.Values["controller"].ToString();
+    var action = ViewContext.RouteData.Values["action"].ToString();
+    Func<string, string> translate = Translator.TranslateIt;
+    Func<string, string> translateFor = pn => translate($"{controller}.{pn}");
+    var title = translateFor(controller);
+
+    ViewData["Title"] = title;
+
+    <h1>@title</h1>
+
+    @if (string.IsNullOrEmpty(ErrorHandler.LastError) == false)
+    {
+        <div class="alert alert-danger" role="alert">
+            @ErrorHandler.GetLastErrorAndClear()
+        </div>
+    }
+    else
+    {
+        var indexViewModel = new IndexViewModel(Model, ViewBag);
+
+        <p style="margin-top: 1em;">
+            <a asp-action="Create" class="btn btn-outline-secondary">@translateFor("Create New")</a>
+        </p>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    @foreach (var item in indexViewModel.DisplayProperties)
+                    {
+                        <th>
+                            @translateFor(indexViewModel.GetLabel(item))
+                        </th>
+                    }
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var model in indexViewModel.Models)
+                {
+                    <tr>
+                        @foreach (var displayItem in indexViewModel.DisplayProperties)
+                        {
+                            <td>
+                                @indexViewModel.GetDisplayValue(model, displayItem)
+                            </td>
+                        }
+                        <td>
+                            @Html.ActionLink("Edit", "Edit", new { id = model.Id }) |
+                            @Html.ActionLink("Delete", "Delete", new { id = model.Id })
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}

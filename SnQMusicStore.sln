@@ -1,0 +1,107 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31019.35
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{50572E67-F7D5-43D1-8516-552D8453520E}") = "CommonBase", "CommonBase\CommonBase.csproj", "{D23A9920-E20F-415D-A478-8DF1003ABE5A}"
+EndProject
+Project("{BEECD927-E992-4447-A034-8E5EF65561C3}") = "SnQMusicStore.Contracts", "SnQMusicStore.Contracts\SnQMusicStore.Contracts.csproj", "{E8ADBBC2-2B34-4C6E-9AE9-4271E549616B}"
+EndProject
+Project("{4FB0B2D1-8F68-459B-B1F0-B0C257B5D026}") = "SnQMusicStore.Logic", "SnQMusicStore.Logic\SnQMusicStore.Logic.csproj", "{AAAD5ED7-2F0A-4346-864D-99F7DE17369D}"
+EndProject
+Project("{0CA49D7A-8F11-45EA-B441-1C344E41B62D}") = "SnQMusicStore.ConApp", "SnQMusicStore.ConApp\SnQMusicStore.ConApp.csproj", "{92FA6FB8-AD7F-4399-9ADF-ACE035E912C4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}")="SolutionItems","SolutionItems","{C4BC300B-0CAF-4A53-815C-C432B6C80611}"
+	ProjectSection(SolutionItems)=preProject
+		CodeGeneration.drawio=CodeGeneration.drawio
+		CodeGeneration.png=CodeGeneration.png
+		Communication_Path.drawio=Communication_Path.drawio
+		Communication_Path.png=Communication_Path.png
+		CreateProject.drawio=CreateProject.drawio
+		CreateProject.png=CreateProject.png
+		DevelopmentStepByStep.md=DevelopmentStepByStep.md
+		docker-compose.yml=docker-compose.yml
+		ReadMe.md=ReadMe.md
+		ReadMeSave.md=ReadMeSave.md
+		SyncProjects.drawio=SyncProjects.drawio
+		SyncProjects.png=SyncProjects.png
+		Translations.csv=Translations.csv
+EndProject
+Project("{FB78742A-56D4-4CFB-A65B-102D970AA8AC}") = "SnQMusicStore.WebApi", "SnQMusicStore.WebApi\SnQMusicStore.WebApi.csproj", "{DEEE04A7-6F3B-4372-9125-CE9EFD989B0C}"
+EndProject
+Project("{FB61D063-3D73-4F0A-9FEA-905CF90EBD6F}") = "SnQMusicStore.Transfer", "SnQMusicStore.Transfer\SnQMusicStore.Transfer.csproj", "{27E686AC-5044-42DB-BFBF-5991B7543183}"
+EndProject
+Project("{12E29432-5501-47CD-AFFF-007CD7CA1588}") = "SnQMusicStore.AspMvc", "SnQMusicStore.AspMvc\SnQMusicStore.AspMvc.csproj", "{EAD77CB9-AA6F-4649-84B4-1E44ED11AFF3}"
+EndProject
+Project("{A8D95AB8-3085-4682-9018-ACAE4A0CB62E}") = "CSharpCodeGenerator.ConApp", "CSharpCodeGenerator.ConApp\CSharpCodeGenerator.ConApp.csproj", "{6D3E65AF-C49C-4A23-A15E-83D66D82125C}"
+EndProject
+Project("{779B2A70-45BB-463E-94E4-332EE4DFA111}") = "CSharpCodeGenerator.Logic", "CSharpCodeGenerator.Logic\CSharpCodeGenerator.Logic.csproj", "{9BAEEDDA-2D69-4861-9E58-B36BE5161AB1}"
+EndProject
+Project("{630F63E9-8A02-4FD4-9A70-4F507F338E80}") = "SnQMusicStore.Adapters", "SnQMusicStore.Adapters\SnQMusicStore.Adapters.csproj", "{54E7AF9B-0944-44F5-A28A-B2CD8CBEC487}"
+EndProject
+Project("{04850E3B-83D8-48A2-B8DB-9C73D6491E78}") = "SolutionPreprocessorHelper.ConApp", "SolutionPreprocessorHelper.ConApp\SolutionPreprocessorHelper.ConApp.csproj", "{709A80C4-069A-4DCE-80F4-B20F3BFDD10C}"
+EndProject
+Project("{945F3430-1752-4EC9-9D38-3E6FC33D0CE0}") = "SolutionDockerBuilder.ConApp", "SolutionDockerBuilder.ConApp\SolutionDockerBuilder.ConApp.csproj", "{E5FB6D10-4434-4BEB-BCD7-7F9CD992557C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D23A9920-E20F-415D-A478-8DF1003ABE5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D23A9920-E20F-415D-A478-8DF1003ABE5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D23A9920-E20F-415D-A478-8DF1003ABE5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D23A9920-E20F-415D-A478-8DF1003ABE5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8ADBBC2-2B34-4C6E-9AE9-4271E549616B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8ADBBC2-2B34-4C6E-9AE9-4271E549616B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8ADBBC2-2B34-4C6E-9AE9-4271E549616B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8ADBBC2-2B34-4C6E-9AE9-4271E549616B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAAD5ED7-2F0A-4346-864D-99F7DE17369D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAAD5ED7-2F0A-4346-864D-99F7DE17369D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAAD5ED7-2F0A-4346-864D-99F7DE17369D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAAD5ED7-2F0A-4346-864D-99F7DE17369D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92FA6FB8-AD7F-4399-9ADF-ACE035E912C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92FA6FB8-AD7F-4399-9ADF-ACE035E912C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92FA6FB8-AD7F-4399-9ADF-ACE035E912C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92FA6FB8-AD7F-4399-9ADF-ACE035E912C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEEE04A7-6F3B-4372-9125-CE9EFD989B0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEEE04A7-6F3B-4372-9125-CE9EFD989B0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEEE04A7-6F3B-4372-9125-CE9EFD989B0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEEE04A7-6F3B-4372-9125-CE9EFD989B0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27E686AC-5044-42DB-BFBF-5991B7543183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27E686AC-5044-42DB-BFBF-5991B7543183}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27E686AC-5044-42DB-BFBF-5991B7543183}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27E686AC-5044-42DB-BFBF-5991B7543183}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAD77CB9-AA6F-4649-84B4-1E44ED11AFF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAD77CB9-AA6F-4649-84B4-1E44ED11AFF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAD77CB9-AA6F-4649-84B4-1E44ED11AFF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAD77CB9-AA6F-4649-84B4-1E44ED11AFF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D3E65AF-C49C-4A23-A15E-83D66D82125C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D3E65AF-C49C-4A23-A15E-83D66D82125C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D3E65AF-C49C-4A23-A15E-83D66D82125C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3E65AF-C49C-4A23-A15E-83D66D82125C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BAEEDDA-2D69-4861-9E58-B36BE5161AB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BAEEDDA-2D69-4861-9E58-B36BE5161AB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BAEEDDA-2D69-4861-9E58-B36BE5161AB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BAEEDDA-2D69-4861-9E58-B36BE5161AB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54E7AF9B-0944-44F5-A28A-B2CD8CBEC487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54E7AF9B-0944-44F5-A28A-B2CD8CBEC487}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54E7AF9B-0944-44F5-A28A-B2CD8CBEC487}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54E7AF9B-0944-44F5-A28A-B2CD8CBEC487}.Release|Any CPU.Build.0 = Release|Any CPU
+		{709A80C4-069A-4DCE-80F4-B20F3BFDD10C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{709A80C4-069A-4DCE-80F4-B20F3BFDD10C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{709A80C4-069A-4DCE-80F4-B20F3BFDD10C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{709A80C4-069A-4DCE-80F4-B20F3BFDD10C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5FB6D10-4434-4BEB-BCD7-7F9CD992557C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5FB6D10-4434-4BEB-BCD7-7F9CD992557C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5FB6D10-4434-4BEB-BCD7-7F9CD992557C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5FB6D10-4434-4BEB-BCD7-7F9CD992557C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9981B144-57D7-4BD7-BE83-935CDDE807E1}
+	EndGlobalSection
+EndGlobal

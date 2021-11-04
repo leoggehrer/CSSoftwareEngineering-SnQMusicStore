@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>ACCOUNT_ON;LOGGING_OFF;REVISION_OFF</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SnQMusicStore.Logic\SnQMusicStore.Logic.csproj" />
+    <ProjectReference Include="..\SnQMusicStore.Transfer\SnQMusicStore.Transfer.csproj" />
+  </ItemGroup>
+
+</Project>

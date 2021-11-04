@@ -1,0 +1,14 @@
+@using SnQMusicStore.AspMvc.Modules.Handler
+
+@{
+    ViewData["Title"] = "ErrorList";
+}
+
+<h1>ErrorList</h1>
+
+@foreach (var item in ErrorHandler.GetErrors())
+{
+    <div class="alert alert-danger" role="alert">
+        @item
+    </div>
+}
