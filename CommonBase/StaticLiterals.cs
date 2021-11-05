@@ -1,4 +1,4 @@
-//@CodeCopy
+﻿//@CodeCopy
 //MdStart
 using System.Collections.Generic;
 
@@ -50,7 +50,7 @@ namespace CommonBase
 		public static string SourceFileExtensions => "*.css|*.cs|*.ts|*.cshtml|*.razor|*.razor.cs|*.template";
 		public static string CSharpFileExtension => ".cs";
 		public static string IgnoreLabel => "@Ignore";
-		public static string BaseCodeLabel => "@CodeCopy";
+		public static string BaseCodeLabel => "@BaseCode";
 		public static string CodeCopyLabel => "@CodeCopy";
 	}
 }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SnQMusicStore.AspMvc.Models;
+using SnQMusicStore.AspMvc.Modules.Language;
 using System.Diagnostics;
 
 namespace SnQMusicStore.AspMvc.Controllers
@@ -26,6 +27,13 @@ namespace SnQMusicStore.AspMvc.Controllers
 		public IActionResult Contact()
 		{
 			return View();
+		}
+
+		public IActionResult ReloadTranslation()
+		{
+			Translator.Instance.ReloadTranslation();
+
+			return RedirectToAction("Index");
 		}
 
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

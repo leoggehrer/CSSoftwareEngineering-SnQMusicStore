@@ -1,4 +1,4 @@
-//@CodeCopy
+﻿//@CodeCopy
 using CommonBase.Extensions;
 using Microsoft.EntityFrameworkCore;
 using SnQMusicStore.Contracts;

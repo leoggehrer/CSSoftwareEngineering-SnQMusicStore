@@ -1,4 +1,4 @@
-//@CodeCopy
+﻿//@CodeCopy
 //MdStart
 #if ACCOUNT_ON
 namespace SnQMusicStore.Contracts.Modules.Account

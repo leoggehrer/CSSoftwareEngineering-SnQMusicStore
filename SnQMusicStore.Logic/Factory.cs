@@ -1,4 +1,4 @@
-//@CodeCopy
+﻿//@CodeCopy
 using SnQMusicStore.Contracts.Client;
 
 namespace SnQMusicStore.Logic

@@ -1,4 +1,4 @@
-//@CodeCopy
+﻿//@CodeCopy
 //MdStart
 namespace SnQMusicStore.AspMvc.Models
 {
