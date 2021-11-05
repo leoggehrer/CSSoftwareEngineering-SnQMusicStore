@@ -1,7 +1,6 @@
-﻿//@Ignore
-using CommonBase.Attributes;
+﻿using CommonBase.Attributes;
 
-namespace SnQMusicStore.Contracts.Persistence.MusicStore
+namespace SnQMusicStore.Contracts.Persistence.App
 {
     [ContractInfo]
     public interface ITrack : IVersionable, ICopyable<ITrack>

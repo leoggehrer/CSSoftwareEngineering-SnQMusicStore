@@ -1,9 +1,8 @@
-﻿//@Ignore
-using CommonBase.Attributes;
+﻿using CommonBase.Attributes;
 
-namespace SnQMusicStore.Contracts.Persistence.MusicStore
+namespace SnQMusicStore.Contracts.Persistence.MasterData
 {
-	[ContractInfo(ContextType = ContextType.Table)]
+    [ContractInfo(ContextType = ContextType.Table)]
 	public interface IGenre : Modules.Base.INameable, IVersionable, ICopyable<IGenre>
 	{
 

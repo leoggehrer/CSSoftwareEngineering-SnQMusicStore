@@ -1,9 +1,8 @@
-﻿//@Ignore
-using CommonBase.Attributes;
+﻿using CommonBase.Attributes;
 
-namespace SnQMusicStore.Contracts.Persistence.MusicStore
+namespace SnQMusicStore.Contracts.Persistence.App
 {
-	[ContractInfo(ContextType = ContextType.Table)]
+    [ContractInfo(ContextType = ContextType.Table)]
 	public partial interface IAlbum : IVersionable, ICopyable<IAlbum>
 	{
 		int ArtistId { get; set; }

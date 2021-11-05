@@ -5,22 +5,22 @@ namespace SnQMusicStore.Logic.DataContext
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
     partial class SnQMusicStoreDbContext
     {
-        protected DbSet<Entities.Persistence.MusicStore.Album> AlbumSet
+        protected DbSet<Entities.Persistence.MasterData.Genre> GenreSet
         {
             get;
             set;
         }
-        protected DbSet<Entities.Persistence.MusicStore.Artist> ArtistSet
+        protected DbSet<Entities.Persistence.App.Album> AlbumSet
         {
             get;
             set;
         }
-        protected DbSet<Entities.Persistence.MusicStore.Track> TrackSet
+        protected DbSet<Entities.Persistence.App.Artist> ArtistSet
         {
             get;
             set;
         }
-        protected DbSet<Entities.Persistence.MusicStore.Genre> GenreSet
+        protected DbSet<Entities.Persistence.App.Track> TrackSet
         {
             get;
             set;
@@ -62,21 +62,21 @@ namespace SnQMusicStore.Logic.DataContext
         }
         partial void GetDbSet<I, E>(ref DbSet<E> dbSet) where E : class
         {
-            if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum))
+            if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
+            {
+                dbSet = GenreSet as DbSet<E>;
+            }
+            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
             {
                 dbSet = AlbumSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IArtist))
+            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
             {
                 dbSet = ArtistSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.ITrack))
+            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
             {
                 dbSet = TrackSet as DbSet<E>;
-            }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IGenre))
-            {
-                dbSet = GenreSet as DbSet<E>;
             }
             else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
             {
@@ -109,10 +109,21 @@ namespace SnQMusicStore.Logic.DataContext
         }
         static partial void DoModelCreating(ModelBuilder modelBuilder)
         {
-            var albumBuilder = modelBuilder.Entity<Entities.Persistence.MusicStore.Album>();
-            albumBuilder.ToTable("Album", "MusicStore")
+            var genreBuilder = modelBuilder.Entity<Entities.Persistence.MasterData.Genre>();
+            genreBuilder.ToTable("Genre", "MasterData")
             .HasKey("Id");
-            modelBuilder.Entity<Entities.Persistence.MusicStore.Album>().Property(p => p.RowVersion).IsRowVersion();
+            modelBuilder.Entity<Entities.Persistence.MasterData.Genre>().Property(p => p.RowVersion).IsRowVersion();
+            genreBuilder
+            .HasIndex(c => c.Name)
+            .IsUnique();
+            genreBuilder.Property(p => p.Name)
+            .IsRequired()
+            .HasMaxLength(256);
+            ConfigureEntityType(genreBuilder);
+            var albumBuilder = modelBuilder.Entity<Entities.Persistence.App.Album>();
+            albumBuilder.ToTable("Album", "App")
+            .HasKey("Id");
+            modelBuilder.Entity<Entities.Persistence.App.Album>().Property(p => p.RowVersion).IsRowVersion();
             albumBuilder
             .HasIndex(c => c.Title)
             .IsUnique();
@@ -120,10 +131,10 @@ namespace SnQMusicStore.Logic.DataContext
             .IsRequired()
             .HasMaxLength(1024);
             ConfigureEntityType(albumBuilder);
-            var artistBuilder = modelBuilder.Entity<Entities.Persistence.MusicStore.Artist>();
-            artistBuilder.ToTable("Artist", "MusicStore")
+            var artistBuilder = modelBuilder.Entity<Entities.Persistence.App.Artist>();
+            artistBuilder.ToTable("Artist", "App")
             .HasKey("Id");
-            modelBuilder.Entity<Entities.Persistence.MusicStore.Artist>().Property(p => p.RowVersion).IsRowVersion();
+            modelBuilder.Entity<Entities.Persistence.App.Artist>().Property(p => p.RowVersion).IsRowVersion();
             artistBuilder
             .HasIndex(c => c.Name)
             .IsUnique();
@@ -131,10 +142,10 @@ namespace SnQMusicStore.Logic.DataContext
             .IsRequired()
             .HasMaxLength(256);
             ConfigureEntityType(artistBuilder);
-            var trackBuilder = modelBuilder.Entity<Entities.Persistence.MusicStore.Track>();
-            trackBuilder.ToTable("Track", "MusicStore")
+            var trackBuilder = modelBuilder.Entity<Entities.Persistence.App.Track>();
+            trackBuilder.ToTable("Track", "App")
             .HasKey("Id");
-            modelBuilder.Entity<Entities.Persistence.MusicStore.Track>().Property(p => p.RowVersion).IsRowVersion();
+            modelBuilder.Entity<Entities.Persistence.App.Track>().Property(p => p.RowVersion).IsRowVersion();
             trackBuilder
             .HasIndex(c => c.Title);
             trackBuilder.Property(p => p.Title)
@@ -143,17 +154,6 @@ namespace SnQMusicStore.Logic.DataContext
             trackBuilder.Property(p => p.Composer)
             .HasMaxLength(512);
             ConfigureEntityType(trackBuilder);
-            var genreBuilder = modelBuilder.Entity<Entities.Persistence.MusicStore.Genre>();
-            genreBuilder.ToTable("Genre", "MusicStore")
-            .HasKey("Id");
-            modelBuilder.Entity<Entities.Persistence.MusicStore.Genre>().Property(p => p.RowVersion).IsRowVersion();
-            genreBuilder
-            .HasIndex(c => c.Name)
-            .IsUnique();
-            genreBuilder.Property(p => p.Name)
-            .IsRequired()
-            .HasMaxLength(256);
-            ConfigureEntityType(genreBuilder);
             var accessBuilder = modelBuilder.Entity<Entities.Persistence.Account.Access>();
             accessBuilder.ToTable("Access", "Account")
             .HasKey("Id");
@@ -246,10 +246,10 @@ namespace SnQMusicStore.Logic.DataContext
             .HasMaxLength(64);
             ConfigureEntityType(userBuilder);
         }
-        static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.MusicStore.Album> entityTypeBuilder);
-        static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.MusicStore.Artist> entityTypeBuilder);
-        static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.MusicStore.Track> entityTypeBuilder);
-        static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.MusicStore.Genre> entityTypeBuilder);
+        static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.MasterData.Genre> entityTypeBuilder);
+        static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.App.Album> entityTypeBuilder);
+        static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.App.Artist> entityTypeBuilder);
+        static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.App.Track> entityTypeBuilder);
         static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.Account.Access> entityTypeBuilder);
         static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.Account.ActionLog> entityTypeBuilder);
         static partial void ConfigureEntityType(EntityTypeBuilder<Entities.Persistence.Account.Identity> entityTypeBuilder);

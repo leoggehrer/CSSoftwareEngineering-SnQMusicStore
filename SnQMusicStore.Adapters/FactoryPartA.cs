@@ -8,21 +8,21 @@ namespace SnQMusicStore.Adapters
             Contracts.Client.IAdapterAccess<C> result = null;
             if (Adapter == AdapterType.Controller)
             {
-                if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum))
+                if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
                 {
-                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum>() as Contracts.Client.IAdapterAccess<C>;
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MasterData.IGenre>() as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IArtist))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
                 {
-                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IArtist>() as Contracts.Client.IAdapterAccess<C>;
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.App.IAlbum>() as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.ITrack))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
                 {
-                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.ITrack>() as Contracts.Client.IAdapterAccess<C>;
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.App.IArtist>() as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IGenre))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
                 {
-                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IGenre>() as Contracts.Client.IAdapterAccess<C>;
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.App.ITrack>() as Contracts.Client.IAdapterAccess<C>;
                 }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
                 {
@@ -52,6 +52,18 @@ namespace SnQMusicStore.Adapters
                 {
                     result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.Account.IUser>() as Contracts.Client.IAdapterAccess<C>;
                 }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IAlbumTracks))
+                {
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IAlbumTracks>() as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbums))
+                {
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbums>() as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
+                {
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IGenreTracks>() as Contracts.Client.IAdapterAccess<C>;
+                }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.Account.IAppAccess))
                 {
                     result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.Account.IAppAccess>() as Contracts.Client.IAdapterAccess<C>;
@@ -63,24 +75,24 @@ namespace SnQMusicStore.Adapters
             }
             else if (Adapter == AdapterType.Service)
             {
-                if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum))
+                if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
                 {
-                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum, Transfer.Models.Persistence.MusicStore.Album>(BaseUri, "Albums")
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MasterData.IGenre, Transfer.Models.Persistence.MasterData.Genre>(BaseUri, "Genres")
                     as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IArtist))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
                 {
-                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IArtist, Transfer.Models.Persistence.MusicStore.Artist>(BaseUri, "Artists")
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.App.IAlbum, Transfer.Models.Persistence.App.Album>(BaseUri, "Albums")
                     as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.ITrack))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
                 {
-                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.ITrack, Transfer.Models.Persistence.MusicStore.Track>(BaseUri, "Tracks")
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.App.IArtist, Transfer.Models.Persistence.App.Artist>(BaseUri, "Artists")
                     as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IGenre))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
                 {
-                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IGenre, Transfer.Models.Persistence.MusicStore.Genre>(BaseUri, "Genres")
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.App.ITrack, Transfer.Models.Persistence.App.Track>(BaseUri, "Tracks")
                     as Contracts.Client.IAdapterAccess<C>;
                 }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
@@ -118,6 +130,21 @@ namespace SnQMusicStore.Adapters
                     result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.Account.IUser, Transfer.Models.Persistence.Account.User>(BaseUri, "Users")
                     as Contracts.Client.IAdapterAccess<C>;
                 }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IAlbumTracks))
+                {
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IAlbumTracks, Transfer.Models.Business.App.AlbumTracks>(BaseUri, "AlbumTrackses")
+                    as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbums))
+                {
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbums, Transfer.Models.Business.App.ArtistAlbums>(BaseUri, "ArtistAlbumses")
+                    as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
+                {
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IGenreTracks, Transfer.Models.Business.App.GenreTracks>(BaseUri, "GenreTrackses")
+                    as Contracts.Client.IAdapterAccess<C>;
+                }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.Account.IAppAccess))
                 {
                     result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.Account.IAppAccess, Transfer.Models.Business.Account.AppAccess>(BaseUri, "AppAccesses")
@@ -137,21 +164,21 @@ namespace SnQMusicStore.Adapters
             Contracts.Client.IAdapterAccess<C> result = null;
             if (Adapter == AdapterType.Controller)
             {
-                if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum))
+                if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
                 {
-                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MasterData.IGenre>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IArtist))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
                 {
-                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IArtist>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.App.IAlbum>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.ITrack))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
                 {
-                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.ITrack>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.App.IArtist>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IGenre))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
                 {
-                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IGenre>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.App.ITrack>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
                 }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
                 {
@@ -181,6 +208,18 @@ namespace SnQMusicStore.Adapters
                 {
                     result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Persistence.Account.IUser>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
                 }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IAlbumTracks))
+                {
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IAlbumTracks>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbums))
+                {
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbums>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
+                {
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IGenreTracks>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
+                }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.Account.IAppAccess))
                 {
                     result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.Account.IAppAccess>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
@@ -192,21 +231,21 @@ namespace SnQMusicStore.Adapters
             }
             else if (Adapter == AdapterType.Service)
             {
-                if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum))
+                if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
                 {
-                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum, Transfer.Models.Persistence.MusicStore.Album>(sessionToken, BaseUri, "Albums") as Contracts.Client.IAdapterAccess<C>;
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MasterData.IGenre, Transfer.Models.Persistence.MasterData.Genre>(sessionToken, BaseUri, "Genres") as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IArtist))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
                 {
-                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IArtist, Transfer.Models.Persistence.MusicStore.Artist>(sessionToken, BaseUri, "Artists") as Contracts.Client.IAdapterAccess<C>;
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.App.IAlbum, Transfer.Models.Persistence.App.Album>(sessionToken, BaseUri, "Albums") as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.ITrack))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
                 {
-                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.ITrack, Transfer.Models.Persistence.MusicStore.Track>(sessionToken, BaseUri, "Tracks") as Contracts.Client.IAdapterAccess<C>;
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.App.IArtist, Transfer.Models.Persistence.App.Artist>(sessionToken, BaseUri, "Artists") as Contracts.Client.IAdapterAccess<C>;
                 }
-                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IGenre))
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
                 {
-                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.MusicStore.IGenre, Transfer.Models.Persistence.MusicStore.Genre>(sessionToken, BaseUri, "Genres") as Contracts.Client.IAdapterAccess<C>;
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.App.ITrack, Transfer.Models.Persistence.App.Track>(sessionToken, BaseUri, "Tracks") as Contracts.Client.IAdapterAccess<C>;
                 }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
                 {
@@ -235,6 +274,18 @@ namespace SnQMusicStore.Adapters
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IUser))
                 {
                     result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Persistence.Account.IUser, Transfer.Models.Persistence.Account.User>(sessionToken, BaseUri, "Users") as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IAlbumTracks))
+                {
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IAlbumTracks, Transfer.Models.Business.App.AlbumTracks>(sessionToken, BaseUri, "AlbumTrackses") as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbums))
+                {
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbums, Transfer.Models.Business.App.ArtistAlbums>(sessionToken, BaseUri, "ArtistAlbumses") as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
+                {
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IGenreTracks, Transfer.Models.Business.App.GenreTracks>(sessionToken, BaseUri, "GenreTrackses") as Contracts.Client.IAdapterAccess<C>;
                 }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.Account.IAppAccess))
                 {

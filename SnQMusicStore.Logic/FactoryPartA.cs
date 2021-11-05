@@ -5,21 +5,21 @@ namespace SnQMusicStore.Logic
     {
         static partial void CreateController<C>(ref Contracts.Client.IControllerAccess<C> controller) where C : Contracts.IIdentifiable
         {
-            if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum))
+            if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
             {
-                controller = new Controllers.Persistence.MusicStore.AlbumController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
+                controller = new Controllers.Persistence.MasterData.GenreController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IArtist))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
             {
-                controller = new Controllers.Persistence.MusicStore.ArtistController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
+                controller = new Controllers.Persistence.App.AlbumController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.ITrack))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
             {
-                controller = new Controllers.Persistence.MusicStore.TrackController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
+                controller = new Controllers.Persistence.App.ArtistController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IGenre))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
             {
-                controller = new Controllers.Persistence.MusicStore.GenreController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
+                controller = new Controllers.Persistence.App.TrackController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
             }
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
             {
@@ -49,6 +49,18 @@ namespace SnQMusicStore.Logic
             {
                 controller = new Controllers.Persistence.Account.UserController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
             }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IAlbumTracks))
+            {
+                controller = new Controllers.Business.App.AlbumTracksController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbums))
+            {
+                controller = new Controllers.Business.App.ArtistAlbumsController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
+            {
+                controller = new Controllers.Business.App.GenreTracksController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
+            }
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.Account.IAppAccess))
             {
                 controller = new Controllers.Business.Account.AppAccessController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
@@ -64,21 +76,21 @@ namespace SnQMusicStore.Logic
         }
         static partial void CreateController<C>(object sharedController, ref Contracts.Client.IControllerAccess<C> controller) where C : Contracts.IIdentifiable
         {
-            if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum))
+            if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
             {
-                controller = new Controllers.Persistence.MusicStore.AlbumController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
+                controller = new Controllers.Persistence.MasterData.GenreController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IArtist))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
             {
-                controller = new Controllers.Persistence.MusicStore.ArtistController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
+                controller = new Controllers.Persistence.App.AlbumController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.ITrack))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
             {
-                controller = new Controllers.Persistence.MusicStore.TrackController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
+                controller = new Controllers.Persistence.App.ArtistController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IGenre))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
             {
-                controller = new Controllers.Persistence.MusicStore.GenreController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
+                controller = new Controllers.Persistence.App.TrackController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
             }
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
             {
@@ -108,6 +120,18 @@ namespace SnQMusicStore.Logic
             {
                 controller = new Controllers.Persistence.Account.UserController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
             }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IAlbumTracks))
+            {
+                controller = new Controllers.Business.App.AlbumTracksController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbums))
+            {
+                controller = new Controllers.Business.App.ArtistAlbumsController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
+            {
+                controller = new Controllers.Business.App.GenreTracksController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
+            }
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.Account.IAppAccess))
             {
                 controller = new Controllers.Business.Account.AppAccessController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
@@ -124,33 +148,33 @@ namespace SnQMusicStore.Logic
 #if ACCOUNT_ON
         public static void CreateController<C>(string sessionToken, ref Contracts.Client.IControllerAccess<C> controller) where C : Contracts.IIdentifiable
         {
-            if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IAlbum))
+            if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
             {
-                controller = new Controllers.Persistence.MusicStore.AlbumController(CreateContext())
+                controller = new Controllers.Persistence.MasterData.GenreController(CreateContext())
                 {
                     SessionToken = sessionToken
                 }
                 as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IArtist))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
             {
-                controller = new Controllers.Persistence.MusicStore.ArtistController(CreateContext())
+                controller = new Controllers.Persistence.App.AlbumController(CreateContext())
                 {
                     SessionToken = sessionToken
                 }
                 as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.ITrack))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
             {
-                controller = new Controllers.Persistence.MusicStore.TrackController(CreateContext())
+                controller = new Controllers.Persistence.App.ArtistController(CreateContext())
                 {
                     SessionToken = sessionToken
                 }
                 as Contracts.Client.IControllerAccess<C>;
             }
-            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MusicStore.IGenre))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
             {
-                controller = new Controllers.Persistence.MusicStore.GenreController(CreateContext())
+                controller = new Controllers.Persistence.App.TrackController(CreateContext())
                 {
                     SessionToken = sessionToken
                 }
@@ -207,6 +231,30 @@ namespace SnQMusicStore.Logic
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IUser))
             {
                 controller = new Controllers.Persistence.Account.UserController(CreateContext())
+                {
+                    SessionToken = sessionToken
+                }
+                as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IAlbumTracks))
+            {
+                controller = new Controllers.Business.App.AlbumTracksController(CreateContext())
+                {
+                    SessionToken = sessionToken
+                }
+                as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbums))
+            {
+                controller = new Controllers.Business.App.ArtistAlbumsController(CreateContext())
+                {
+                    SessionToken = sessionToken
+                }
+                as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
+            {
+                controller = new Controllers.Business.App.GenreTracksController(CreateContext())
                 {
                     SessionToken = sessionToken
                 }
