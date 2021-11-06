@@ -2,6 +2,7 @@
 //MdStart
 using CommonBase.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -74,6 +75,12 @@ namespace SnQMusicStore.AspMvc.Controllers
         protected virtual Task<TModel> BeforeViewAsync(TModel model, Action action) => Task.FromResult(model);
         protected virtual Task<IEnumerable<TModel>> BeforeViewAsync(IEnumerable<TModel> models, Action action) => Task.FromResult(models);
 
+        public override void OnActionExecuted(ActionExecutedContext context)
+        {
+            ViewBag.ViewModelCreator = new Modules.View.ViewModelCreator();
+
+            base.OnActionExecuted(context);
+        }
         [HttpGet]
         [ActionName("Index")]
         public virtual async Task<IActionResult> IndexAsync()
@@ -95,7 +102,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
                 catch (Exception ex)
                 {
-                    LastError = ex.GetError();
+                    LastViewError = ex.GetError();
                 }
             }
             AfterIndex(models);
@@ -117,12 +124,12 @@ namespace SnQMusicStore.AspMvc.Controllers
             {
                 try
                 {
-                    LastError = string.Empty;
+                    LastViewError = string.Empty;
                     model = await CreateModelAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    LastError = ex.GetError();
+                    LastViewError = ex.GetError();
                 }
             }
             AfterCreate(model);
@@ -172,11 +179,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                     var entity = await ctrl.InsertAsync(model).ConfigureAwait(false);
 
                     model.CopyProperties(entity);
-                    LastError = string.Empty;
+                    LastViewError = string.Empty;
                 }
                 catch (Exception ex)
                 {
-                    LastError = ex.GetError();
+                    LastViewError = ex.GetError();
                 }
             }
             AfterInsertModel(model);
@@ -204,11 +211,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                 try
                 {
                     model = await EditModelAsync(id).ConfigureAwait(false);
-                    LastError = string.Empty;
+                    LastViewError = string.Empty;
                 }
                 catch (Exception ex)
                 {
-                    LastError = ex.GetError();
+                    LastViewError = ex.GetError();
                 }
             }
             AfterEdit(model);
@@ -257,11 +264,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                     var entity = await ctrl.UpdateAsync(model).ConfigureAwait(false);
 
                     model.CopyProperties(entity);
-                    LastError = string.Empty;
+                    LastViewError = string.Empty;
                 }
                 catch (Exception ex)
                 {
-                    LastError = ex.GetError();
+                    LastViewError = ex.GetError();
                 }
             }
             AfterUpdateModel(model);
@@ -292,11 +299,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                     var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
 
                     model = ToModel(entity);
-                    LastError = string.Empty;
+                    LastViewError = string.Empty;
                 }
                 catch (Exception ex)
                 {
-                    LastError = ex.GetError();
+                    LastViewError = ex.GetError();
                 }
             }
             AfterDelete(model);
@@ -325,11 +332,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                     using var ctrl = CreateController();
 
                     await ctrl.DeleteAsync(id).ConfigureAwait(false);
-                    LastError = string.Empty;
+                    LastViewError = string.Empty;
                 }
                 catch (Exception ex)
                 {
-                    LastError = ex.GetError();
+                    LastViewError = ex.GetError();
                 }
             }
             AfterDeleteModel(id);

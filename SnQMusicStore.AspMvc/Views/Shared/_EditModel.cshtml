@@ -3,16 +3,17 @@
     @using SnQMusicStore.AspMvc.Modules.Language
     @using SnQMusicStore.AspMvc.Modules.Session
     @using SnQMusicStore.AspMvc.Modules.View
-    @using SnQMusicStore.AspMvc.Models.Modules.View
     @model SnQMusicStore.AspMvc.Models.IdentityModel
 
+    var viewBagWrapper = new ViewBagWrapper(ViewBag);
     var sessionWrapper = new SessionWrapper(Context.Session);
     var controller = ViewContext.RouteData.Values["controller"].ToString();
     var action = ViewContext.RouteData.Values["action"].ToString();
     Func<string, string> translate = Translator.TranslateIt;
     Func<string, string> translateFor = pn => translate($"{controller}.{pn}");
-    var viewBagWrapper = new ViewBagWrapper(ViewBag);
-    var editViewModel = new EditViewModel(Model, ViewBag);
+    var editViewModel = viewBagWrapper.CreateEditViewModel(controller, Model);
+
+    Model.ViewBagInfo = viewBagWrapper;
 
     <div class="row">
         <div class="col-md-6">
@@ -20,12 +21,12 @@
             {
                 if (item.CanRead && item.CanWrite)
                 {
-                    viewBagWrapper.Handled = false;
-                    viewBagWrapper.DisplayProperty = item;
+                    Model.ViewBagInfo.Handled = false;
+                    Model.ViewBagInfo.DisplayProperty = item;
                     <div class="form-group">
                         <label class="control-label" for="@item.Name">@translateFor(editViewModel.GetLabel(item))</label>
                         @await Html.PartialAsync("_EditControl", Model)
-                        @if (viewBagWrapper.Handled.GetValueOrDefault() == false)
+                        @if (Model.ViewBagInfo.Handled == false)
                         {
                             if (item.PropertyType.IsEnum)
                             {
@@ -41,12 +42,12 @@
                 }
                 else if (item.CanRead)
                 {
-                    viewBagWrapper.Handled = false;
-                    viewBagWrapper.DisplayProperty = item;
+                    Model.ViewBagInfo.Handled = false;
+                    Model.ViewBagInfo.DisplayProperty = item;
                     <div class="form-group">
                         <label class="control-label" for="@item.Name">@translateFor(editViewModel.GetLabel(item))</label>
                         @await Html.PartialAsync("_EditControl", Model)
-                        @if (viewBagWrapper.Handled.GetValueOrDefault() == false)
+                        @if (Model.ViewBagInfo.Handled == false)
                         {
                             <input class="form-control" type="text" id="@item.Name" name="@item.Name" value="@editViewModel.GetValue(item)" readonly="readonly" />
                         }

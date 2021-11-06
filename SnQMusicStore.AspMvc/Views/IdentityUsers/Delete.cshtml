@@ -5,17 +5,17 @@
     @using SnQMusicStore.AspMvc.Modules.Session
     @using SnQMusicStore.AspMvc.Modules.Handler
     @using SnQMusicStore.AspMvc.Modules.Language
+    @using SnQMusicStore.AspMvc.Modules.View
     @using SnQMusicStore.AspMvc.Models.Modules.View
     @model SnQMusicStore.AspMvc.Models.Business.Account.IdentityUser
 
+    var viewBagWrapper = new ViewBagWrapper(ViewBag);
     var sessionWrapper = new SessionWrapper(Context.Session);
     var controller = ViewContext.RouteData.Values["controller"].ToString();
     var action = ViewContext.RouteData.Values["action"].ToString();
     Func<string, string> translate = Translator.TranslateIt;
     Func<string, string> translateFor = pn => translate($"{controller}.{pn}");
     var title = translateFor(action);
-    var displayOneViewModel = new DisplayViewModel(Model.OneModel);
-    var displayAnotherViewModel = new DisplayViewModel(Model.AnotherModel, null, new string[] { "IdentityId" }, null);
 
     ViewData["Title"] = title;
 
@@ -28,10 +28,10 @@
     </div>
     <hr />
 
-    @if (string.IsNullOrEmpty(ErrorHandler.LastError) == false)
+    @if (string.IsNullOrEmpty(ErrorHandler.LastViewError) == false)
     {
         <div class="alert alert-danger" role="alert">
-            @ErrorHandler.GetLastErrorAndClear()
+            @ErrorHandler.GetLastViewErrorAndClear()
         </div>
     }
     else
@@ -42,15 +42,21 @@
     }
 
     <form asp-action="Delete" method="post">
+        @{
+            viewBagWrapper.IgnoreNames = new string[] { "Password" };
+        }
         <div style="margin-top: 1em;">
-            @await Html.PartialAsync("_DisplayModel", displayOneViewModel)
+            @await Html.PartialAsync("_DisplayModel", Model.OneModel)
         </div>
 
         <hr />
 
+        @{
+            viewBagWrapper.IgnoreNames = new string[] { "IdentityId" };
+        }
         <div style="margin-top: 1em;">
             <h4>@translateFor("User")</h4>
-            @await Html.PartialAsync("_DisplayModel", displayAnotherViewModel)
+            @await Html.PartialAsync("_DisplayModel", Model.AnotherModel)
         </div>
 
         @await Html.PartialAsync("_SubmitBack", new SubmitBackCmd() { SubmitText = translateFor("Delete"), BackText = translateFor("Back to List"), SubmitCss = "btn btn-danger", FromSubmitToBack = true })

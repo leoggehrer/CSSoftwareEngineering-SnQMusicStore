@@ -1,5 +1,6 @@
 ﻿//@CodeCopy
 //MdStart
+using SnQMusicStore.AspMvc.Modules.View;
 using System.Collections;
 using System.Linq;
 
@@ -7,6 +8,7 @@ namespace SnQMusicStore.AspMvc.Models
 {
     public class ModelObject
 	{
+        public ViewBagWrapper ViewBagInfo { get; set; }
         protected static bool IsEqualsWith(object obj1, object obj2)
         {
             bool result = false;

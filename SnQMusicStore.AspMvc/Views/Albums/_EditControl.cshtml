@@ -1,0 +1,13 @@
+﻿@{
+    @model SnQMusicStore.AspMvc.Models.Persistence.App.Album
+
+    if (Model.ViewBagInfo.DisplayProperty.Name.Equals(nameof(Model.ArtistId)))
+    {
+        Model.ViewBagInfo.Handled = true;
+
+        if (Model.Artists != null)
+        {
+            @Html.DropDownListFor(m => m.ArtistId, new SelectList(Model.Artists, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
+        }
+    }
+}

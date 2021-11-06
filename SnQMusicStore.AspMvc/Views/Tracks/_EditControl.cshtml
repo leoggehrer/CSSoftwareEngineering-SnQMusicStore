@@ -1,0 +1,22 @@
+﻿@{
+    @model SnQMusicStore.AspMvc.Models.Persistence.App.Track
+
+    if (Model.ViewBagInfo.DisplayProperty.Name.Equals(nameof(Model.GenreId)))
+    {
+        Model.ViewBagInfo.Handled = true;
+
+        if (Model.Genres != null)
+        {
+            @Html.DropDownListFor(m => m.GenreId, new SelectList(Model.Genres, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
+        }
+    }
+    else if (Model.ViewBagInfo.DisplayProperty.Name.Equals(nameof(Model.AlbumId)))
+    {
+        Model.ViewBagInfo.Handled = true;
+
+        if (Model.Albums != null)
+        {
+            @Html.DropDownListFor(m => m.AlbumId, new SelectList(Model.Albums, "Id", "Title"), null, new { @class = "form-control", style = "min-width: 400px;" })
+        }
+    }
+}
