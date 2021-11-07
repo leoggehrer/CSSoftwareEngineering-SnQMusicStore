@@ -1,6 +1,5 @@
 ﻿//@CodeCopy
 //MdStart
-
 #if ACCOUNT_ON
 using SnQMusicStore.Adapters.Exceptions;
 using SnQMusicStore.Transfer.Models.Modules.Account;
