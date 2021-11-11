@@ -29,13 +29,6 @@ namespace SnQMusicStore.AspMvc.Controllers
 			return View();
 		}
 
-		public IActionResult ReloadTranslation()
-		{
-			Translator.Instance.ReloadTranslation();
-
-			return RedirectToAction("Index");
-		}
-
 		[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
 		public IActionResult Error()
 		{

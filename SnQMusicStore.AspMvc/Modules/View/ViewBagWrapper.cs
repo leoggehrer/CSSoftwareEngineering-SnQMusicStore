@@ -2,6 +2,7 @@
 //MdStart
 
 using SnQMusicStore.AspMvc.Models.Modules.View;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -13,6 +14,18 @@ namespace SnQMusicStore.AspMvc.Modules.View
         public ViewBagWrapper(dynamic viewBag)
         {
             ViewBag = viewBag;
+        }
+
+        public string Title => Translate(Controller);
+        public string Controller
+        {
+            get => ViewBag.Controller as string;
+            set => ViewBag.Controller = value;
+        }
+        public string Action
+        {
+            get => ViewBag.Action as string;
+            set => ViewBag.Action = value;
         }
 
         public bool Handled
@@ -47,15 +60,39 @@ namespace SnQMusicStore.AspMvc.Modules.View
             set => ViewBag.ViewModelCreator = value;
         }
 
+        public Func<string, string> Translate
+        {
+            get
+            {
+                var result = ViewBag.Translate as Func<string, string>;
+
+                return result != null ? result : s => s;
+            }
+            set => ViewBag.Translate = value;
+        }
+        public Func<string, string> TranslateFor => text => Translate($"{Controller}.{text}");
+
+        public IndexViewModel CreateIndexViewModel(IEnumerable<Models.IdentityModel> models)
+        {
+            return CreateIndexViewModel(Controller, models);
+        }
         public IndexViewModel CreateIndexViewModel(string viewName, IEnumerable<Models.IdentityModel> models)
         {
             return ViewModelCreator != null ? ViewModelCreator.CreateIndexViewModel(viewName, models, this) 
                                             : new ViewModelCreator().CreateIndexViewModel(viewName, models, this);
         }
+        public EditViewModel CreateEditViewModel(Models.IdentityModel model)
+        {
+            return CreateEditViewModel(Controller, model);
+        }
         public EditViewModel CreateEditViewModel(string viewName, Models.IdentityModel model)
         {
             return ViewModelCreator != null ? ViewModelCreator.CreateEditViewModel(viewName, model, this)
                                             : new ViewModelCreator().CreateEditViewModel(viewName, model, this);
+        }
+        public DisplayViewModel CreateDisplayViewModel(Models.IdentityModel model)
+        {
+            return CreateDisplayViewModel(Controller, model);
         }
         public DisplayViewModel CreateDisplayViewModel(string viewName, Models.IdentityModel model)
         {

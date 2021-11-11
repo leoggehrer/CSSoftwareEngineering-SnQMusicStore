@@ -8,15 +8,13 @@
 
     var viewBagWrapper = new ViewBagWrapper(ViewBag);
     var sessionWrapper = new SessionWrapper(Context.Session);
-    var controller = ViewContext.RouteData.Values["controller"].ToString();
-    var action = ViewContext.RouteData.Values["action"].ToString();
-    Func<string, string> translate = Translator.TranslateIt;
-    Func<string, string> translateFor = pn => translate($"{controller}.{pn}");
-    var title = translateFor(controller);
 
-    ViewData["Title"] = title;
+    viewBagWrapper.Translate = Translator.TranslateIt;
+    viewBagWrapper.Controller = ViewContext.RouteData.Values["controller"].ToString();
+    viewBagWrapper.Action = ViewContext.RouteData.Values["action"].ToString();
 
-    <h1>@title</h1>
+    ViewData["Title"] = viewBagWrapper.Title;
+    <h1>@ViewData["Title"]</h1>
 
     @if (string.IsNullOrEmpty(ErrorHandler.LastViewError) == false)
     {
@@ -26,10 +24,10 @@
     }
     else
     {
-        var indexViewModel = viewBagWrapper.CreateIndexViewModel(controller, Model);
+        var indexViewModel = viewBagWrapper.CreateIndexViewModel(Model);
 
         <p style="margin-top: 1em;">
-            <a asp-action="Create" class="btn btn-outline-secondary">@translateFor("Create New")</a>
+            <a asp-action="Create" class="btn btn-outline-secondary">@viewBagWrapper.TranslateFor("Create New")</a>
         </p>
 
         <table class="table">
@@ -38,7 +36,7 @@
                     @foreach (var item in indexViewModel.DisplayProperties)
                     {
                         <th>
-                            @translateFor(indexViewModel.GetLabel(item))
+                            @viewBagWrapper.TranslateFor(indexViewModel.GetLabel(item))
                         </th>
                     }
                     <th></th>

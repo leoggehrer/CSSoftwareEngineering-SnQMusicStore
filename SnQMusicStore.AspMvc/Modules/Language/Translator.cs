@@ -23,6 +23,8 @@ namespace SnQMusicStore.AspMvc.Modules.Language
         static partial void ClassConstructing();
         static partial void ClassConstructed();
 
+        private bool Reload { get; set; } = false;
+
         private Translator()
         {
             Constructing();
@@ -31,15 +33,20 @@ namespace SnQMusicStore.AspMvc.Modules.Language
         }
         partial void Constructing();
         partial void Constructed();
+
         private static Translator instance = null;
         public static Translator Instance => instance ??= new Translator();
 
+        protected List<Translation> translations = new();
+        protected List<Translation> noTranslations = new();
+
         public bool HasLoaded => LastLoad.HasValue;
         public DateTime? LastLoad { get; private set; }
-        public LanguageCode KeyLanguage => LanguageCode.En;
-        public LanguageCode ValueLanguage => LanguageCode.De;
+        public LanguageCode KeyLanguage { get; set; } = LanguageCode.En;
+        public LanguageCode ValueLanguage { get; set; } = LanguageCode.De;
 
-        protected List<Models.ThirdParty.Translation> translations = new();
+        public IEnumerable<Translation> NoTranslations => noTranslations;
+
         protected virtual void LoadTranslations()
         {
             bool LoadTranslationsFromServer(List<Translation> translations)
@@ -47,6 +54,7 @@ namespace SnQMusicStore.AspMvc.Modules.Language
                 var result = false;
                 var translationServer = AppSettings.Configuration[StaticLiterals.EnvironmentTranslationServerKey];
 
+                noTranslations.Clear();
                 if (translationServer.HasContent())
                 {
                     var ctrl = Adapters.Factory.CreateThridParty<Contracts.ThirdParty.ITranslation>(translationServer);
@@ -72,6 +80,12 @@ namespace SnQMusicStore.AspMvc.Modules.Language
                 return result;
             };
 
+            if (Reload)
+            {
+                Reload = false;
+                LoadTranslationsFromServer(translations);
+                LastLoad = DateTime.Now;
+            }
             if (LastLoad.HasValue == false)
             {
                 LoadTranslationsFromServer(translations);
@@ -86,9 +100,9 @@ namespace SnQMusicStore.AspMvc.Modules.Language
                 }
             }
         }
-        public virtual void ReloadTranslation()
+        public virtual void ReloadTranslations()
         {
-            LastLoad = null;
+            Reload = true;
             LoadTranslations();
         }
         protected virtual string Translate(string key)
@@ -109,11 +123,8 @@ namespace SnQMusicStore.AspMvc.Modules.Language
             }
             else
             {
-#if DEBUG
-                var csvTranslation = $"Translation;{nameof(SnQMusicStore)};{KeyLanguage};{key};{ValueLanguage};";
+                AppendNoTranslation(key);
 
-                System.Diagnostics.Debug.WriteLine(csvTranslation);
-#endif
                 var splitKey = key.Split(".");
 
                 if (splitKey.Length == 2)
@@ -127,10 +138,45 @@ namespace SnQMusicStore.AspMvc.Modules.Language
                     else if (defaultValue == key)
                     {
                         result = splitKey[1];
+                        AppendNoTranslation(splitKey[1]);
                     }
                 }
             }
             return result;
+        }
+
+        protected void AppendNoTranslation(string key)
+        {
+            var item = noTranslations.SingleOrDefault(t => t.Key.Equals(key) && t.KeyLanguage == KeyLanguage);
+
+            if (item == null)
+            {
+                noTranslations.Add(new Translation
+                {
+                    AppName = nameof(SnQMusicStore),
+                    KeyLanguage = KeyLanguage,
+                    Key = key,
+                    ValueLanguage = ValueLanguage,
+                    Value = default
+                });
+            }
+        }
+
+        public static void ChangeKeyLanguage(LanguageCode languageCode)
+        {
+            if (Instance.KeyLanguage != languageCode)
+            {
+                Instance.Reload = true;
+                Instance.KeyLanguage = languageCode;
+            }
+        }
+        public static void ChangeValueLanguage(LanguageCode languageCode)
+        {
+            if (Instance.ValueLanguage != languageCode)
+            {
+                Instance.Reload = true;
+                Instance.ValueLanguage = languageCode;
+            }
         }
 
         public static string TranslateIt(string key) => Instance.Translate(key);

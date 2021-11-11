@@ -16,6 +16,7 @@ namespace SnQMusicStore.AspMvc.Controllers
 {
     public class MvcController : Controller
 	{
+        #region Error
         protected virtual string LastViewError
         {
             get => Modules.Handler.ErrorHandler.LastViewError;
@@ -25,6 +26,7 @@ namespace SnQMusicStore.AspMvc.Controllers
             }
         }
         protected bool HasError => string.IsNullOrEmpty(LastViewError) == false;
+        #endregion Error
 
         #region SessionWrapper
         public bool IsSessionAvailable => HttpContext?.Session != null;
@@ -310,7 +312,6 @@ namespace SnQMusicStore.AspMvc.Controllers
             return source.GetError();
         }
         #endregion Error-Helpers
-
     }
 }
 //MdEnd

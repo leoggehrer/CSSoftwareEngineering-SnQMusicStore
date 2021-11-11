@@ -1,22 +1,43 @@
 ﻿@{
     @model SnQMusicStore.AspMvc.Models.Persistence.App.Track
 
-    if (Model.ViewBagInfo.DisplayProperty.Name.Equals(nameof(Model.GenreId)))
-    {
-        Model.ViewBagInfo.Handled = true;
+    var viewBagWrapper = Model.ViewBagInfo;
+    var property = viewBagWrapper.DisplayProperty;
 
-        if (Model.Genres != null)
-        {
-            @Html.DropDownListFor(m => m.GenreId, new SelectList(Model.Genres, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
-        }
+    if (property.Name.Equals(nameof(Model.GenreId)))
+    {
+        var editViewModel = Model.ViewBagInfo.CreateEditViewModel(Model);
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label" for="@property.Name">@viewBagWrapper.TranslateFor(editViewModel.GetLabel(property))</label>
+                    @if (Model.Genres != null)
+                    {
+                        @Html.DropDownListFor(m => m.GenreId, new SelectList(Model.Genres, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
+                    }
+                </div>
+            </div>
+        </div>
+
+        Model.ViewBagInfo.Handled = true;
     }
     else if (Model.ViewBagInfo.DisplayProperty.Name.Equals(nameof(Model.AlbumId)))
     {
-        Model.ViewBagInfo.Handled = true;
+        var editViewModel = Model.ViewBagInfo.CreateEditViewModel(Model);
 
-        if (Model.Albums != null)
-        {
-            @Html.DropDownListFor(m => m.AlbumId, new SelectList(Model.Albums, "Id", "Title"), null, new { @class = "form-control", style = "min-width: 400px;" })
-        }
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="control-label" for="@property.Name">@viewBagWrapper.TranslateFor(editViewModel.GetLabel(property))</label>
+                    @if (Model.Albums != null)
+                    {
+                        @Html.DropDownListFor(m => m.AlbumId, new SelectList(Model.Albums, "Id", "Title"), null, new { @class = "form-control", style = "min-width: 400px;" })
+                    }
+                </div>
+            </div>
+        </div>
+
+        Model.ViewBagInfo.Handled = true;
     }
 }
