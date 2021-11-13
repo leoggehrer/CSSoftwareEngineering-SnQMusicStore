@@ -8,18 +8,14 @@
     {
         var editViewModel = Model.ViewBagInfo.CreateEditViewModel(Model);
 
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label class="control-label" for="@property.Name">@viewBagWrapper.TranslateFor(editViewModel.GetLabel(property))</label>
-                    @if (Model.Artists != null)
-                    {
-                        @Html.DropDownListFor(m => m.ArtistId, new SelectList(Model.Artists, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
-                    }
-                </div>
-            </div>
-        </div>
-
+        @if (Model.Artists != null)
+        {
+            @Html.DropDownListFor(m => m.ArtistId, new SelectList(Model.Artists, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
+        }
         Model.ViewBagInfo.Handled = true;
+    }
+    else
+    {
+        @await Html.PartialAsync("../Shared/_EditControl", Model)
     }
 }
