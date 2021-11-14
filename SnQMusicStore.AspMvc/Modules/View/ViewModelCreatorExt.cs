@@ -6,27 +6,37 @@ namespace SnQMusicStore.AspMvc.Modules.View
 {
     partial class ViewModelCreator
     {
-        partial void BeforeCreateIndexViewModel(string viewName, IEnumerable<IdentityModel> models, ViewBagWrapper viewBagWrapper, ref IndexViewModel result, ref bool handled)
+        partial void BeforeCreateIndexViewModel(string viewTypeName, IEnumerable<IdentityModel> models, ViewBagWrapper viewBagWrapper, ref IndexViewModel result, ref bool handled)
         {
-            if (viewName.Equals("Tracks"))
+            if (viewTypeName.Equals(typeof(Models.Business.App.AlbumTracks).FullName))
             {
                 handled = true;
                 result = new TrackIndexViewModel(models, viewBagWrapper.HiddenNames, viewBagWrapper.IgnoreNames, viewBagWrapper.DisplayNames);
             }
-            else if (viewName.Equals("Albums"))
+            else if (viewTypeName.Equals(typeof(List<Models.Persistence.App.Track>).FullName))
+            {
+                handled = true;
+                result = new TrackIndexViewModel(models, viewBagWrapper.HiddenNames, viewBagWrapper.IgnoreNames, viewBagWrapper.DisplayNames);
+            }
+            else if (viewTypeName.Equals(typeof(List<Models.Persistence.App.Album>).FullName))
             {
                 handled = true;
                 result = new AlbumIndexViewModel(models, viewBagWrapper.HiddenNames, viewBagWrapper.IgnoreNames, viewBagWrapper.DisplayNames);
             }
         }
-        partial void BeforeCreateDisplayViewModel(string viewName, IdentityModel model, ViewBagWrapper viewBagWrapper, ref DisplayViewModel result, ref bool handled)
+        partial void BeforeCreateDisplayViewModel(string viewTypeName, IdentityModel model, ViewBagWrapper viewBagWrapper, ref DisplayViewModel result, ref bool handled)
         {
-            if (viewName.Equals("Tracks"))
+            if (viewTypeName.Equals(typeof(Models.Business.App.AlbumTracks).FullName))
+            {
+                handled = true;
+                result = new AlbumDisplayViewModel(model, viewBagWrapper.HiddenNames, viewBagWrapper.IgnoreNames, viewBagWrapper.DisplayNames);
+            }
+            else if (viewTypeName.Equals(typeof(Models.Persistence.App.Track).FullName))
             {
                 handled = true;
                 result = new TrackDisplayViewModel(model, viewBagWrapper.HiddenNames, viewBagWrapper.IgnoreNames, viewBagWrapper.DisplayNames);
             }
-            else if (viewName.Equals("Albums"))
+            else if (viewTypeName.Equals(typeof(Models.Persistence.App.Album).FullName))
             {
                 handled = true;
                 result = new AlbumDisplayViewModel(model, viewBagWrapper.HiddenNames, viewBagWrapper.IgnoreNames, viewBagWrapper.DisplayNames);
