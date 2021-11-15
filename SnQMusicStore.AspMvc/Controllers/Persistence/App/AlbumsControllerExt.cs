@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SnQMusicStore.AspMvc.Models.Modules.Common;
 using SnQMusicStore.AspMvc.Models.Persistence.App;
 using SnQMusicStore.AspMvc.Modules.View;
 using System.Collections.Generic;
@@ -9,9 +10,9 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 {
     partial class AlbumsController
     {
-        internal static async Task<Album> LoadReferenceDataAsync(string sessionToken, Album model, Action action)
+        internal static async Task<Album> LoadModelReferencesAsync(string sessionToken, Album model, ActionMode action)
         {
-            if (action == Action.Display || action == Action.Create || action == Action.Edit || action == Action.Delete)
+            if (action == ActionMode.Display || action == ActionMode.Create || action == ActionMode.Edit || action == ActionMode.Delete)
             {
                 using var artistCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IArtist>(sessionToken);
 
@@ -20,7 +21,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             }
             return model;
         }
-        internal static async Task<IEnumerable<Album>> LoadReferenceDataAsync(string sessionToken, IEnumerable<Album> models)
+        internal static async Task<IEnumerable<Album>> LoadModelsReferencesAsync(string sessionToken, IEnumerable<Album> models)
         {
             using var artistCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IArtist>(sessionToken);
             var artists = await artistCtrl.GetAllAsync().ConfigureAwait(false);
@@ -34,17 +35,17 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             return result;
         }
 
-        protected override async Task<Album> BeforeViewAsync(Album model, Action action)
+        protected override async Task<Album> BeforeViewAsync(Album model, ActionMode action)
         {
-            var result = await LoadReferenceDataAsync(SessionWrapper.SessionToken, model, action).ConfigureAwait(false);
+            var result = await LoadModelReferencesAsync(SessionWrapper.SessionToken, model, action).ConfigureAwait(false);
 
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
         }
-        protected override async Task<IEnumerable<Album>> BeforeViewAsync(IEnumerable<Album> models, Action action)
+        protected override async Task<IEnumerable<Album>> BeforeViewAsync(IEnumerable<Album> models, ActionMode action)
         {
             var viewBagWrapper = new ViewBagWrapper(ViewBag);
             var sessionToken = SessionWrapper.LoginSession.SessionToken;
-            var result = await LoadReferenceDataAsync(sessionToken, models).ConfigureAwait(false);
+            var result = await LoadModelsReferencesAsync(sessionToken, models).ConfigureAwait(false);
 
             viewBagWrapper.CommandMode = viewBagWrapper.CommandMode | Models.Modules.Common.CommandMode.ShowDetails;
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
@@ -59,8 +60,8 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
             if (model != null)
             {
-                await LoadReferenceDataAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, Action.Display).ConfigureAwait(false);
-                await TracksController.LoadReferenceDataAsync(SessionWrapper.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
+                await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Display).ConfigureAwait(false);
+                await TracksController.LoadModelsReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
             }
             viewBagWrapper.CommandMode = Models.Modules.Common.CommandMode.None;
             return View("MasterDetails", model);

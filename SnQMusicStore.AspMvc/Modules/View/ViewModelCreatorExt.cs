@@ -26,7 +26,12 @@ namespace SnQMusicStore.AspMvc.Modules.View
         }
         partial void BeforeCreateDisplayViewModel(string viewTypeName, IdentityModel model, ViewBagWrapper viewBagWrapper, ref DisplayViewModel result, ref bool handled)
         {
-            if (viewTypeName.Equals(typeof(Models.Business.App.AlbumTracks).FullName))
+            if (viewTypeName.Equals(typeof(Models.Business.App.TrackAlbumGenre).FullName))
+            {
+                handled = true;
+                result = new TrackAlbumGenreDisplayViewModel(model, viewBagWrapper.HiddenNames, viewBagWrapper.IgnoreNames, viewBagWrapper.DisplayNames);
+            }
+            else if (viewTypeName.Equals(typeof(Models.Business.App.AlbumTracks).FullName))
             {
                 handled = true;
                 result = new AlbumDisplayViewModel(model, viewBagWrapper.HiddenNames, viewBagWrapper.IgnoreNames, viewBagWrapper.DisplayNames);

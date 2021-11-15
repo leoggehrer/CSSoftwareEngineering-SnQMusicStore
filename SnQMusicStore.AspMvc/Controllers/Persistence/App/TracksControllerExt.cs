@@ -1,4 +1,7 @@
-﻿using SnQMusicStore.AspMvc.Models.Persistence.App;
+﻿using Microsoft.AspNetCore.Mvc;
+using SnQMusicStore.AspMvc.Models.Modules.Common;
+using SnQMusicStore.AspMvc.Models.Persistence.App;
+using SnQMusicStore.AspMvc.Modules.View;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,24 +10,21 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 {
     partial class TracksController
     {
-        internal static async Task<Track> LoadReferenceDataAsync(string sessionToken, Track model, Action action)
+        internal static async Task<Track> LoadModelReferencesAsync(string sessionToken, Track model, ActionMode action)
         {
-            if (action == Action.Display || action == Action.Create || action == Action.Edit || action == Action.Delete)
+            if (action == ActionMode.Display || action == ActionMode.Create || action == ActionMode.Edit || action == ActionMode.Delete)
             {
-                if (action == Action.Create || action == Action.Edit || action == Action.Delete)
-                {
-                    using var genreCtrl = Adapters.Factory.Create<Contracts.Persistence.MasterData.IGenre>(sessionToken);
-                    using var albumCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IAlbum>(sessionToken);
+                using var genreCtrl = Adapters.Factory.Create<Contracts.Persistence.MasterData.IGenre>(sessionToken);
+                using var albumCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IAlbum>(sessionToken);
 
-                    model.Genres = await genreCtrl.GetAllAsync().ConfigureAwait(false);
-                    model.Genre = model.Genres.FirstOrDefault(e => e.Id == model.GenreId);
-                    model.Albums = await albumCtrl.GetAllAsync().ConfigureAwait(false);
-                    model.Album = model.Albums.FirstOrDefault(e => e.Id == model.AlbumId);
-                }
+                model.Genres = await genreCtrl.GetAllAsync().ConfigureAwait(false);
+                model.Genre = model.Genres.FirstOrDefault(e => e.Id == model.GenreId);
+                model.Albums = await albumCtrl.GetAllAsync().ConfigureAwait(false);
+                model.Album = model.Albums.FirstOrDefault(e => e.Id == model.AlbumId);
             }
             return model;
         }
-        internal static async Task<IEnumerable<Track>> LoadReferenceDataAsync(string sessionToken, IEnumerable<Track> models)
+        internal static async Task<IEnumerable<Track>> LoadModelsReferencesAsync(string sessionToken, IEnumerable<Track> models)
         {
             using var genreCtrl = Adapters.Factory.Create<Contracts.Persistence.MasterData.IGenre>(sessionToken);
             using var albumCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IAlbum>(sessionToken);
@@ -41,18 +41,35 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             return result;
         }
 
-        protected override async Task<Track> BeforeViewAsync(Track model, Action action)
+        protected override async Task<Track> BeforeViewAsync(Track model, ActionMode action)
         {
-            var result = await LoadReferenceDataAsync(SessionWrapper.SessionToken, model, action).ConfigureAwait(false);
+            var result = await LoadModelReferencesAsync(SessionWrapper.SessionToken, model, action).ConfigureAwait(false);
 
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
         }
-        protected override async Task<IEnumerable<Track>> BeforeViewAsync(IEnumerable<Track> models, Action action)
+        protected override async Task<IEnumerable<Track>> BeforeViewAsync(IEnumerable<Track> models, ActionMode action)
         {
             var sessionToken = SessionWrapper.LoginSession.SessionToken;
-            var result = await LoadReferenceDataAsync(sessionToken, models).ConfigureAwait(false);
+            var result = await LoadModelsReferencesAsync(sessionToken, models).ConfigureAwait(false);
 
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
         }
+
+        public override async Task<IActionResult> DetailsAsync(int id)
+        {
+            var viewBagWrapper = new ViewBagWrapper(ViewBag);
+            using var ctrl = CreateController<Contracts.Business.App.ITrackAlbumGenre>();
+            var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
+            var model = Models.Business.App.TrackAlbumGenre.Create(entity);
+
+            if (model != null)
+            {
+                await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ConnectorModel, ActionMode.Display).ConfigureAwait(false);
+                await AlbumsController.LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Display).ConfigureAwait(false);
+            }
+            viewBagWrapper.CommandMode = Models.Modules.Common.CommandMode.None;
+            return View("Composite", model);
+        }
+
     }
 }

@@ -61,6 +61,10 @@ namespace SnQMusicStore.Logic
             {
                 controller = new Controllers.Business.App.GenreTracksController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
             }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.ITrackAlbumGenre))
+            {
+                controller = new Controllers.Business.App.TrackAlbumGenreController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
+            }
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.Account.IAppAccess))
             {
                 controller = new Controllers.Business.Account.AppAccessController(CreateContext()) as Contracts.Client.IControllerAccess<C>;
@@ -131,6 +135,10 @@ namespace SnQMusicStore.Logic
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
             {
                 controller = new Controllers.Business.App.GenreTracksController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.ITrackAlbumGenre))
+            {
+                controller = new Controllers.Business.App.TrackAlbumGenreController(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;
             }
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.Account.IAppAccess))
             {
@@ -255,6 +263,14 @@ namespace SnQMusicStore.Logic
             else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
             {
                 controller = new Controllers.Business.App.GenreTracksController(CreateContext())
+                {
+                    SessionToken = sessionToken
+                }
+                as Contracts.Client.IControllerAccess<C>;
+            }
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.ITrackAlbumGenre))
+            {
+                controller = new Controllers.Business.App.TrackAlbumGenreController(CreateContext())
                 {
                     SessionToken = sessionToken
                 }
