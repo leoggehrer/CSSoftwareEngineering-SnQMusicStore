@@ -1,12 +1,13 @@
 ﻿using SnQMusicStore.AspMvc.Models.Persistence.App;
+using SnQMusicStore.AspMvc.Modules.View;
 using System.Reflection;
 
 namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public class AlbumDisplayViewModel : DisplayViewModel
     {
-        public AlbumDisplayViewModel(IdentityModel model, string[] hiddenNames, string[] ignoreNames, string[] displayNames) 
-            : base(model, hiddenNames, ignoreNames, displayNames)
+        public AlbumDisplayViewModel(ViewBagWrapper viewBagWrapper, IdentityModel model) 
+            : base(viewBagWrapper, model)
         {
         }
 

@@ -1,4 +1,5 @@
 ﻿using SnQMusicStore.AspMvc.Models.Persistence.App;
+using SnQMusicStore.AspMvc.Modules.View;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -6,8 +7,8 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public class TrackIndexViewModel : IndexViewModel
     {
-        public TrackIndexViewModel(IEnumerable<IdentityModel> models, string[] hiddenNames, string[] ignoreNames, string[] displayNames) 
-            : base(models, hiddenNames, ignoreNames, displayNames)
+        public TrackIndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models)
+            : base(viewBagWrapper, models)
         {
         }
 
