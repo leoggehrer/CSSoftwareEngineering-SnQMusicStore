@@ -5,7 +5,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.Account
     using System.Threading.Tasks;
     using TContract = Contracts.Business.Account.IAppAccess;
     using TModel = AspMvc.Models.Business.Account.AppAccess;
-    partial class AppAccessesController : AspMvc.Controllers.GenericController<TContract, TModel>
+    public partial class AppAccessesController : AspMvc.Controllers.GenericController<TContract, TModel>
     {
     }
 }

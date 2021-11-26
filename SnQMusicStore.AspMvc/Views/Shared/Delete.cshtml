@@ -1,6 +1,5 @@
 ﻿@*@CodeCopy*@
 @{
-    @using CommonBase.Extensions
     @using SnQMusicStore.AspMvc.Modules.Handler
     @using SnQMusicStore.AspMvc.Modules.Language
     @using SnQMusicStore.AspMvc.Modules.Session
@@ -22,7 +21,7 @@
 
     <div class="d-flex bg-transparent">
         <div class="p-sm-2 mr-auto">
-            <h4>@viewBagWrapper.TranslateFor("Delete")</h4>
+            <h4>@viewBagWrapper.TranslateFor(viewBagWrapper.Action)</h4>
         </div>
     </div>
     <hr />
@@ -40,28 +39,8 @@
         </div>
     }
 
-    <form asp-action="Delete">
-        @if (Model.GetType().IsGenericTypeOf(typeof(OneToAnotherModel<,,,>)))
-        {
-            var oneProperty = Model.GetType().GetProperty("OneModel");
-            var oneModel = oneProperty?.GetValue(Model) as IdentityModel;
-            var anotherProperty = Model.GetType().GetProperty("AnotherModel");
-            var anotherModel = anotherProperty?.GetValue(Model) as IdentityModel;
-            var editViewModel = viewBagWrapper.CreateEditViewModel(oneModel);
-
-            viewBagWrapper.ItemPrefix = "OneModel";
-            oneModel.ViewBagInfo = viewBagWrapper;
-            @await Html.PartialAsync("_DisplayModel", oneModel)
-
-            viewBagWrapper.ItemPrefix = "AnotherModel";
-            anotherModel.ViewBagInfo = viewBagWrapper;
-            @await Html.PartialAsync("_DisplayModel", anotherModel)
-        }
-        else
-        {
-            Model.ViewBagInfo = viewBagWrapper;
-            @await Html.PartialAsync("_DisplayModel", Model)
-        }
+    <form asp-action="@viewBagWrapper.Action">
+        @await Html.PartialAsync("_Display", Model)
         <hr />
         @await Html.PartialAsync("_SubmitBack", new SubmitBackCmd() { SubmitText = viewBagWrapper.TranslateFor("Delete"), BackText = viewBagWrapper.TranslateFor("Back to List"), SubmitCss = "btn btn-danger", FromSubmitToBack = true })
     </form>

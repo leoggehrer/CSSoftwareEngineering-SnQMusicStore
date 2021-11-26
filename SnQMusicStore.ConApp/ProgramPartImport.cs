@@ -18,7 +18,7 @@ namespace SnQMusicStore.ConApp
             using var artistCtrl = Create<Contracts.Persistence.App.IArtist>();
             using var albumCtrl = Create<Contracts.Persistence.App.IAlbum>();
             using var trackCtrl = Create<Contracts.Persistence.App.ITrack>();
-            using var artistAlbumsCtrl = Create<Contracts.Business.App.IArtistAlbums>();
+            using var artistAlbumTracksCtrl = Create<Contracts.Business.App.IArtistAlbumTracks>();
             var genreData = File.ReadAllLines("Data\\Genre.csv", Encoding.Default).Skip(1).Select(l =>
             {
                 var data = l.Split(';');
@@ -44,18 +44,18 @@ namespace SnQMusicStore.ConApp
             // import genre
             genres.AddRange(await genreCtrl.InsertAsync(genreData.Select(e => e.Entity)));
 
-            var artistAlbumsList = new List<Contracts.Business.App.IArtistAlbums>();
-            var artistAlbumsUpdateList = new List<Contracts.Business.App.IArtistAlbums>();
+            var artistAlbumsList = new List<Contracts.Business.App.IArtistAlbumTracks>();
+            var artistAlbumsUpdateList = new List<Contracts.Business.App.IArtistAlbumTracks>();
 
             foreach (var item in artistData)
             {
-                var artistAlbums = await artistAlbumsCtrl.CreateAsync();
-                var artist = artistAlbums.OneItem;
+                var artistAlbumTracks = await artistAlbumTracksCtrl.CreateAsync();
+                var artist = artistAlbumTracks.OneItem;
 
                 artist.CopyProperties(item.Entity);
                 foreach (var item2 in albumData.Where(e => e.Entity.ArtistId == item.Id))
                 {
-                    var albumTracks = artistAlbums.CreateManyItem();
+                    var albumTracks = artistAlbumTracks.CreateManyItem();
                     var album = albumTracks.OneItem;
 
                     album.CopyProperties(item2.Entity);
@@ -72,11 +72,11 @@ namespace SnQMusicStore.ConApp
                         track.CopyProperties(item3.Entity);
                         albumTracks.AddManyItem(track);
                     }
-                    artistAlbums.AddManyItem(albumTracks);
+                    artistAlbumTracks.AddManyItem(albumTracks);
                 }
-                artistAlbumsUpdateList.Add(artistAlbums);
+                artistAlbumsUpdateList.Add(artistAlbumTracks);
             }
-            artistAlbumsList.AddRange(await artistAlbumsCtrl.InsertAsync(artistAlbumsUpdateList));
+            artistAlbumsList.AddRange(await artistAlbumTracksCtrl.InsertAsync(artistAlbumsUpdateList));
         }
     }
 }

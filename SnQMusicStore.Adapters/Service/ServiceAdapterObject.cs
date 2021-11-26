@@ -1,6 +1,5 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;

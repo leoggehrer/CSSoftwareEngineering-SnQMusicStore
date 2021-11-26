@@ -1,5 +1,6 @@
 ﻿@*@CodeCopy*@
 @{
+    @using SnQMusicStore.AspMvc.Models.Modules.View
     @using SnQMusicStore.AspMvc.Modules.Handler
     @using SnQMusicStore.AspMvc.Modules.Language
     @using SnQMusicStore.AspMvc.Modules.Session
@@ -13,32 +14,38 @@
     viewBagWrapper.Controller = ViewContext.RouteData.Values["controller"].ToString();
     viewBagWrapper.Action = ViewContext.RouteData.Values["action"].ToString();
 
-    var indexViewModel = viewBagWrapper.CreateIndexViewModel(Model);
+    var indexViewModel = default(IndexViewModel);
 
-    <table class="table">
-        <thead>
-            <tr>
-                @foreach (var item in indexViewModel.DisplayProperties)
-                {
-                    <th>
-                        @viewBagWrapper.TranslateFor(indexViewModel.GetLabel(item))
-                    </th>
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var model in indexViewModel.Models)
-            {
-                model.ViewBagInfo = viewBagWrapper;
-                <tr>
-                    @foreach (var displayItem in indexViewModel.DisplayProperties)
+    if (Model is IEnumerable<IMasterDetails> mds)
+    {
+        var models = mds.Select(m => m.Master);
+
+        if (models.Any())
+        {
+            indexViewModel = viewBagWrapper.CreateIndexViewModel(models);
+        }
+    }
+    else
+    {
+        indexViewModel = viewBagWrapper.CreateIndexViewModel(Model);
+    }
+
+    if (indexViewModel != null)
+    {
+        @foreach (var model in indexViewModel.Models)
+        {
+            model.ViewBagInfo = viewBagWrapper;
+            <div class="card" style="margin-bottom: 0.5em;">
+                <ul class="list-group list-group-flush">
+                    @foreach (var item in indexViewModel.GetDisplayProperties())
                     {
-                        <td>
-                            @indexViewModel.GetDisplayValue(model, displayItem)
-                        </td>
+                        <li class="list-group-item"><strong>@viewBagWrapper.TranslateFor(indexViewModel.GetLabel(item))</strong><p>@indexViewModel.GetDisplayValue(model, item)</p></li>
                     }
-                </tr>
-            }
-        </tbody>
-    </table>
+                </ul>
+                <div class="card-body">
+                    @await Html.PartialAsync("_CommandControl", model)
+                </div>
+            </div>
+        }
+    }
 }

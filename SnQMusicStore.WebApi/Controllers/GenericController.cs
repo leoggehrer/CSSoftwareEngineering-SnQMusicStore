@@ -1,5 +1,4 @@
 ﻿//@CodeCopy
-using CommonBase.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SnQMusicStore.WebApi.Controllers
 {
-	public abstract class GenericController<I, M> : ApiControllerBase, IDisposable
+    public abstract class GenericController<I, M> : ApiControllerBase, IDisposable
         where I : Contracts.IIdentifiable
         where M : Transfer.Models.IdentityModel, I, Contracts.ICopyable<I>, new()
     {

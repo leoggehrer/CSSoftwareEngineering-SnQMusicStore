@@ -1,6 +1,5 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using CSharpCodeGenerator.Logic.Contracts;
 using CSharpCodeGenerator.Logic.Extensions;
 using System;

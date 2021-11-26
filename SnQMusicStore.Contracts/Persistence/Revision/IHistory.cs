@@ -1,7 +1,6 @@
 ﻿//@CodeCopy
 //MdStart
 #if REVISION_ON
-using CommonBase.Attributes;
 using System;
 
 namespace SnQMusicStore.Contracts.Persistence.Revision

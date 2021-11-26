@@ -60,49 +60,49 @@ namespace SnQMusicStore.Logic.DataContext
             get;
             set;
         }
-        partial void GetDbSet<I, E>(ref DbSet<E> dbSet) where E : class
+        partial void GetDbSet<C, E>(ref DbSet<E> dbSet) where E : class
         {
-            if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
+            if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.MasterData.IGenre))
             {
                 dbSet = GenreSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IAlbum))
             {
                 dbSet = AlbumSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.IArtist))
             {
                 dbSet = ArtistSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.App.ITrack))
             {
                 dbSet = TrackSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IAccess))
             {
                 dbSet = AccessSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.Account.IActionLog))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IActionLog))
             {
                 dbSet = ActionLogSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.Account.IIdentity))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IIdentity))
             {
                 dbSet = IdentitySet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.Account.IIdentityXRole))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IIdentityXRole))
             {
                 dbSet = IdentityXRoleSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.Account.ILoginSession))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.ILoginSession))
             {
                 dbSet = LoginSessionSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.Account.IRole))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IRole))
             {
                 dbSet = RoleSet as DbSet<E>;
             }
-            else if (typeof(I) == typeof(SnQMusicStore.Contracts.Persistence.Account.IUser))
+            else if (typeof(C) == typeof(SnQMusicStore.Contracts.Persistence.Account.IUser))
             {
                 dbSet = UserSet as DbSet<E>;
             }

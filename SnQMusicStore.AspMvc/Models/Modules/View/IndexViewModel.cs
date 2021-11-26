@@ -11,40 +11,46 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public partial class IndexViewModel : ViewModel
     {
+        private Type modelType = null;
         public IEnumerable<IdentityModel> Models { get; init; }
-        public override Type ModelType => Models.GetType().GetGenericArguments()[0];
+        public override Type ModelType => modelType ??= Models.Any() ? Models.First().GetType() 
+                                                                     : Models.GetType().GetGenericArguments().FirstOrDefault(e => e.IsClass || e.IsInterface);
 
         public IndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models)
             : base(viewBagWrapper)
         {
             models.CheckArgument(nameof(models));
 
+            Constructing();
             Models = models;
+            Constructed();
         }
-
-        private List<PropertyInfo> displayProperties = null;
-        public virtual IEnumerable<PropertyInfo> DisplayProperties
+        public IndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models, Type elementType)
+            : base(viewBagWrapper)
         {
-            get
-            {
-                if (displayProperties == null)
-                {
-                    displayProperties = new List<PropertyInfo>();
+            models.CheckArgument(nameof(models));
+            elementType.CheckArgument(nameof(elementType));
 
-                    foreach (var item in ModelType.GetAllInterfacePropertyInfos())
-                    {
-                        if (item.CanRead && DisplayNames.Any(e => e.Equals(item.Name)))
-                        {
-                            displayProperties.Add(item);
-                        }
-                        else if (item.CanRead && DisplayNames.Count == 0 && IgnoreNames.Any(e => e.Equals(item.Name)) == false)
-                        {
-                            displayProperties.Add(item);
-                        }
-                    }
-                }
-                return displayProperties;
+            Constructing();
+            Models = models;
+            modelType = elementType;
+            Constructed();
+        }
+        partial void Constructing();
+        partial void Constructed();
+
+        private IEnumerable<PropertyInfo> displayProperties = null;
+        public virtual IEnumerable<PropertyInfo> GetHiddenProperties()
+        {
+            return GetHiddenProperties(ModelType);
+        }
+        public virtual IEnumerable<PropertyInfo> GetDisplayProperties()
+        {
+            if (displayProperties == null)
+            {
+                displayProperties = GetDisplayProperties(ModelType);
             }
+            return displayProperties;
         }
 
         public virtual object GetValue(object model, PropertyInfo propertyInfo)

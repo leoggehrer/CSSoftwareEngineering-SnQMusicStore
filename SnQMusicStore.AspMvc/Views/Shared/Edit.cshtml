@@ -1,6 +1,5 @@
 ﻿@*@CodeCopy*@
 @{
-    @using CommonBase.Extensions
     @using SnQMusicStore.AspMvc.Modules.Handler
     @using SnQMusicStore.AspMvc.Modules.Language
     @using SnQMusicStore.AspMvc.Modules.Session
@@ -21,7 +20,7 @@
 
     <div class="d-flex bg-transparent">
         <div class="p-sm-2 mr-auto">
-            <h4>@viewBagWrapper.TranslateFor("Edit")</h4>
+            <h4>@viewBagWrapper.TranslateFor(viewBagWrapper.Action)</h4>
         </div>
     </div>
     <hr />
@@ -33,29 +32,9 @@
         </div>
     }
 
-    <form asp-action="Edit" method="post">
+    <form asp-action="@viewBagWrapper.Action" method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        @if (Model.GetType().IsGenericTypeOf(typeof(OneToAnotherModel<,,,>)))
-        {
-            var oneProperty = Model.GetType().GetProperty("OneModel");
-            var oneModel = oneProperty?.GetValue(Model) as IdentityModel;
-            var anotherProperty = Model.GetType().GetProperty("AnotherModel");
-            var anotherModel = anotherProperty?.GetValue(Model) as IdentityModel;
-            var editViewModel = viewBagWrapper.CreateEditViewModel(oneModel);
-
-            viewBagWrapper.ItemPrefix = "OneModel";
-            oneModel.ViewBagInfo = viewBagWrapper;
-            @await Html.PartialAsync("_EditModel", oneModel)
-
-            viewBagWrapper.ItemPrefix = "AnotherModel";
-            anotherModel.ViewBagInfo = viewBagWrapper;
-            @await Html.PartialAsync("_EditModel", anotherModel)
-        }
-        else
-        {
-            Model.ViewBagInfo = viewBagWrapper;
-            @await Html.PartialAsync("_EditModel", Model)
-        }
+        @await Html.PartialAsync("_CreateEdit", Model)
         <hr />
         @await Html.PartialAsync("_SubmitBack", new SubmitBackCmd() { SubmitText = viewBagWrapper.TranslateFor("Save"), BackText = viewBagWrapper.TranslateFor("Back to List") })
     </form>
@@ -63,6 +42,7 @@
 
 @section Scripts {
     @{
-    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
-}
+

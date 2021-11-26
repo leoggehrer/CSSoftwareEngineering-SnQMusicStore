@@ -1,7 +1,6 @@
 ﻿//@CodeCopy
 //MdStart
 #if ACCOUNT_ON
-using CommonBase.Attributes;
 
 namespace SnQMusicStore.Contracts.Persistence.Account
 {

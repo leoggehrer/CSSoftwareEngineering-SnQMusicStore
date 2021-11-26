@@ -5,7 +5,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.Account
     using System.Threading.Tasks;
     using TContract = Contracts.Business.Account.IIdentityUser;
     using TModel = AspMvc.Models.Business.Account.IdentityUser;
-    partial class IdentityUsersController : AspMvc.Controllers.GenericController<TContract, TModel>
+    public partial class IdentityUsersController : AspMvc.Controllers.GenericController<TContract, TModel>
     {
     }
 }

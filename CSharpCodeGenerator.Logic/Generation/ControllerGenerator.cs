@@ -1,6 +1,5 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -531,7 +530,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             {
                 if (CanCreate(nameof(CreateAspMvcControllers), type))
                 {
-                    var isPublic = contractsProject.BusinessTypes.Any(t => t == type) == false;
+                    var isPublic = true;// contractsProject.BusinessTypes.Any(t => t == type) == false;
 
                     result.Add(CreateAspMvcController(type, isPublic));
                 }

@@ -60,6 +60,10 @@ namespace SnQMusicStore.Adapters
                 {
                     result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbums>() as Contracts.Client.IAdapterAccess<C>;
                 }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbumTracks))
+                {
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbumTracks>() as Contracts.Client.IAdapterAccess<C>;
+                }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
                 {
                     result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IGenreTracks>() as Contracts.Client.IAdapterAccess<C>;
@@ -144,6 +148,11 @@ namespace SnQMusicStore.Adapters
                     result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbums, Transfer.Models.Business.App.ArtistAlbums>(BaseUri, "ArtistAlbums")
                     as Contracts.Client.IAdapterAccess<C>;
                 }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbumTracks))
+                {
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbumTracks, Transfer.Models.Business.App.ArtistAlbumTracks>(BaseUri, "ArtistAlbumTracks")
+                    as Contracts.Client.IAdapterAccess<C>;
+                }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
                 {
                     result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IGenreTracks, Transfer.Models.Business.App.GenreTracks>(BaseUri, "GenreTracks")
@@ -225,6 +234,10 @@ namespace SnQMusicStore.Adapters
                 {
                     result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbums>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
                 }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbumTracks))
+                {
+                    result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbumTracks>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
+                }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
                 {
                     result = new Controller.GenericControllerAdapter<SnQMusicStore.Contracts.Business.App.IGenreTracks>(sessionToken) as Contracts.Client.IAdapterAccess<C>;
@@ -295,6 +308,10 @@ namespace SnQMusicStore.Adapters
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbums))
                 {
                     result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbums, Transfer.Models.Business.App.ArtistAlbums>(sessionToken, BaseUri, "ArtistAlbums") as Contracts.Client.IAdapterAccess<C>;
+                }
+                else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IArtistAlbumTracks))
+                {
+                    result = new Service.GenericServiceAdapter<SnQMusicStore.Contracts.Business.App.IArtistAlbumTracks, Transfer.Models.Business.App.ArtistAlbumTracks>(sessionToken, BaseUri, "ArtistAlbumTracks") as Contracts.Client.IAdapterAccess<C>;
                 }
                 else if (typeof(C) == typeof(SnQMusicStore.Contracts.Business.App.IGenreTracks))
                 {

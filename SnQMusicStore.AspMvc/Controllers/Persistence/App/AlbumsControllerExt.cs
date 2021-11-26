@@ -12,7 +12,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
     {
         internal static async Task<Album> LoadModelReferencesAsync(string sessionToken, Album model, ActionMode action)
         {
-            if (action == ActionMode.Display || action == ActionMode.Create || action == ActionMode.Edit || action == ActionMode.Delete)
+            if (action == ActionMode.Details || action == ActionMode.Create || action == ActionMode.Edit || action == ActionMode.Delete)
             {
                 using var artistCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IArtist>(sessionToken);
 
@@ -47,7 +47,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             var sessionToken = SessionWrapper.LoginSession.SessionToken;
             var result = await LoadModelsReferencesAsync(sessionToken, models).ConfigureAwait(false);
 
-            viewBagWrapper.CommandMode = viewBagWrapper.CommandMode | Models.Modules.Common.CommandMode.ShowDetails;
+            viewBagWrapper.CommandMode = viewBagWrapper.CommandMode | CommandMode.Details;
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
         }
 
@@ -60,10 +60,10 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
             if (model != null)
             {
-                await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Display).ConfigureAwait(false);
+                await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
                 await TracksController.LoadModelsReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
             }
-            viewBagWrapper.CommandMode = Models.Modules.Common.CommandMode.None;
+            viewBagWrapper.CommandMode = CommandMode.None;
             return View("MasterDetails", model);
         }
     }

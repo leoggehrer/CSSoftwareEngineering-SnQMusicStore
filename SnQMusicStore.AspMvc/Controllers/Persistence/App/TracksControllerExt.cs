@@ -12,7 +12,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
     {
         internal static async Task<Track> LoadModelReferencesAsync(string sessionToken, Track model, ActionMode action)
         {
-            if (action == ActionMode.Display || action == ActionMode.Create || action == ActionMode.Edit || action == ActionMode.Delete)
+            if (action == ActionMode.Details || action == ActionMode.Create || action == ActionMode.Edit || action == ActionMode.Delete)
             {
                 using var genreCtrl = Adapters.Factory.Create<Contracts.Persistence.MasterData.IGenre>(sessionToken);
                 using var albumCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IAlbum>(sessionToken);
@@ -64,8 +64,8 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
             if (model != null)
             {
-                await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ConnectorModel, ActionMode.Display).ConfigureAwait(false);
-                await AlbumsController.LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Display).ConfigureAwait(false);
+                await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ConnectorModel, ActionMode.Details).ConfigureAwait(false);
+                await AlbumsController.LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
             }
             viewBagWrapper.CommandMode = Models.Modules.Common.CommandMode.None;
             return View("Composite", model);
