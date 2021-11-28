@@ -42,27 +42,34 @@
     @if (pageCount > pageSize)
     {
         <nav class="navbar">
-            <div class="nav-item" style="min-width: 175px;" data-toggle="tooltip" title="@viewBagWrapper.Translate("PageIndex")">
-                <a class="btn btn-outline-secondary dropdown-toggle" name="pageIndex" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    @($"{MinItemIndex(pageIndex)}..{MaxItemIndex(pageIndex)} / {pageCount}")
-                    <span class="caret"></span>
-                </a>
-                <div class="dropdown-menu">
-                    @for (int index = 0; index <= maxPageIndex; index++)
-                    {
-                        string action = Url.Action(pageIndexAction, viewBagWrapper.Controller, CreateIndexParameters(index));
 
-                        if (index == pageIndex)
+            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                <button class="btn btn-outline-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    <i class="fa fa-add"></i>Filter
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" style="min-width: 175px;" type="button" id="dropdownPageIndex" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="@viewBagWrapper.Translate("PageIndex")">
+                        @($"{MinItemIndex(pageIndex)}..{MaxItemIndex(pageIndex)} / {pageCount}")
+                        <span class="caret"></span>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownPageIndex">
+                        @for (int index = 0; index <= maxPageIndex; index++)
                         {
-                            <a class="dropdown-item active" href="@action">@($"{MinItemIndex(index)}..{MaxItemIndex(index)}")</a>
+                            string action = Url.Action(pageIndexAction, viewBagWrapper.Controller, CreateIndexParameters(index));
+
+                            if (index == pageIndex)
+                            {
+                                <a class="dropdown-item active" href="@action">@($"{MinItemIndex(index)}..{MaxItemIndex(index)}")</a>
+                            }
+                            else
+                            {
+                                <a class="dropdown-item" href="@action">@($"{MinItemIndex(index)}..{MaxItemIndex(index)}")</a>
+                            }
                         }
-                        else
-                        {
-                            <a class="dropdown-item" href="@action">@($"{MinItemIndex(index)}..{MaxItemIndex(index)}")</a>
-                        }
-                    }
+                    </div>
                 </div>
             </div>
+
 
             <ul class="pagination justify-content-center" style="margin-top: 15px">
                 <li class="@prvCss">
@@ -127,25 +134,33 @@
                 </li>
             </ul>
 
-            <div class="nav-item pull-right" style="margin-left: 0px;" data-toggle="tooltip" title="@viewBagWrapper.Translate(" PageSize")">
-                <a class="btn btn-outline-secondary dropdown-toggle" name="pageSize" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    @pageSize
-                    <span class="caret"></span>
-                </a>
-                <div class="dropdown-menu">
-                    @foreach (int size in sessionWrapper.GetPageSizes(viewBagWrapper.Controller))
-                    {
-                        string action = Url.Action(pageSizeAction, viewBagWrapper.Controller, new { pageSize = size });
+            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="dropdownPageSize" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="@viewBagWrapper.Translate("PageSize")">
+                        @pageSize
+                        <span class="caret"></span>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownPageSize">
+                        @foreach (int size in sessionWrapper.GetPageSizes(viewBagWrapper.Controller))
+                        {
+                            string action = Url.Action(pageSizeAction, viewBagWrapper.Controller, new { pageSize = size });
 
-                        if (size == pageSize)
-                        {
-                            <a class="dropdown-item active" href="@action">@size</a>
+                            if (size == pageSize)
+                            {
+                                <a class="dropdown-item active" href="@action">@size</a>
+                            }
+                            else
+                            {
+                                <a class="dropdown-item" href="@action">@size</a>
+                            }
                         }
-                        else
-                        {
-                            <a class="dropdown-item" href="@action">@size</a>
-                        }
-                    }
+                    </div>
+                </div>
+
+            </div>
+            <div class="collapse" id="collapseExample">
+                <div class="card card-body">
+                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
                 </div>
             </div>
         </nav>

@@ -64,7 +64,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
                 await TracksController.LoadModelsReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
             }
             viewBagWrapper.CommandMode = CommandMode.None;
-            return View("MasterDetails", model);
+            return View("Details", model);
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+#nullable disable
+
 namespace SnQMusicStore.Logic.Migrations
 {
     public partial class InitDb : Migration
