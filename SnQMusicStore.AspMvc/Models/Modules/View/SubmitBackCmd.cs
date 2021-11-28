@@ -1,6 +1,5 @@
 ﻿//@CodeCopy
 //MdStart
-
 namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public partial class SubmitBackCmd : SubmitCmd
@@ -16,6 +15,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         public bool FromSubmitToBack { get; set; } = false;
         public string BackText { get; set; } = "Back to List";
         public string BackAction { get; set; } = "Index";
+        public object BackRouteValues { get; set; }
         public string BackController { get; set; }
         public string BackCss { get; set; } = "btn btn-outline-dark";
         public string BackStyle { get; set; } = "min-width: 8em;";
