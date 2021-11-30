@@ -6,6 +6,7 @@
     @using SnQMusicStore.AspMvc.Modules.Language
     @using SnQMusicStore.AspMvc.Modules.Session
     @using SnQMusicStore.AspMvc.Modules.View
+    @model IEnumerable<SnQMusicStore.AspMvc.Models.IdentityModel>
 
     var viewBagWrapper = new ViewBagWrapper(ViewBag);
     var sessionWrapper = new SessionWrapper(Context.Session);
@@ -22,6 +23,8 @@
     var prvCss = pageIndex == 0 ? "page-item disabled" : "page-item";
     var nxtCss = (pageIndex + 1) * pageSize >= pageCount ? "page-item disabled" : "page-item";
     var maxPageIndex = pageCount / pageSize;
+    var filterValues = sessionWrapper.GetFilterValues(viewBagWrapper.Controller);
+    var filterText = filterValues?.Count > 0 ? "*" : string.Empty;
 
     if (pageCount % pageSize == 0)
     {
@@ -42,10 +45,9 @@
     @if (pageCount > pageSize)
     {
         <nav class="navbar">
-
-            <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
-                <button class="btn btn-outline-primary" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
-                    <i class="fa fa-add"></i>Filter
+            <div class="btn-group" role="group" aria-label="Button group filter and page index">
+                <button class="btn btn-outline-primary" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="false" aria-controls="collapseFilter">
+                    <i class="fa fa-filter">@filterText</i>
                 </button>
                 <div class="dropdown">
                     <button class="btn btn-outline-primary dropdown-toggle" style="min-width: 175px;" type="button" id="dropdownPageIndex" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="@viewBagWrapper.Translate("PageIndex")">
@@ -69,7 +71,6 @@
                     </div>
                 </div>
             </div>
-
 
             <ul class="pagination justify-content-center" style="margin-top: 15px">
                 <li class="@prvCss">
@@ -156,11 +157,43 @@
                         }
                     </div>
                 </div>
-
             </div>
-            <div class="collapse" id="collapseExample">
+
+            <div class="collapse w-100" style="margin-top: 0.5em;" id="collapseFilter">
                 <div class="card card-body">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                    @await Html.PartialAsync("_FilterControl", Model)
+                </div>
+            </div>
+        </nav>
+    }
+    else if (pageCount == 0)
+    {
+        <nav class="navbar">
+            <div class="btn-group" role="group" aria-label="Button group filter">
+                <button class="btn btn-outline-primary" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="false" aria-controls="collapseFilter">
+                    <i class="fa fa-filter">@filterText</i>
+                </button>
+            </div>
+
+            <div class="collapse.show w-100" style="margin-top: 0.5em;" id="collapseFilter">
+                <div class="card card-body">
+                    @await Html.PartialAsync("_FilterControl", Model)
+                </div>
+            </div>
+        </nav>
+    }
+    else
+    {
+        <nav class="navbar">
+            <div class="btn-group" role="group" aria-label="Button group filter">
+                <button class="btn btn-outline-primary" data-toggle="collapse" href="#collapseFilter" role="button" aria-expanded="false" aria-controls="collapseFilter">
+                    <i class="fa fa-filter">@filterText</i>
+                </button>
+            </div>
+
+            <div class="collapse w-100" style="margin-top: 0.5em;" id="collapseFilter">
+                <div class="card card-body">
+                    @await Html.PartialAsync("_FilterControl", Model)
                 </div>
             </div>
         </nav>

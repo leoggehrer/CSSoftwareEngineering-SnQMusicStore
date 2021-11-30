@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using SnQMusicStore.AspMvc.Models;
 using SnQMusicStore.AspMvc.Models.Modules.Common;
+using SnQMusicStore.AspMvc.Models.Modules.View;
+using SnQMusicStore.AspMvc.Modules.View;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -101,6 +103,87 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void BeforeGetModel(ref TModel model, ref bool handled);
         partial void AfterGetModel(TModel model);
 
+        protected virtual FilterValues CreateFilterValues(IFormCollection formCollection)
+        {
+            var models = Array.Empty<IdentityModel>();
+            var viewBagWrapper = new ViewBagWrapper(ViewBag);
+            var indexViewModel = viewBagWrapper.CreateIndexViewModel(models, typeof(TModel));
+            var filterModel = new FilterModel(SessionWrapper, viewBagWrapper, indexViewModel);
+            
+            return filterModel.GetFilterValues(formCollection);
+        }
+        protected virtual void SetSessionPageData(ref int pageCount, ref int pageIndex, ref int pageSize)
+        {
+            pageCount = pageCount < 0 ? 0 : pageCount;
+            pageSize = pageSize < 1 ? 1 : pageSize;
+            pageIndex = pageIndex < 0 || pageIndex * pageSize >= pageCount ? 0 : pageIndex;
+
+            SessionWrapper.SetPageCount(ControllerName, pageCount);
+            SessionWrapper.SetPageIndex(ControllerName, pageIndex);
+            SessionWrapper.SetPageSize(ControllerName, pageSize);
+        }
+        protected virtual void SetSessionFilterValues(FilterValues filterValues)
+        {
+            SessionWrapper.SetFilterValues(ControllerName, filterValues);
+        }
+        protected virtual async Task<IEnumerable<TContract>> QueryPageListAsync(int pageIndex, int pageSize)
+        {
+            var result = default(IEnumerable<TContract>);
+            var filterValue = SessionWrapper.GetFilterValues(ControllerName);
+            var predicate = filterValue?.CreatePredicate();
+
+            if (predicate.HasContent())
+            {
+                using var ctrl = CreateController();
+                var pageCount = await ctrl.CountByAsync(predicate).ConfigureAwait(false);
+
+                SetSessionPageData(ref pageCount, ref pageIndex, ref pageSize);
+                result = await ctrl.QueryPageListAsync(predicate, pageIndex, pageSize).ConfigureAwait(false);
+            }
+            else
+            {
+                using var ctrl = CreateController();
+                var pageCount = await ctrl.CountAsync().ConfigureAwait(false);
+
+                SetSessionPageData(ref pageCount, ref pageIndex, ref pageSize);
+                result = await ctrl.GetPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
+            }
+            return result;
+        }
+
+        [HttpPost]
+        [ActionName("Filter")]
+        public virtual async Task<IActionResult> FilterAsync(IFormCollection formCollection)
+        {
+            var handled = false;
+            var models = default(IEnumerable<TModel>);
+
+            BeforeIndex(ref models, ref handled);
+            if (handled == false)
+            {
+                try
+                {
+                    var filterValues = CreateFilterValues(formCollection);
+                    var pageIndex = 0;
+                    var pageSize = SessionWrapper.GetPageSize(ControllerName);
+
+                    SetSessionFilterValues(filterValues);
+
+                    var entities = await QueryPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
+
+                    models = entities.Select(e => ToModel(e));
+                    models = BeforeView(models, ActionMode.Index);
+                    models = await BeforeViewAsync(models, ActionMode.Index).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    LastViewError = ex.GetError();
+                }
+            }
+            AfterIndex(models);
+            return ReturnIndexView(models);
+        }
+
         [HttpGet]
         [ActionName("Index")]
         public virtual async Task<IActionResult> IndexAsync()
@@ -113,16 +196,11 @@ namespace SnQMusicStore.AspMvc.Controllers
             {
                 try
                 {
-                    using var ctrl = CreateController();
-                    var pageCount = await ctrl.CountAsync().ConfigureAwait(false);
                     var pageIndex = SessionWrapper.GetPageIndex(ControllerName);
                     var pageSize = SessionWrapper.GetPageSize(ControllerName);
-                    var entities = await ctrl.GetPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
 
-                    pageIndex = pageIndex * pageSize > pageCount ? 0 : pageIndex;
-                    SessionWrapper.SetPageCount(ControllerName, pageCount);
-                    SessionWrapper.SetPageIndex(ControllerName, pageIndex);
-                    SessionWrapper.SetPageSize(ControllerName, pageSize);
+                    var entities = await QueryPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
+
                     models = entities.Select(e => ToModel(e));
                     models = BeforeView(models, ActionMode.Index);
                     models = await BeforeViewAsync(models, ActionMode.Index).ConfigureAwait(false);
@@ -151,14 +229,8 @@ namespace SnQMusicStore.AspMvc.Controllers
             {
                 try
                 {
-                    using var ctrl = CreateController();
-                    var pageCount = await ctrl.CountAsync().ConfigureAwait(false);
-                    var entities = await ctrl.GetPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
+                    var entities = await QueryPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
 
-                    pageIndex = pageIndex * pageSize > pageCount ? 0 : pageIndex;
-                    SessionWrapper.SetPageCount(ControllerName, pageCount);
-                    SessionWrapper.SetPageIndex(ControllerName, pageIndex);
-                    SessionWrapper.SetPageSize(ControllerName, pageSize);
                     models = entities.Select(e => ToModel(e));
                     models = BeforeView(models, ActionMode.Index);
                     models = await BeforeViewAsync(models, ActionMode.Index).ConfigureAwait(false);
@@ -186,13 +258,10 @@ namespace SnQMusicStore.AspMvc.Controllers
             {
                 try
                 {
-                    using var ctrl = CreateController();
-                    var pageCount = await ctrl.CountAsync().ConfigureAwait(false);
-                    var entities = await ctrl.GetPageListAsync(0, pageSize).ConfigureAwait(false);
+                    var pageIndex = 0;
 
-                    SessionWrapper.SetPageCount(ControllerName, pageCount);
-                    SessionWrapper.SetPageIndex(ControllerName, 0);
-                    SessionWrapper.SetPageSize(ControllerName, pageSize);
+                    var entities = await QueryPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
+
                     models = entities.Select(e => ToModel(e));
                     models = BeforeView(models, ActionMode.Index);
                     models = await BeforeViewAsync(models, ActionMode.Index).ConfigureAwait(false);

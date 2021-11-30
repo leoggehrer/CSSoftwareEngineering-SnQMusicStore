@@ -8,6 +8,7 @@
     @using SnQMusicStore.AspMvc.Modules.View
     @model IEnumerable<SnQMusicStore.AspMvc.Models.IdentityModel>
 
+    var index = 0;
     var viewBagWrapper = new ViewBagWrapper(ViewBag);
     var sessionWrapper = new SessionWrapper(Context.Session);
 
@@ -25,12 +26,12 @@
         {
             indexViewModel = viewBagWrapper.CreateIndexViewModel(models);
         }
-        viewBagWrapper.ModelType = ModelType.MasterDetail;
+        viewBagWrapper.ModelCategory = ModelCategory.MasterDetail;
         viewBagWrapper.CommandMode |= SnQMusicStore.AspMvc.Models.Modules.Common.CommandMode.CreateDetail;
     }
     else
     {
-        viewBagWrapper.ModelType = ModelType.Single;
+        viewBagWrapper.ModelCategory = ModelCategory.Single;
         indexViewModel = viewBagWrapper.CreateIndexViewModel(Model);
     }
 
@@ -38,12 +39,14 @@
     {
         @foreach (var model in indexViewModel.Models)
         {
+            index = 0;
             model.ViewBagInfo = viewBagWrapper;
             <div class="card" style="margin-bottom: 0.5em;">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         @foreach (var item in indexViewModel.GetDisplayProperties())
                         {
+                            model.ViewBagInfo.Index = index++;
                             model.ViewBagInfo.Handled = false;
                             model.ViewBagInfo.DisplayProperty = item;
                             @await Html.PartialAsync("_CardItem", model)

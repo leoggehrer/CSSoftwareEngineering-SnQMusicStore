@@ -17,19 +17,24 @@ namespace SnQMusicStore.AspMvc.Modules.View
             ViewBag = viewBag;
         }
 
-        public ModelType ModelType
+        public Type ViewType
+        {
+            get => ViewBag.ViewType as Type;
+            set => ViewBag.ViewType = value;
+        }
+        public ModelCategory ModelCategory
         {
             get
             {
-                var result = ModelType.Single;
+                var result = ModelCategory.Single;
 
-                if (ViewBag.ModelType != null)
+                if (ViewBag.ModelCategory != null)
                 {
-                    result = ViewBag.ModelType;
+                    result = ViewBag.ModelCategory;
                 }
                 return result;
             }
-            set => ViewBag.ModelType = value;
+            set => ViewBag.ModelCategory = value;
         }
         public EditMode EditMode
         {
@@ -76,11 +81,6 @@ namespace SnQMusicStore.AspMvc.Modules.View
             get => ViewBag.Action as string;
             set => ViewBag.Action = value;
         }
-        public Type ViewType
-        {
-            get => ViewBag.ViewType as Type;
-            set => ViewBag.ViewType = value;
-        }
         public string ItemPrefix
         {
             get => ViewBag.ItemPrefix as string;
@@ -93,6 +93,11 @@ namespace SnQMusicStore.AspMvc.Modules.View
             set => ViewBag.ViewModelCreator = value;
         }
 
+        public int Index
+        {
+            get => ViewBag.Index != null ? (int)ViewBag.Index : 0;
+            set => ViewBag.Index = value;
+        }
         public bool Handled
         {
             get => ViewBag.Handled != null ? (bool)ViewBag.Handled : false;
