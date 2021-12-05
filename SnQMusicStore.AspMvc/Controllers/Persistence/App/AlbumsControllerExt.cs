@@ -53,18 +53,18 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
         public override async Task<IActionResult> DetailsAsync(int id)
         {
-            var viewBagWrapper = new ViewBagWrapper(ViewBag);
+            var viewBagInfo = new ViewBagWrapper(ViewBag);
             using var ctrl = CreateController<Contracts.Business.App.IAlbumTracks>();
             var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
             var model = Models.Business.App.AlbumTracks.Create(entity);
+            var modelType = model.GetType();
+            var displayType = modelType;
 
-            if (model != null)
-            {
-                await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
-                await TracksController.LoadModelsReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
-            }
-            viewBagWrapper.CommandMode = CommandMode.None;
-            return View("Details", model);
+            await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
+            await TracksController.LoadModelsReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
+
+            viewBagInfo.CommandMode = CommandMode.None;
+            return View("Details", ViewModelCreator.CreateDisplayViewModel(viewBagInfo, model, modelType, displayType));
         }
     }
 }

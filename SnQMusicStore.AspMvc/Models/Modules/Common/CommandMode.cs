@@ -15,6 +15,8 @@ namespace SnQMusicStore.AspMvc.Models.Modules.Common
         DeleteDetail = 2 * EditDetail,
 
         Details = 2 * DeleteDetail,
+
+        All = Create + CreateDetail + Edit + EditDetail + Delete + DeleteDetail + Details,
     }
 }
 //MdEnd

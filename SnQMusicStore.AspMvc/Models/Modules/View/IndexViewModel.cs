@@ -11,37 +11,35 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public partial class IndexViewModel : ViewModel
     {
-        private Type modelType = null;
-        public override Type ModelType => modelType ??= Models.Any() ? Models.First().GetType() 
-                                                                     : Models.GetType().GetGenericArguments().FirstOrDefault(e => e.IsClass || e.IsInterface);
+        private IEnumerable<IdentityModel> displayModels = null;
+
         public IEnumerable<IdentityModel> Models { get; init; }
-
-        public IndexViewModel(ViewBagWrapper viewBagWrapper, Type elementType)
-            : this(viewBagWrapper, Array.Empty<IdentityModel>(), elementType)
+        public IEnumerable<IdentityModel> DisplayModels
         {
-        }
-        public IndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models)
-            : base(viewBagWrapper)
-        {
-            models.CheckArgument(nameof(models));
-
-            Constructing();
-            Models = models;
-            if (models.Any())
+            get
             {
-                modelType = models.First().GetType();
+                if (displayModels == null)
+                {
+                    if (Models is IEnumerable<IMasterDetails> mds)
+                    {
+                        displayModels = mds.Select(m => m.Master);
+                    }
+                    else
+                    {
+                        displayModels = Models;
+                    }
+                }
+                return displayModels;
             }
-            Constructed();
         }
-        public IndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models, Type elementType)
-            : base(viewBagWrapper)
+
+        public IndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models, Type modelType, Type displayType)
+            : base(viewBagWrapper, modelType, displayType)
         {
             models.CheckArgument(nameof(models));
-            elementType.CheckArgument(nameof(elementType));
 
             Constructing();
             Models = models;
-            modelType = elementType;
             Constructed();
         }
         partial void Constructing();
@@ -50,13 +48,13 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         private IEnumerable<PropertyInfo> displayProperties = null;
         public virtual IEnumerable<PropertyInfo> GetHiddenProperties()
         {
-            return GetHiddenProperties(ModelType);
+            return GetHiddenProperties(DisplayType);
         }
         public virtual IEnumerable<PropertyInfo> GetDisplayProperties()
         {
             if (displayProperties == null)
             {
-                displayProperties = GetDisplayProperties(ModelType);
+                displayProperties = GetDisplayProperties(DisplayType);
             }
             return displayProperties;
         }

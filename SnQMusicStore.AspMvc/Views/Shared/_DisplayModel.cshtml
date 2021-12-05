@@ -1,10 +1,11 @@
 ﻿@*@CodeCopy*@
 @{
-    @model SnQMusicStore.AspMvc.Models.IdentityModel
+    @using SnQMusicStore.AspMvc.Modules.View
+    @model SnQMusicStore.AspMvc.Models.ModelObject
 
     var index = 0;
-    var viewBagWrapper = Model.ViewBagInfo;
-    var displayViewModel = viewBagWrapper.CreateDisplayViewModel(Model);
+    var viewBagInfo = Model.ViewBagInfo;
+    var displayViewModel = ViewModelCreator.CreateDisplayViewModel(viewBagInfo, Model);
 
     @foreach (var property in displayViewModel.GetHiddenProperties())
     {

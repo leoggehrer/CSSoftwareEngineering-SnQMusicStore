@@ -12,18 +12,16 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public class FilterModel
     {
-        public ISessionWrapper Session { get; init; }
-        public ViewBagWrapper ViewBagInfo { get; init; }
+        public ISessionWrapper SessionInfo { get; init; }
+        public ViewBagWrapper ViewBagInfo => IndexViewModel.ViewBagInfo;
         public IndexViewModel IndexViewModel { get; init; }
 
-        public FilterModel(ISessionWrapper session, ViewBagWrapper viewBagInfo, IndexViewModel indexViewModel)
+        public FilterModel(ISessionWrapper sessionInfo, IndexViewModel indexViewModel)
         {
-            session.CheckArgument(nameof(session));
-            viewBagInfo.CheckArgument(nameof(viewBagInfo));
+            sessionInfo.CheckArgument(nameof(sessionInfo));
             indexViewModel.CheckArgument(nameof(indexViewModel));
 
-            Session = session;
-            ViewBagInfo = viewBagInfo;
+            SessionInfo = sessionInfo;
             IndexViewModel = indexViewModel;
         }
 
@@ -86,17 +84,19 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public SelectList GetFieldOperations()
         {
-            var operations = new List<SelectListItem>();
-
-            operations.Add(new SelectListItem { Selected = true, Value = string.Empty, Text = string.Empty });
-            operations.Add(new SelectListItem { Selected = true, Value = "and", Text = "And" });
-            operations.Add(new SelectListItem { Selected = true, Value = "or", Text = "Or" });
+            var operations = new List<SelectListItem>
+            {
+                new SelectListItem { Selected = true, Value = string.Empty, Text = string.Empty },
+                new SelectListItem { Selected = true, Value = "and", Text = "And" },
+                new SelectListItem { Selected = true, Value = "or", Text = "Or" }
+            };
             return new SelectList(operations, "Value", "Text");
         }
         public SelectList GetTypeOperations(PropertyInfo propertyInfo)
         {
             propertyInfo.CheckArgument(nameof(propertyInfo));
 
+            var translate = ViewBagInfo.Translate;
             var operations = new List<SelectListItem>();
 
             if (ViewBagInfo.GetMappingProperty(propertyInfo.Name, out var property) == false)
@@ -107,45 +107,49 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             operations.Add(new SelectListItem { Value = string.Empty, Text = string.Empty });
             if (property.PropertyType == typeof(string))
             {
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationEquals, Text = StaticLiterals.OperationEquals });
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationNotEquals, Text = StaticLiterals.OperationNotEquals });
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationContains, Text = StaticLiterals.OperationContains });
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationStartsWith, Text = StaticLiterals.OperationStartsWith });
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationEndsWith, Text = StaticLiterals.OperationEndsWith });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationEquals, Text = translate(StaticLiterals.OperationEquals) });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationNotEquals, Text = translate(StaticLiterals.OperationNotEquals) });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationContains, Text = translate(StaticLiterals.OperationContains) });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationStartsWith, Text = translate(StaticLiterals.OperationStartsWith) });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationEndsWith, Text = translate(StaticLiterals.OperationEndsWith) });
             }
             else if (property.PropertyType == typeof(int))
             {
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationNumEquals, Text = StaticLiterals.OperationNumEquals });
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationNumIsGreater, Text = StaticLiterals.OperationNumIsGreater });
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationNumIsLess, Text = StaticLiterals.OperationNumIsLess });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationNumEquals, Text = translate(StaticLiterals.OperationNumEquals) });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationNumIsGreater, Text = translate(StaticLiterals.OperationNumIsGreater) });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationNumIsLess, Text = translate(StaticLiterals.OperationNumIsLess) });
             }
             else
             {
-                operations.Add(new SelectListItem { Value = StaticLiterals.OperationEquals, Text = StaticLiterals.OperationEquals });
+                operations.Add(new SelectListItem { Value = StaticLiterals.OperationEquals, Text = translate(StaticLiterals.OperationEquals) });
             }
             return new SelectList(operations, "Value", "Text");
         }
-
         public FilterValues GetFilterValues(IFormCollection formCollection)
         {
             formCollection.CheckArgument(nameof(formCollection));
 
             var result = new FilterValues();
 
-            foreach (var item in IndexViewModel.GetDisplayProperties())
+            foreach (var property in IndexViewModel.GetDisplayProperties())
             {
-                var operationName = GetTypeOperationName(item);
+                var operationName = GetTypeOperationName(property);
                 var operationValue = formCollection[operationName];
 
                 if (operationValue.Count > 0 && string.IsNullOrEmpty(operationValue[0]) == false)
                 {
-                    var operandName = GetName(item);
+                    var operandName = GetName(property);
                     var operandValue = formCollection[operandName];
 
                     if (operandValue.Count > 0 && string.IsNullOrEmpty(operandValue[0]) == false)
                     {
-                        result[item.Name] = operandValue[0];
-                        result[$"{item.Name}.{StaticLiterals.TypeOperationPostfix}"] = operationValue;
+                        var filterItem = new FilterItem()
+                        {
+                            Name = property.Name,
+                            Operation = operationValue,
+                            Value = operandValue[0],
+                        };
+                        result[property.Name] = filterItem;
                     }
                 }
             }

@@ -1,18 +1,29 @@
 ﻿@*@CodeCopy*@
 @{
+    @using SnQMusicStore.AspMvc.Modules.View
     @model SnQMusicStore.AspMvc.Models.IdentityModel
 
-    var viewBagWrapper = Model.ViewBagInfo;
-    var property = viewBagWrapper.DisplayProperty;
-    var editViewModel = viewBagWrapper.CreateEditViewModel(Model);
+    var viewBagInfo = Model.ViewBagInfo;
+    var property = viewBagInfo.DisplayProperty;
+    var editViewModel = ViewModelCreator.CreateEditViewModel(viewBagInfo, Model);
 
     <div class="row">
         <div class="col-md-6">
-            <div class="form-group">
-                <label class="control-label" for="@property.Name">@viewBagWrapper.TranslateFor(editViewModel.GetLabel(property))</label>
-                @await Html.PartialAsync("_EditControl", Model)
-            </div>
+            @if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+            {
+                <div class="form-check" style="margin-bottom: 0.5em;">
+                    @await Html.PartialAsync("_EditControl", Model)
+                    <label class="form-check-label" for="@property.Name">@viewBagInfo.TranslateFor(editViewModel.GetLabel(property))</label>
+                </div>
+            }
+            else
+            {
+                <div class="form-group">
+                    <label class="control-label" for="@property.Name">@viewBagInfo.TranslateFor(editViewModel.GetLabel(property))</label>
+                    @await Html.PartialAsync("_EditControl", Model)
+                </div>
+            }
         </div>
     </div>
-    viewBagWrapper.Handled = true;
+    viewBagInfo.Handled = true;
 }

@@ -3,7 +3,6 @@
 using CommonBase.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using SnQMusicStore.AspMvc.Models;
 using SnQMusicStore.AspMvc.Models.Modules.Common;
 using SnQMusicStore.AspMvc.Models.Modules.View;
@@ -17,7 +16,7 @@ namespace SnQMusicStore.AspMvc.Controllers
 {
     public abstract partial class GenericController<TContract, TModel> : MvcController
         where TContract : Contracts.IIdentifiable, Contracts.ICopyable<TContract>
-        where TModel : TContract, new()
+        where TModel : IdentityModel, TContract, new()
     {
         static GenericController()
         {
@@ -63,6 +62,17 @@ namespace SnQMusicStore.AspMvc.Controllers
         protected bool FromEditToIndex { get; set; } = true;
         protected string ControllerName => GetType().Name.Replace("Controller", string.Empty);
 
+        #region Before view
+        protected virtual TModel BeforeView(TModel model, ActionMode action) => model;
+        protected virtual IEnumerable<TModel> BeforeView(IEnumerable<TModel> models, ActionMode action) => models;
+
+        protected virtual Task<TModel> BeforeViewAsync(TModel model, ActionMode action) => Task.FromResult(model);
+        protected virtual Task<IEnumerable<TModel>> BeforeViewAsync(IEnumerable<TModel> models, ActionMode action) => Task.FromResult(models);
+
+        protected virtual MasterDetailModel BeforeViewMasterDetail(MasterDetailModel model, ActionMode action) => model;
+        protected virtual Task<MasterDetailModel> BeforeViewMasterDetailAsync(MasterDetailModel model, ActionMode action) => Task.FromResult(model);
+        #endregion Before view
+
         protected virtual TModel ToModel(TContract entity)
         {
             entity.CheckArgument(nameof(entity));
@@ -72,18 +82,6 @@ namespace SnQMusicStore.AspMvc.Controllers
             result.CopyProperties(entity);
             return result;
         }
-        protected virtual TModel BeforeView(TModel model, ActionMode action) => model;
-        protected virtual IEnumerable<TModel> BeforeView(IEnumerable<TModel> models, ActionMode action) => models;
-        protected virtual Task<TModel> BeforeViewAsync(TModel model, ActionMode action) => Task.FromResult(model);
-        protected virtual Task<IEnumerable<TModel>> BeforeViewAsync(IEnumerable<TModel> models, ActionMode action) => Task.FromResult(models);
-
-        public override void OnActionExecuted(ActionExecutedContext context)
-        {
-            ViewBag.ViewModelCreator = new Modules.View.ViewModelCreator();
-
-            base.OnActionExecuted(context);
-        }
-
         protected virtual async Task<TModel> GetModelAsync(int id)
         {
             var handled = false;
@@ -103,16 +101,40 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void BeforeGetModel(ref TModel model, ref bool handled);
         partial void AfterGetModel(TModel model);
 
-        protected virtual FilterValues CreateFilterValues(IFormCollection formCollection)
+        protected virtual FilterModel CreateFilterModel()
         {
-            var models = Array.Empty<IdentityModel>();
-            var viewBagWrapper = new ViewBagWrapper(ViewBag);
-            var indexViewModel = viewBagWrapper.CreateIndexViewModel(models, typeof(TModel));
-            var filterModel = new FilterModel(SessionWrapper, viewBagWrapper, indexViewModel);
-            
-            return filterModel.GetFilterValues(formCollection);
+            var models = new TModel[] { new TModel() };
+            var indexViewModel = CreateIndexViewModel(models);
+
+            return new FilterModel(SessionWrapper, indexViewModel);
         }
-        protected virtual void SetSessionPageData(ref int pageCount, ref int pageIndex, ref int pageSize)
+        protected virtual IndexViewModel CreateIndexViewModel(IEnumerable<TModel> models)
+        {
+            var modelType = typeof(TModel);
+            var displayType = ViewBagWrapper.GetDisplayType(modelType);
+            var viewBageInfo = new ViewBagWrapper(ViewBag);
+            var viewModels = models ?? Array.Empty<TModel>();
+
+            return ViewModelCreator.CreateIndexViewModel(viewBageInfo, viewModels, modelType, displayType);
+        }
+        protected virtual EditViewModel CreateEditViewModel(TModel model)
+        {
+            var modelType = typeof(TModel);
+            var displayType = modelType;
+            var viewBagInfo = new ViewBagWrapper(ViewBag);
+
+            return ViewModelCreator.CreateEditViewModel(viewBagInfo, model, modelType, displayType);
+        }
+        protected virtual DisplayViewModel CreateDisplayViewModel(TModel model)
+        {
+            var modelType = typeof(TModel);
+            var displayType = modelType;
+            var viewBagInfo = new ViewBagWrapper(ViewBag);
+
+            return ViewModelCreator.CreateDisplayViewModel(viewBagInfo, model, modelType, displayType);
+        }
+
+        protected virtual void SetSessionPageData(int pageCount, int pageIndex, int pageSize)
         {
             pageCount = pageCount < 0 ? 0 : pageCount;
             pageSize = pageSize < 1 ? 1 : pageSize;
@@ -129,30 +151,32 @@ namespace SnQMusicStore.AspMvc.Controllers
         protected virtual async Task<IEnumerable<TContract>> QueryPageListAsync(int pageIndex, int pageSize)
         {
             var result = default(IEnumerable<TContract>);
+            var pageCount = 0;
             var filterValue = SessionWrapper.GetFilterValues(ControllerName);
             var predicate = filterValue?.CreatePredicate();
 
+            SetSessionPageData(pageCount, pageIndex, pageSize);
             if (predicate.HasContent())
             {
                 using var ctrl = CreateController();
-                var pageCount = await ctrl.CountByAsync(predicate).ConfigureAwait(false);
+                pageCount = await ctrl.CountByAsync(predicate).ConfigureAwait(false);
 
-                SetSessionPageData(ref pageCount, ref pageIndex, ref pageSize);
+                SetSessionPageData(pageCount, pageIndex, pageSize);
                 result = await ctrl.QueryPageListAsync(predicate, pageIndex, pageSize).ConfigureAwait(false);
             }
             else
             {
                 using var ctrl = CreateController();
-                var pageCount = await ctrl.CountAsync().ConfigureAwait(false);
+                pageCount = await ctrl.CountAsync().ConfigureAwait(false);
 
-                SetSessionPageData(ref pageCount, ref pageIndex, ref pageSize);
+                SetSessionPageData(pageCount, pageIndex, pageSize);
                 result = await ctrl.GetPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
             }
             return result;
         }
 
         [HttpPost]
-        [ActionName("Filter")]
+        [ActionName(nameof(ActionMode.Filter))]
         public virtual async Task<IActionResult> FilterAsync(IFormCollection formCollection)
         {
             var handled = false;
@@ -163,8 +187,9 @@ namespace SnQMusicStore.AspMvc.Controllers
             {
                 try
                 {
-                    var filterValues = CreateFilterValues(formCollection);
                     var pageIndex = 0;
+                    var filterModel = CreateFilterModel();
+                    var filterValues = filterModel.GetFilterValues(formCollection);
                     var pageSize = SessionWrapper.GetPageSize(ControllerName);
 
                     SetSessionFilterValues(filterValues);
@@ -185,7 +210,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
 
         [HttpGet]
-        [ActionName("Index")]
+        [ActionName(nameof(ActionMode.Index))]
         public virtual async Task<IActionResult> IndexAsync()
         {
             var handled = false;
@@ -215,10 +240,10 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         partial void BeforeIndex(ref IEnumerable<TModel> models, ref bool handled);
         partial void AfterIndex(IEnumerable<TModel> models);
-        protected virtual IActionResult ReturnIndexView(IEnumerable<TModel> models) => View("Index", models);
+        protected virtual IActionResult ReturnIndexView(IEnumerable<TModel> models) => View("Index", CreateIndexViewModel(models));
 
         [HttpGet]
-        [ActionName("IndexByPageIndex")]
+        [ActionName(nameof(ActionMode.IndexByPageIndex))]
         public virtual async Task<IActionResult> IndexByPageIndexAsync(int pageIndex, int pageSize)
         {
             var handled = false;
@@ -247,7 +272,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void AfterIndexByPageIndex(IEnumerable<TModel> models);
 
         [HttpGet]
-        [ActionName("IndexByPageSize")]
+        [ActionName(nameof(ActionMode.IndexByPageSize))]
         public virtual async Task<IActionResult> IndexByPageSizeAsync(int pageSize)
         {
             var handled = false;
@@ -278,7 +303,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void AfterIndexByPageSize(IEnumerable<TModel> models);
 
         [HttpGet]
-        [ActionName("Create")]
+        [ActionName(nameof(ActionMode.Create))]
         public virtual async Task<IActionResult> CreateAsync()
         {
             var handled = false;
@@ -307,7 +332,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         partial void BeforeCreate(ref TModel model, ref bool handled);
         partial void AfterCreate(TModel model);
-        protected virtual IActionResult ReturnCreateView(TModel model) => View("Create", model);
+        protected virtual IActionResult ReturnCreateView(TModel model) => View("Create", CreateEditViewModel(model));
 
         protected virtual async Task<TModel> CreateModelAsync()
         {
@@ -330,7 +355,7 @@ namespace SnQMusicStore.AspMvc.Controllers
 
 
         [HttpPost]
-        [ActionName("Create")]
+        [ActionName(nameof(ActionMode.Create))]
         public virtual async Task<IActionResult> InsertAsync(TModel model)
         {
             var handled = false;
@@ -361,10 +386,10 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         partial void BeforeInsertModel(TModel model, ref bool handled);
         partial void AfterInsertModel(TModel model);
-        protected virtual IActionResult ReturnAfterCreate(bool hasError, TModel model) => hasError ? View("Create", model) : FromCreateToEdit ? RedirectToAction("Edit", new { model.Id }) : RedirectToAction("Index");
+        protected virtual IActionResult ReturnAfterCreate(bool hasError, TModel model) => hasError ? View("Create", CreateEditViewModel(model)) : FromCreateToEdit ? RedirectToAction("Edit", new { model.Id }) : RedirectToAction("Index");
 
         [HttpGet]
-        [ActionName("Edit")]
+        [ActionName(nameof(ActionMode.Edit))]
         public virtual async Task<IActionResult> EditAsync(int id)
         {
             var handled = false;
@@ -393,7 +418,10 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         partial void BeforeEdit(ref TModel model, ref bool handled);
         partial void AfterEdit(TModel model);
-        protected virtual IActionResult ReturnEditView(TModel model) => View("Edit", model);
+        protected virtual IActionResult ReturnEditView(TModel model)
+        {
+            return View("Edit", CreateEditViewModel(model));
+        }
 
         protected virtual async Task<TModel> EditModelAsync(int id)
         {
@@ -415,7 +443,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void AfterEditModel(TModel model);
 
         [HttpPost]
-        [ActionName("Edit")]
+        [ActionName(nameof(ActionMode.Edit))]
         public virtual async Task<IActionResult> Update(TModel model)
         {
             var handled = false;
@@ -462,10 +490,10 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         partial void BeforeUpdateModel(TModel model, ref bool handled);
         partial void AfterUpdateModel(TModel model);
-        protected virtual IActionResult ReturnAfterEdit(bool hasError, TModel model) => hasError ? View("Edit", model) : FromEditToIndex ? RedirectToAction("Index") : RedirectToAction("Edit", new { model.Id });
+        protected virtual IActionResult ReturnAfterEdit(bool hasError, TModel model) => hasError ? View("Edit", CreateEditViewModel(model)) : FromEditToIndex ? RedirectToAction("Index") : RedirectToAction("Edit", new { model.Id });
 
         [HttpGet]
-        [ActionName("Delete")]
+        [ActionName(nameof(ActionMode.Delete))]
         public virtual async Task<IActionResult> ViewDeleteAsync(int id)
         {
             var handled = false;
@@ -497,9 +525,9 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         partial void BeforeDelete(ref TModel model, ref bool handled);
         partial void AfterDelete(TModel model);
-        protected virtual IActionResult ReturnDeleteView(TModel model) => View("Delete", model);
+        protected virtual IActionResult ReturnDeleteView(TModel model) => View("Delete", CreateDisplayViewModel(model));
 
-        [ActionName("Delete")]
+        [ActionName(nameof(ActionMode.Delete))]
         public virtual async Task<IActionResult> DeleteAsync(int id)
         {
             var handled = false;
@@ -532,10 +560,10 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         partial void BeforeDeleteModel(int id, ref bool handled);
         partial void AfterDeleteModel(int id);
-        protected virtual IActionResult ReturnAfterDelete(bool hasError, TModel model) => hasError ? View("Delete", model) : RedirectToAction("Index");
+        protected virtual IActionResult ReturnAfterDelete(bool hasError, TModel model) => hasError ? View("Delete", CreateDisplayViewModel(model)) : RedirectToAction("Index");
 
         [HttpGet]
-        [ActionName("Details")]
+        [ActionName(nameof(ActionMode.Details))]
         public virtual async Task<IActionResult> DetailsAsync(int id)
         {
             var handled = false;
@@ -564,11 +592,11 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         partial void BeforeDetails(ref TModel model, ref bool handled);
         partial void AfterDetails(TModel model);
-        protected virtual IActionResult ReturnDetailsView(TModel model) => View("Details", model);
+        protected virtual IActionResult ReturnDetailsView(TModel model) => View("Details", CreateDisplayViewModel(model));
 
         #region Detail actions
         [HttpGet]
-        [ActionName("CreateDetail")]
+        [ActionName(nameof(ActionMode.CreateDetail))]
         public virtual async Task<IActionResult> CreateDetailAsync(int id)
         {
             var handled = false;
@@ -588,7 +616,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                         var oneProperty = model.GetType().GetProperty("OneModel");
                         var oneModel = oneProperty?.GetValue(model) as IdentityModel;
                         var createManyMethod = model.GetType().GetMethod("CreateManyModel");
-                        var manyModel = createManyMethod?.Invoke(model, new object[] { }) as IdentityModel;
+                        var manyModel = createManyMethod?.Invoke(model, Array.Empty<object>()) as IdentityModel;
 
                         masterDetailModel.Master = oneModel;
                         masterDetailModel.Detail = manyModel;
@@ -604,6 +632,8 @@ namespace SnQMusicStore.AspMvc.Controllers
             {
                 model = BeforeView(model, ActionMode.CreateDetail);
                 model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
+                masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.CreateDetail);
+                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.CreateDetail).ConfigureAwait (false);
             }
             return HasError ? RedirectToAction("Index") : ReturnCreateDetailView(masterDetailModel);
         }
@@ -612,7 +642,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         protected virtual IActionResult ReturnCreateDetailView(MasterDetailModel model) => View("CreateDetail", model);
 
         [HttpPost]
-        [ActionName("CreateDetail")]
+        [ActionName(nameof(ActionMode.CreateDetail))]
         public virtual async Task<IActionResult> AddDetailAsync(int id, IFormCollection formCollection)
         {
             var handled = false;
@@ -630,12 +660,12 @@ namespace SnQMusicStore.AspMvc.Controllers
                         var oneProperty = model.GetType().GetProperty("OneModel");
                         var oneModel = oneProperty?.GetValue(model) as IdentityModel;
                         var createManyMethod = model.GetType().GetMethod("CreateManyModel");
-                        var manyModel = createManyMethod?.Invoke(model, new object[] { }) as IdentityModel;
+                        var manyModel = createManyMethod?.Invoke(model, Array.Empty<object>()) as IdentityModel;
                         var addManyMethod = model.GetType().GetMethod("AddManyItem");
 
                         masterDetailModel.Master = oneModel;
                         masterDetailModel.Detail = manyModel;
-                        SetModelValues(masterDetailModel.Detail, nameof(Models.MasterDetailModel.Detail), formCollection);
+                        SetModelValues(masterDetailModel.Detail, nameof(MasterDetailModel.Detail), formCollection);
                         addManyMethod?.Invoke(model, new object[] { masterDetailModel.Detail });
 
                         using var ctrl = CreateController();
@@ -651,10 +681,12 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterAddDetail(model);
-            if (HasError == false)
+            if (HasError)
             {
                 model = BeforeView(model, ActionMode.CreateDetail);
                 model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
+                masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.CreateDetail);
+                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.CreateDetail).ConfigureAwait(false);
             }
             return HasError ? ReturnCreateDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model.Id });
         }
@@ -662,7 +694,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void AfterAddDetail(TModel model);
 
         [HttpGet]
-        [ActionName("EditDetail")]
+        [ActionName(nameof(ActionMode.EditDetail))]
         public virtual async Task<IActionResult> EditDetailAsync(int id, int detailId)
         {
             var handled = false;
@@ -696,8 +728,10 @@ namespace SnQMusicStore.AspMvc.Controllers
             AfterEditDetail(model);
             if (HasError == false)
             {
-                model = BeforeView(model, ActionMode.CreateDetail);
-                model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
+                model = BeforeView(model, ActionMode.EditDetail);
+                model = await BeforeViewAsync(model, ActionMode.EditDetail).ConfigureAwait(false);
+                masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.EditDetail);
+                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.EditDetail).ConfigureAwait(false);
             }
             return HasError ? RedirectToAction("Index") : ReturnEditDetailView(masterDetailModel);
         }
@@ -706,7 +740,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         protected virtual IActionResult ReturnEditDetailView(MasterDetailModel model) => View("EditDetail", model);
 
         [HttpPost]
-        [ActionName("EditDetail")]
+        [ActionName(nameof(ActionMode.EditDetail))]
         public virtual async Task<IActionResult> EditDetailAsync(int id, IFormCollection formCollection)
         {
             var handled = false;
@@ -747,10 +781,12 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterUpdateDetail(model);
-            if (HasError == false)
+            if (HasError)
             {
-                model = BeforeView(model, ActionMode.CreateDetail);
-                model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
+                model = BeforeView(model, ActionMode.EditDetail);
+                model = await BeforeViewAsync(model, ActionMode.EditDetail).ConfigureAwait(false);
+                masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.EditDetail);
+                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.EditDetail).ConfigureAwait(false);
             }
             return HasError ? ReturnCreateDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model.Id });
         }
@@ -758,7 +794,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void AfterUpdateDetail(TModel model);
 
         [HttpGet]
-        [ActionName("DeleteDetail")]
+        [ActionName(nameof(ActionMode.DeleteDetail))]
         public virtual async Task<IActionResult> ViewDeleteDetailAsync(int id, int detailId)
         {
             var handled = false;
@@ -792,8 +828,10 @@ namespace SnQMusicStore.AspMvc.Controllers
             AfterViewDeleteDetail(model);
             if (HasError == false)
             {
-                model = BeforeView(model, ActionMode.CreateDetail);
-                model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
+                model = BeforeView(model, ActionMode.DeleteDetail);
+                model = await BeforeViewAsync(model, ActionMode.DeleteDetail).ConfigureAwait(false);
+                masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.DeleteDetail);
+                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.DeleteDetail).ConfigureAwait(false);
             }
             return HasError ? RedirectToAction("Index") : ReturnDeleteDetailView(masterDetailModel);
         }
@@ -802,7 +840,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         protected virtual IActionResult ReturnDeleteDetailView(MasterDetailModel model) => View("DeleteDetail", model);
 
         [HttpPost]
-        [ActionName("DeleteDetail")]
+        [ActionName(nameof(ActionMode.DeleteDetail))]
         public virtual async Task<IActionResult> DeleteDetailAsync(int id, IFormCollection formCollection)
         {
             var handled = false;
@@ -845,10 +883,12 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterDeleteDetail(model);
-            if (HasError == false)
+            if (HasError)
             {
-                model = BeforeView(model, ActionMode.CreateDetail);
-                model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
+                model = BeforeView(model, ActionMode.DeleteDetail);
+                model = await BeforeViewAsync(model, ActionMode.DeleteDetail).ConfigureAwait(false);
+                masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.DeleteDetail);
+                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.DeleteDetail).ConfigureAwait(false);
             }
             return HasError ? ReturnDeleteDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model.Id });
         }

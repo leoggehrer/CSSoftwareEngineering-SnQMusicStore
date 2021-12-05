@@ -1,92 +1,79 @@
 ﻿//@CodeCopy
 //MdStart
+using CommonBase.Extensions;
 using SnQMusicStore.AspMvc.Models.Modules.View;
 using System;
 using System.Collections.Generic;
 
 namespace SnQMusicStore.AspMvc.Modules.View
 {
-    public partial class ViewModelCreator
+    public static partial class ViewModelCreator
     {
-        public virtual IndexViewModel CreateIndexViewModel(string viewTypeName, Type elementType, ViewBagWrapper viewBagWrapper)
+        public static IndexViewModel CreateIndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<Models.IdentityModel> models, Type modelType, Type displayType)
         {
             var handled = false;
             IndexViewModel result = null;
 
-            BeforeCreateIndexViewModel(viewTypeName, elementType, viewBagWrapper, ref result, ref handled);
+            BeforeCreateIndexViewModel(viewBagWrapper, models, modelType, displayType, ref result, ref handled);
             if (handled == false)
             {
-                result = new IndexViewModel(viewBagWrapper, elementType);
+                result = new IndexViewModel(viewBagWrapper, models, modelType, displayType);
             }
-            AfterCreateIndexViewModel(viewTypeName, elementType, viewBagWrapper, result);
+            AfterCreateIndexViewModel(result);
             return result;
         }
-        partial void BeforeCreateIndexViewModel(string viewTypeName, Type elementType, ViewBagWrapper viewBagWrapper, ref IndexViewModel result, ref bool handled);
-        partial void AfterCreateIndexViewModel(string viewTypeName, Type elementType, ViewBagWrapper viewBagWrapper, IndexViewModel result);
+        static partial void BeforeCreateIndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<Models.IdentityModel> models, Type modelType, Type displayType, ref IndexViewModel result, ref bool handled);
+        static partial void AfterCreateIndexViewModel(IndexViewModel result);
 
-        public virtual IndexViewModel CreateIndexViewModel(string viewTypeName, IEnumerable<Models.IdentityModel> models, ViewBagWrapper viewBagWrapper)
+        public static DisplayViewModel CreateDisplayViewModel(ViewBagWrapper viewBagWrapper, Models.ModelObject model)
         {
-            var handled = false;
-            IndexViewModel result = null;
+            viewBagWrapper.CheckArgument(nameof(viewBagWrapper));
+            model.CheckArgument(nameof(model));
 
-            BeforeCreateIndexViewModel(viewTypeName, models, viewBagWrapper, ref result, ref handled);
-            if (handled == false)
-            {
-                result = new IndexViewModel(viewBagWrapper, models);
-            }
-            AfterCreateIndexViewModel(viewTypeName, models, viewBagWrapper, result);
-            return result;
+            var modelType = model.GetType();
+
+            return CreateDisplayViewModel(viewBagWrapper, model, modelType, modelType); 
         }
-        partial void BeforeCreateIndexViewModel(string viewTypeName, IEnumerable<Models.IdentityModel> models, ViewBagWrapper viewBagWrapper, ref IndexViewModel result, ref bool handled);
-        partial void AfterCreateIndexViewModel(string viewTypeName, IEnumerable<Models.IdentityModel> models, ViewBagWrapper viewBagWrapper, IndexViewModel result);
-
-        public virtual IndexViewModel CreateIndexViewModel(string viewTypeName, IEnumerable<Models.IdentityModel> models, Type elementType, ViewBagWrapper viewBagWrapper)
-        {
-            var handled = false;
-            IndexViewModel result = null;
-
-            BeforeCreateIndexViewModel(viewTypeName, models, elementType, viewBagWrapper, ref result, ref handled);
-            if (handled == false)
-            {
-                result = new IndexViewModel(viewBagWrapper, models, elementType);
-            }
-            AfterCreateIndexViewModel(viewTypeName, models, elementType, viewBagWrapper, result);
-            return result;
-        }
-        partial void BeforeCreateIndexViewModel(string viewTypeName, IEnumerable<Models.IdentityModel> models, Type elementType, ViewBagWrapper viewBagWrapper, ref IndexViewModel result, ref bool handled);
-        partial void AfterCreateIndexViewModel(string viewTypeName, IEnumerable<Models.IdentityModel> models, Type elementType, ViewBagWrapper viewBagWrapper, IndexViewModel result);
-
-        public virtual DisplayViewModel CreateDisplayViewModel(string viewTypeName, Models.IdentityModel model, ViewBagWrapper viewBagWrapper)
+        public static DisplayViewModel CreateDisplayViewModel( ViewBagWrapper viewBagWrapper, Models.ModelObject model, Type modelType, Type displayType)
         {
             var handled = false;
             DisplayViewModel result = null;
 
-            BeforeCreateDisplayViewModel(viewTypeName, model, viewBagWrapper, ref result, ref handled);
+            BeforeCreateDisplayViewModel(viewBagWrapper, model, modelType, displayType, ref result, ref handled);
             if (handled == false)
             {
-                result = new DisplayViewModel(viewBagWrapper, model);
+                result = new DisplayViewModel(viewBagWrapper, model, modelType, displayType);
             }
-            AfterCreateDisplayViewModel(viewTypeName, model, viewBagWrapper, result);
+            AfterCreateDisplayViewModel(result);
             return result;
         }
-        partial void BeforeCreateDisplayViewModel(string viewTypeName, Models.IdentityModel model, ViewBagWrapper viewBagWrapper, ref DisplayViewModel result, ref bool handled);
-        partial void AfterCreateDisplayViewModel(string viewTypeName, Models.IdentityModel model, ViewBagWrapper viewBagWrapper, DisplayViewModel result);
+        static partial void BeforeCreateDisplayViewModel(ViewBagWrapper viewBagWrapper, Models.ModelObject model, Type modelType, Type displayType, ref DisplayViewModel result, ref bool handled);
+        static partial void AfterCreateDisplayViewModel(DisplayViewModel result);
 
-        public virtual EditViewModel CreateEditViewModel(string viewTypeName, Models.IdentityModel model, ViewBagWrapper viewBagWrapper)
+        public static EditViewModel CreateEditViewModel(ViewBagWrapper viewBagWrapper, Models.IdentityModel model)
+        {
+            viewBagWrapper.CheckArgument(nameof(viewBagWrapper));
+            model.CheckArgument(nameof(model));
+
+            var modelType = model.GetType();
+
+            return CreateEditViewModel(viewBagWrapper, model, modelType, modelType);
+        }
+        public static EditViewModel CreateEditViewModel(ViewBagWrapper viewBagWrapper, Models.IdentityModel model, Type modelType, Type displayType)
         {
             var handled = false;
             EditViewModel result = null;
 
-            BeforeCreateEditViewModel(viewTypeName, model, viewBagWrapper, ref result, ref handled);
+            BeforeCreateEditViewModel(viewBagWrapper, model, modelType, displayType, ref result, ref handled);
             if (handled == false)
             {
-                result = new EditViewModel(viewBagWrapper, model);
+                result = new EditViewModel(viewBagWrapper, model, modelType, displayType);
             }
-            AfterCreateEditViewModel(viewTypeName, model, viewBagWrapper, result);
+            AfterCreateEditViewModel(result);
             return result;
         }
-        partial void BeforeCreateEditViewModel(string viewTypeName, Models.IdentityModel model, ViewBagWrapper viewBagWrapper, ref EditViewModel result, ref bool handled);
-        partial void AfterCreateEditViewModel(string viewTypeName, Models.IdentityModel model, ViewBagWrapper viewBagWrapper, EditViewModel result);
+        static partial void BeforeCreateEditViewModel(ViewBagWrapper viewBagWrapper, Models.IdentityModel model, Type modelType, Type displayType, ref EditViewModel result, ref bool handled);
+        static partial void AfterCreateEditViewModel(EditViewModel result);
     }
 }
 //MdEnd

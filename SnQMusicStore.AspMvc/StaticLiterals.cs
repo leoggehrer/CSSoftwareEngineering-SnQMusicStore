@@ -6,12 +6,13 @@ namespace SnQMusicStore.AspMvc
 	{
 		public static string RedirectControllerKey => nameof(RedirectControllerKey);
 		public static string EnvironmentTranslationServerKey => "ASPNETCORE_TRANSLATIONSERVER";
-		public static string EnvironmentStaticPageServerKey => "ASPNETCORE_STATICPAGESERVER";
+		public static string EnvironmentHtmlStoreServerKey => "ASPNETCORE_HTMLSTORESERVER";
 
         public static int[] DefaultPageSizes { get; private set; } = new int[] { 25, 50, 100, 200 };
         public static string SearchFilterKeyPrefix => "SFILK";
         public static string FilterPredicateKeyPrefix => "FPREDK";
 
+        public static string FilterModelKey => "FMK";
         public static string FilterValuesKey => "FVK";
         public static string PageSizesKeyPrefix => "PSIZSK";
         public static string PageCountKeyPrefix => "PCNTK";

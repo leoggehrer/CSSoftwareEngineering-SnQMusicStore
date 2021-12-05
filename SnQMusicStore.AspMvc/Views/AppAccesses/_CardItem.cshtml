@@ -1,0 +1,16 @@
+﻿@*@CodeCopy*@
+@{
+    @using SnQMusicStore.AspMvc.Models.Persistence.Account
+    @using SnQMusicStore.AspMvc.Modules.View
+    @model SnQMusicStore.AspMvc.Models.IdentityModel
+
+    if (Model is Role role)
+    {
+        var viewBagInfo = Model.ViewBagInfo;
+        var property = viewBagInfo.DisplayProperty;
+        var displayViewModel = ViewModelCreator.CreateDisplayViewModel(viewBagInfo, Model);
+
+        viewBagInfo.Handled = true;
+        <p><span style="color: blue;">@($"{viewBagInfo.TranslateFor("Has access to")}: ")</span><strong>@($"{displayViewModel.GetDisplayValue(property)}")</strong></p>
+    }
+}

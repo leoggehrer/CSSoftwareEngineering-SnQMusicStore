@@ -8,13 +8,16 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
     {
         public override async Task<IActionResult> DetailsAsync(int id)
         {
-            var viewBagWrapper = new ViewBagWrapper(ViewBag);
+            var viewBagInfo = new ViewBagWrapper(ViewBag);
             using var ctrl = CreateController<Contracts.Business.App.IArtistAlbums>();
             var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
             var model = Models.Business.App.ArtistAlbums.Create(entity);
+            var modelType = model.GetType();
+            var displayType = modelType;
 
-            viewBagWrapper.IgnoreNames.Add("ArtistId");
-            return View("Details", model);
+            viewBagInfo.IgnoreNames.Add("ArtistId");
+
+            return View("Details", ViewModelCreator.CreateDisplayViewModel(viewBagInfo, model, modelType, displayType));
         }
     }
 }

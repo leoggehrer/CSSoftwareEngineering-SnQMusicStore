@@ -1,12 +1,17 @@
 ﻿@*@CodeCopy*@
 @{
-    @model SnQMusicStore.AspMvc.Models.Modules.View.FilterModel
+    @using SnQMusicStore.AspMvc.Models.Modules.View
+    @using System.Reflection
+    @model FilterModel
 
     var index = 0;
-    var viewBagWrapper = Model.ViewBagInfo;
+    var viewBagInfo = Model.ViewBagInfo;
+    var sessionInfo = Model.SessionInfo;
     var indexViewModel = Model.IndexViewModel;
+    var filterValues = sessionInfo.GetFilterValues(viewBagInfo.Controller);
+    var properties = indexViewModel.GetDisplayProperties();
 
-    @foreach (var property in indexViewModel.GetDisplayProperties())
+    @foreach (var property in properties)
     {
         if (property.CanRead)
         {

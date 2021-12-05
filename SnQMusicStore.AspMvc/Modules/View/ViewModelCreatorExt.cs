@@ -1,50 +1,51 @@
 ﻿using SnQMusicStore.AspMvc.Models;
 using SnQMusicStore.AspMvc.Models.Modules.View;
+using System;
 using System.Collections.Generic;
 
 namespace SnQMusicStore.AspMvc.Modules.View
 {
     partial class ViewModelCreator
     {
-        partial void BeforeCreateIndexViewModel(string viewTypeName, IEnumerable<IdentityModel> models, ViewBagWrapper viewBagWrapper, ref IndexViewModel result, ref bool handled)
+        static partial void BeforeCreateIndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models, Type modelType, Type displayType, ref IndexViewModel result, ref bool handled)
         {
-            if (viewTypeName.Equals(typeof(Models.Business.App.AlbumTracks).FullName))
+            if (modelType.Equals(typeof(Models.Business.App.AlbumTracks)))
             {
                 handled = true;
-                result = new TrackIndexViewModel(viewBagWrapper, models);
+                result = new TrackIndexViewModel(viewBagWrapper, models, modelType, displayType);
             }
-            else if (viewTypeName.Equals(typeof(List<Models.Persistence.App.Track>).FullName))
+            else if (modelType.Equals(typeof(Models.Persistence.App.Track)))
             {
                 handled = true;
-                result = new TrackIndexViewModel(viewBagWrapper, models);
+                result = new TrackIndexViewModel(viewBagWrapper, models, modelType, displayType);
             }
-            else if (viewTypeName.Equals(typeof(List<Models.Persistence.App.Album>).FullName))
+            else if (modelType.Equals(typeof(Models.Persistence.App.Album)))
             {
                 handled = true;
-                result = new AlbumIndexViewModel(viewBagWrapper, models);
+                result = new AlbumIndexViewModel(viewBagWrapper, models, modelType, displayType);
             }
         }
-        partial void BeforeCreateDisplayViewModel(string viewTypeName, IdentityModel model, ViewBagWrapper viewBagWrapper, ref DisplayViewModel result, ref bool handled)
+        static partial void BeforeCreateDisplayViewModel(ViewBagWrapper viewBagWrapper, ModelObject model, Type modelType, Type displayType, ref DisplayViewModel result, ref bool handled)
         {
-            if (viewTypeName.Equals(typeof(Models.Business.App.TrackAlbumGenre).FullName))
+            if (modelType.Equals(typeof(Models.Business.App.TrackAlbumGenre)))
             {
                 handled = true;
-                result = new TrackAlbumGenreDisplayViewModel(viewBagWrapper, model);
+                result = new TrackAlbumGenreDisplayViewModel(viewBagWrapper, model, modelType, displayType);
             }
-            else if (viewTypeName.Equals(typeof(Models.Business.App.AlbumTracks).FullName))
+            else if (modelType.Equals(typeof(Models.Business.App.AlbumTracks)))
             {
                 handled = true;
-                result = new AlbumDisplayViewModel(viewBagWrapper, model);
+                result = new AlbumDisplayViewModel(viewBagWrapper, model, modelType, displayType);
             }
-            else if (viewTypeName.Equals(typeof(Models.Persistence.App.Track).FullName))    
+            else if (modelType.Equals(typeof(Models.Persistence.App.Track)))
             {
                 handled = true;
-                result = new TrackDisplayViewModel(viewBagWrapper, model);
+                result = new TrackDisplayViewModel(viewBagWrapper, model, modelType, displayType);
             }
-            else if (viewTypeName.Equals(typeof(Models.Persistence.App.Album).FullName))
+            else if (modelType.Equals(typeof(Models.Persistence.App.Album)))
             {
                 handled = true;
-                result = new AlbumDisplayViewModel(viewBagWrapper, model);
+                result = new AlbumDisplayViewModel(viewBagWrapper, model, modelType, displayType);
             }
         }
     }

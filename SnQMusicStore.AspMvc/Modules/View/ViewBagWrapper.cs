@@ -1,8 +1,9 @@
 ﻿//@CodeCopy
 //MdStart
 
+using CommonBase.Extensions;
+using SnQMusicStore.AspMvc.Models;
 using SnQMusicStore.AspMvc.Models.Modules.Common;
-using SnQMusicStore.AspMvc.Models.Modules.View;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -17,10 +18,15 @@ namespace SnQMusicStore.AspMvc.Modules.View
             ViewBag = viewBag;
         }
 
-        public Type ViewType
+        public bool HasPager
         {
-            get => ViewBag.ViewType as Type;
-            set => ViewBag.ViewType = value;
+            get => ViewBag.HasPager != null ? (bool)ViewBag.HasPager : true;
+            set => ViewBag.HasPager = value;
+        }
+        public bool HasFilter
+        {
+            get => ViewBag.HasFilter != null ? (bool)ViewBag.HasFilter : true;
+            set => ViewBag.HasFilter = value;
         }
         public ModelCategory ModelCategory
         {
@@ -54,7 +60,7 @@ namespace SnQMusicStore.AspMvc.Modules.View
         {
             get
             {
-                var result = CommandMode.Create | CommandMode.Edit | CommandMode.Delete | CommandMode.Details | CommandMode.CreateDetail | CommandMode.EditDetail | CommandMode.DeleteDetail;
+                var result = CommandMode.All;
 
                 if (ViewBag.CommandMode != null)
                 {
@@ -86,13 +92,6 @@ namespace SnQMusicStore.AspMvc.Modules.View
             get => ViewBag.ItemPrefix as string;
             set => ViewBag.ItemPrefix = value;
         }
-        public string ViewTypeName => ViewType?.FullName;
-        public ViewModelCreator ViewModelCreator
-        {
-            get => ViewBag.ViewModelCreator as ViewModelCreator;
-            set => ViewBag.ViewModelCreator = value;
-        }
-
         public int Index
         {
             get => ViewBag.Index != null ? (int)ViewBag.Index : 0;
@@ -210,43 +209,31 @@ namespace SnQMusicStore.AspMvc.Modules.View
         }
         public Func<string, string> TranslateFor => text => Translate($"{Controller}.{text}");
 
-        public IndexViewModel CreateIndexViewModel(IEnumerable<Models.IdentityModel> models)
+        public static Type GetDisplayType(Type modelType)
         {
-            return CreateIndexViewModel(ViewTypeName, models);
-        }
-        public IndexViewModel CreateIndexViewModel(IEnumerable<Models.IdentityModel> models, Type elementType)
-        {
-            return CreateIndexViewModel(ViewTypeName, models, elementType);
-        }
-        public IndexViewModel CreateIndexViewModel(string viewTypeName, IEnumerable<Models.IdentityModel> models)
-        {
-            return ViewModelCreator != null ? ViewModelCreator.CreateIndexViewModel(viewTypeName, models, this) 
-                                            : new ViewModelCreator().CreateIndexViewModel(viewTypeName, models, this);
-        }
-        public IndexViewModel CreateIndexViewModel(string viewTypeName, IEnumerable<Models.IdentityModel> models, Type elementType)
-        {
-            return ViewModelCreator != null ? ViewModelCreator.CreateIndexViewModel(viewTypeName, models, elementType, this)
-                                            : new ViewModelCreator().CreateIndexViewModel(viewTypeName, models, elementType, this);
-        }
+            modelType.CheckArgument(nameof(modelType));
 
-        public EditViewModel CreateEditViewModel(Models.IdentityModel model)
-        {
-            return CreateEditViewModel(ViewTypeName, model);
-        }
-        public EditViewModel CreateEditViewModel(string viewTypeName, Models.IdentityModel model)
-        {
-            return ViewModelCreator != null ? ViewModelCreator.CreateEditViewModel(viewTypeName, model, this)
-                                            : new ViewModelCreator().CreateEditViewModel(viewTypeName, model, this);
-        }
+            var result = modelType;
 
-        public DisplayViewModel CreateDisplayViewModel(Models.IdentityModel model)
-        {
-            return CreateDisplayViewModel(ViewTypeName, model);
-        }
-        public DisplayViewModel CreateDisplayViewModel(string viewTypeName, Models.IdentityModel model)
-        {
-            return ViewModelCreator != null ? ViewModelCreator.CreateDisplayViewModel(viewTypeName, model, this)
-                                            : new ViewModelCreator().CreateDisplayViewModel(viewTypeName, model, this);
+            if (modelType.IsGenericTypeOf(typeof(OneToManyModel<,,,>)))
+            {
+                var genericTypes = modelType.BaseType.GetGenericArguments();
+
+                if (genericTypes.Length > 1)
+                {
+                    result = genericTypes[1];
+                }
+            }
+            else if (modelType.IsGenericTypeOf(typeof(OneToAnotherModel<,,,>)))
+            {
+                var genericTypes = modelType.BaseType.GetGenericArguments();
+
+                if (genericTypes.Length > 1)
+                {
+                    result = genericTypes[1];
+                }
+            }
+            return result;
         }
     }
 }

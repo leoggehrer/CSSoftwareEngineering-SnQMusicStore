@@ -1,11 +1,12 @@
 ﻿@*@CodeCopy*@
 @{
+    @using SnQMusicStore.AspMvc.Modules.View
     @model SnQMusicStore.AspMvc.Models.IdentityModel
 
-    var viewBagWrapper = Model.ViewBagInfo;
-    var property = viewBagWrapper.DisplayProperty;
-    var displayViewModel = viewBagWrapper.CreateDisplayViewModel(Model);
+    var viewBagInfo = Model.ViewBagInfo;
+    var property = viewBagInfo.DisplayProperty;
+    var displayViewModel = ViewModelCreator.CreateDisplayViewModel(viewBagInfo, Model);
 
     @displayViewModel.GetDisplayValue(property)
-    viewBagWrapper.Handled = true;
+    viewBagInfo.Handled = true;
 }

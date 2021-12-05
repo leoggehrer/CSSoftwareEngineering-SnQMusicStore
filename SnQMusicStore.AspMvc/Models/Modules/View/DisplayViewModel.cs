@@ -10,11 +10,11 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public partial class DisplayViewModel : ViewModel
     {
-        public object Model { get; init; }
-        public override Type ModelType => Model.GetType();
+        public ModelObject Model { get; init; }
+        public ModelObject DisplayModel => Model;
 
-        public DisplayViewModel(ViewBagWrapper viewBagWrapper, object model)
-            : base(viewBagWrapper)
+        public DisplayViewModel(ViewBagWrapper viewBagWrapper, ModelObject model, Type modelType, Type displayType)
+            : base(viewBagWrapper, modelType, displayType)
         {
             model.CheckArgument(nameof(model));
 
@@ -27,23 +27,23 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public virtual IEnumerable<PropertyInfo> GetHiddenProperties()
         {
-            return GetHiddenProperties(ModelType);
+            return GetHiddenProperties(DisplayType);
         }
         public virtual IEnumerable<PropertyInfo> GetDisplayProperties()
         {
-            return GetDisplayProperties(ModelType);
+            return GetDisplayProperties(DisplayType);
         }
         public virtual object GetValue(PropertyInfo propertyInfo)
         {
             propertyInfo.CheckArgument(nameof(propertyInfo));
 
-            return propertyInfo.GetValue(Model);
+            return propertyInfo.GetValue(DisplayModel);
         }
         public virtual string GetDisplayValue(PropertyInfo propertyInfo)
         {
             propertyInfo.CheckArgument(nameof(propertyInfo));
 
-            var value = propertyInfo.GetValue(Model);
+            var value = propertyInfo.GetValue(DisplayModel);
 
             return value != null ? value.ToString() : string.Empty;
         }

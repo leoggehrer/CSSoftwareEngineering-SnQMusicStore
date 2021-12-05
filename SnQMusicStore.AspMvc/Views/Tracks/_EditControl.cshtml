@@ -1,12 +1,13 @@
 ﻿@{
+    @using SnQMusicStore.AspMvc.Modules.View
     @model SnQMusicStore.AspMvc.Models.Persistence.App.Track
 
-    var viewBagWrapper = Model.ViewBagInfo;
-    var property = viewBagWrapper.DisplayProperty;
+    var viewBagInfo = Model.ViewBagInfo;
+    var property = viewBagInfo.DisplayProperty;
 
     if (property.Name.Equals(nameof(Model.GenreId)))
     {
-        var editViewModel = Model.ViewBagInfo.CreateEditViewModel(Model);
+        var editViewModel = ViewModelCreator.CreateEditViewModel(viewBagInfo, Model);
 
         @if (Model.Genres != null)
         {
@@ -16,7 +17,7 @@
     }
     else if (Model.ViewBagInfo.DisplayProperty.Name.Equals(nameof(Model.AlbumId)))
     {
-        var editViewModel = Model.ViewBagInfo.CreateEditViewModel(Model);
+        var editViewModel = ViewModelCreator.CreateEditViewModel(viewBagInfo, Model);
 
         @if (Model.Albums != null)
         {
