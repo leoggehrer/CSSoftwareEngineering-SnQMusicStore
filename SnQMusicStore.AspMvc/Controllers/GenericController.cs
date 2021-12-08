@@ -108,6 +108,14 @@ namespace SnQMusicStore.AspMvc.Controllers
 
             return new FilterModel(SessionWrapper, indexViewModel);
         }
+        protected virtual SorterModel CreateSorterModel()
+        {
+            var models = new TModel[] { new TModel() };
+            var indexViewModel = CreateIndexViewModel(models);
+
+            return new SorterModel(SessionWrapper, indexViewModel);
+        }
+
         protected virtual IndexViewModel CreateIndexViewModel(IEnumerable<TModel> models)
         {
             var modelType = typeof(TModel);
@@ -148,25 +156,44 @@ namespace SnQMusicStore.AspMvc.Controllers
         {
             SessionWrapper.SetFilterValues(ControllerName, filterValues);
         }
+        protected virtual void SetSessionSorterValues(SorterValues sorterValues)
+        {
+            SessionWrapper.SetSorterValues(ControllerName, sorterValues);
+        }
         protected virtual async Task<IEnumerable<TContract>> QueryPageListAsync(int pageIndex, int pageSize)
         {
-            var result = default(IEnumerable<TContract>);
+            IEnumerable<TContract> result;
             var pageCount = 0;
-            var filterValue = SessionWrapper.GetFilterValues(ControllerName);
-            var predicate = filterValue?.CreatePredicate();
+            var filterValues = SessionWrapper.GetFilterValues(ControllerName);
+            var predicate = filterValues?.CreatePredicate();
+            var sorterValues = SessionWrapper.GetSorterValues(ControllerName);
+            var orderBy = sorterValues?.CreateOrderBy();
+            using var ctrl = CreateController();
 
             SetSessionPageData(pageCount, pageIndex, pageSize);
-            if (predicate.HasContent())
+            if (predicate.HasContent() && orderBy.HasContent())
             {
-                using var ctrl = CreateController();
+                pageCount = await ctrl.CountByAsync(predicate).ConfigureAwait(false);
+
+                SetSessionPageData(pageCount, pageIndex, pageSize);
+                result = await ctrl.QueryPageListAsync(predicate, orderBy, pageIndex, pageSize).ConfigureAwait(false);
+            }
+            else if (predicate.HasContent())
+            {
                 pageCount = await ctrl.CountByAsync(predicate).ConfigureAwait(false);
 
                 SetSessionPageData(pageCount, pageIndex, pageSize);
                 result = await ctrl.QueryPageListAsync(predicate, pageIndex, pageSize).ConfigureAwait(false);
             }
+            else if (orderBy.HasContent())
+            {
+                pageCount = await ctrl.CountAsync().ConfigureAwait(false);
+
+                SetSessionPageData(pageCount, pageIndex, pageSize);
+                result = await ctrl.GetPageListAsync(orderBy, pageIndex, pageSize).ConfigureAwait(false);
+            }
             else
             {
-                using var ctrl = CreateController();
                 pageCount = await ctrl.CountAsync().ConfigureAwait(false);
 
                 SetSessionPageData(pageCount, pageIndex, pageSize);
@@ -193,6 +220,40 @@ namespace SnQMusicStore.AspMvc.Controllers
                     var pageSize = SessionWrapper.GetPageSize(ControllerName);
 
                     SetSessionFilterValues(filterValues);
+
+                    var entities = await QueryPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
+
+                    models = entities.Select(e => ToModel(e));
+                    models = BeforeView(models, ActionMode.Index);
+                    models = await BeforeViewAsync(models, ActionMode.Index).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    LastViewError = ex.GetError();
+                }
+            }
+            AfterIndex(models);
+            return ReturnIndexView(models);
+        }
+
+        [HttpPost]
+        [ActionName(nameof(ActionMode.Sorter))]
+        public virtual async Task<IActionResult> SorterAsync(IFormCollection formCollection)
+        {
+            var handled = false;
+            var models = default(IEnumerable<TModel>);
+
+            BeforeIndex(ref models, ref handled);
+            if (handled == false)
+            {
+                try
+                {
+                    var pageIndex = 0;
+                    var sorterModel = CreateSorterModel();
+                    var sorterValues = sorterModel.GetSorterValues(formCollection);
+                    var pageSize = SessionWrapper.GetPageSize(ControllerName);
+
+                    SetSessionSorterValues(sorterValues);
 
                     var entities = await QueryPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
 
@@ -330,6 +391,35 @@ namespace SnQMusicStore.AspMvc.Controllers
             }
             return HasError ? RedirectToAction("Index") : ReturnCreateView(model);
         }
+        [HttpGet]
+        [ActionName(nameof(ActionMode.CreateById))]
+        public virtual async Task<IActionResult> CreateAsync(int id)
+        {
+            var handled = false;
+            var model = default(TModel);
+
+            BeforeCreate(ref model, ref handled);
+            if (handled == false)
+            {
+                try
+                {
+                    LastViewError = string.Empty;
+                    model = await EditModelAsync(id).ConfigureAwait(false);
+                    model.Id = 0;
+                }
+                catch (Exception ex)
+                {
+                    LastViewError = ex.GetError();
+                }
+            }
+            AfterCreate(model);
+            if (HasError == false)
+            {
+                model = BeforeView(model, ActionMode.Create);
+                model = await BeforeViewAsync(model, ActionMode.Create).ConfigureAwait(false);
+            }
+            return HasError ? RedirectToAction("Index") : ReturnCreateView(model);
+        }
         partial void BeforeCreate(ref TModel model, ref bool handled);
         partial void AfterCreate(TModel model);
         protected virtual IActionResult ReturnCreateView(TModel model) => View("Create", CreateEditViewModel(model));
@@ -400,8 +490,8 @@ namespace SnQMusicStore.AspMvc.Controllers
             {
                 try
                 {
-                    model = await EditModelAsync(id).ConfigureAwait(false);
                     LastViewError = string.Empty;
+                    model = await EditModelAsync(id).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -633,7 +723,50 @@ namespace SnQMusicStore.AspMvc.Controllers
                 model = BeforeView(model, ActionMode.CreateDetail);
                 model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
                 masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.CreateDetail);
-                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.CreateDetail).ConfigureAwait (false);
+                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.CreateDetail).ConfigureAwait(false);
+            }
+            return HasError ? RedirectToAction("Index") : ReturnCreateDetailView(masterDetailModel);
+        }
+        [HttpGet]
+        [ActionName(nameof(ActionMode.CreateDetailById))]
+        public virtual async Task<IActionResult> CreateDetailAsync(int id, int detailId)
+        {
+            var handled = false;
+            var model = default(TModel);
+            var masterDetailModel = new MasterDetailModel();
+
+            BeforeCreateDetail(ref model, ref handled);
+            if (handled == false)
+            {
+                try
+                {
+                    LastViewError = string.Empty;
+                    model = await GetModelAsync(id).ConfigureAwait(false);
+
+                    if (model != null)
+                    {
+                        var oneProperty = model.GetType().GetProperty("OneModel");
+                        var oneModel = oneProperty?.GetValue(model) as IdentityModel;
+                        var getManyMethod = model.GetType().GetMethod("GetManyModelById");
+                        var manyModel = getManyMethod?.Invoke(model, new object[] { detailId }) as IdentityModel;
+
+                        masterDetailModel.Master = oneModel;
+                        masterDetailModel.Detail = manyModel;
+                        manyModel.Id = 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LastViewError = ex.GetError();
+                }
+            }
+            AfterCreateDetail(model);
+            if (HasError == false)
+            {
+                model = BeforeView(model, ActionMode.CreateDetail);
+                model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
+                masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.CreateDetailById);
+                masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.CreateDetailById).ConfigureAwait(false);
             }
             return HasError ? RedirectToAction("Index") : ReturnCreateDetailView(masterDetailModel);
         }

@@ -4,17 +4,20 @@ namespace SnQMusicStore.AspMvc.Models.Modules.Common
 {
     public enum ActionMode : int
     {
-        Index = 1,
-        Filter = 2 * Index,
-        IndexByPageIndex = 2 * Filter,
+        Filter = 1,
+        Sorter = 2 * Filter,
+        Index = 2 * Sorter,
+        IndexByPageIndex = 2 * Index,
         IndexByPageSize = 2 * IndexByPageIndex,
 
         Create = 2 * IndexByPageSize,
-        Edit = 2 * Create,
+        CreateById = 2 * Create,
+        Edit = 2 * CreateById,
         Delete = 2 * Edit,
 
         CreateDetail = 2 * Delete,
-        EditDetail = 2 * CreateDetail,
+        CreateDetailById = 2 * CreateDetail,
+        EditDetail = 2 * CreateDetailById,
         DeleteDetail = 2 * EditDetail,
 
         Details = 2 * DeleteDetail,

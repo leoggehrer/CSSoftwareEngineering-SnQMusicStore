@@ -12,7 +12,7 @@ namespace SnQMusicStore.AspMvc.Modules.View
             if (modelType.Equals(typeof(Models.Business.App.AlbumTracks)))
             {
                 handled = true;
-                result = new TrackIndexViewModel(viewBagWrapper, models, modelType, displayType);
+                result = new AlbumTracksIndexViewModel(viewBagWrapper, models, modelType, displayType);
             }
             else if (modelType.Equals(typeof(Models.Persistence.App.Track)))
             {
@@ -46,6 +46,14 @@ namespace SnQMusicStore.AspMvc.Modules.View
             {
                 handled = true;
                 result = new AlbumDisplayViewModel(viewBagWrapper, model, modelType, displayType);
+            }
+        }
+        static partial void BeforeCreateEditViewModel(ViewBagWrapper viewBagWrapper, IdentityModel model, Type modelType, Type displayType, ref EditViewModel result, ref bool handled)
+        {
+            if (modelType.Equals(typeof(Models.Persistence.App.Album)))
+            {
+                handled = true;
+                result = new AlbumEditViewModel(viewBagWrapper, model, modelType, displayType);
             }
         }
     }

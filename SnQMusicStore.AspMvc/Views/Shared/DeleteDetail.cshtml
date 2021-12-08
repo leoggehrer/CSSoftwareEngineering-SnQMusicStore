@@ -1,5 +1,6 @@
 ﻿@*@CodeCopy*@
 @{
+    @using SnQMusicStore.AspMvc.Models.Modules.Common
     @using SnQMusicStore.AspMvc.Modules.Handler
     @using SnQMusicStore.AspMvc.Modules.Language
     @using SnQMusicStore.AspMvc.Modules.Session
@@ -32,7 +33,7 @@
     <hr />
 
     viewBagInfo.ItemPrefix = nameof(Model.Detail);
-    <form asp-action="@viewBagInfo.Action" method="post">
+    <form asp-action="@nameof(ActionMode.DeleteDetail)" method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         @if (string.IsNullOrEmpty(ErrorHandler.LastViewError) == false)

@@ -13,8 +13,8 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         public IdentityModel Model { get; init; }
         public IdentityModel DisplayModel => Model;
 
-        public EditViewModel(ViewBagWrapper viewBagWrapper, IdentityModel model, Type modelType, Type displayType)
-            : base(viewBagWrapper, modelType, displayType)
+        public EditViewModel(ViewBagWrapper viewBagInfo, IdentityModel model, Type modelType, Type displayType)
+            : base(viewBagInfo, modelType, displayType)
         {
             model.CheckArgument(nameof(model));
 
@@ -35,17 +35,11 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         }
         public virtual object GetValue(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
-            return propertyInfo.GetValue(Model);
+            return GetValue(Model, propertyInfo);
         }
         public virtual string GetDisplayValue(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
-            var value = propertyInfo.GetValue(Model);
-
-            return value != null ? value.ToString() : string.Empty;
+            return GetDisplayValue(Model, propertyInfo);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿//@CodeCopy
+//MdStart
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -970,3 +971,4 @@ namespace CommonBase.Extensions
         }
     }
 }
+//MdEnd

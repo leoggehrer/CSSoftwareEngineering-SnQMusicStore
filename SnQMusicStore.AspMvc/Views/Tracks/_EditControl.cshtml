@@ -1,27 +1,24 @@
 ﻿@{
+    @using SnQMusicStore.AspMvc.Models.Modules.View
     @using SnQMusicStore.AspMvc.Modules.View
-    @model SnQMusicStore.AspMvc.Models.Persistence.App.Track
+    @model EditViewModel
 
     var viewBagInfo = Model.ViewBagInfo;
     var property = viewBagInfo.DisplayProperty;
 
-    if (property.Name.Equals(nameof(Model.GenreId)))
+    if (property.Name.Equals("GenreId"))
     {
-        var editViewModel = ViewModelCreator.CreateEditViewModel(viewBagInfo, Model);
-
-        @if (Model.Genres != null)
+        @if (Model.DisplayModel is SnQMusicStore.AspMvc.Models.Persistence.App.Track track)
         {
-            @Html.DropDownListFor(m => m.GenreId, new SelectList(Model.Genres, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
+            @Html.DropDownList("GenreId", new SelectList(track.Genres, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
         }
         Model.ViewBagInfo.Handled = true;
     }
-    else if (Model.ViewBagInfo.DisplayProperty.Name.Equals(nameof(Model.AlbumId)))
+    else if (property.Name.Equals("AlbumId"))
     {
-        var editViewModel = ViewModelCreator.CreateEditViewModel(viewBagInfo, Model);
-
-        @if (Model.Albums != null)
+        @if (Model.DisplayModel is SnQMusicStore.AspMvc.Models.Persistence.App.Track track)
         {
-            @Html.DropDownListFor(m => m.AlbumId, new SelectList(Model.Albums, "Id", "Title"), null, new { @class = "form-control", style = "min-width: 400px;" })
+            @Html.DropDownList("AlbumId", new SelectList(track.Albums, "Id", "Title"), null, new { @class = "form-control", style = "min-width: 400px;" })
         }
         Model.ViewBagInfo.Handled = true;
     }

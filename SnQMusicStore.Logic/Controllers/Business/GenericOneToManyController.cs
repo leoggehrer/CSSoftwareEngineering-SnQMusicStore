@@ -134,8 +134,10 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
             if (oneEntity != null)
             {
-                result = new E();
-                result.OneEntity = oneEntity;
+                result = new E
+                {
+                    OneEntity = oneEntity
+                };
                 await LoadDetailsAsync(result, oneEntity.Id).ConfigureAwait(false);
             }
             else
@@ -143,6 +145,7 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
             return result;
         }
+
         internal override async Task<IEnumerable<E>> ExecuteGetEntityAllAsync()
         {
             var result = new List<E>();
@@ -150,15 +153,34 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
             foreach (var item in query)
             {
-                var entity = new E();
-
-                entity.OneEntity = item;
+                var entity = new E
+                {
+                    OneEntity = item
+                };
                 await LoadDetailsAsync(entity, item.Id).ConfigureAwait(false);
 
                 result.Add(entity);
             }
             return result;
         }
+        internal override async Task<IEnumerable<E>> ExecuteGetEntityAllAsync(string orderBy)
+        {
+            var result = new List<E>();
+            var query = await OneEntityController.GetEntityAllAsync(orderBy).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new E
+                {
+                    OneEntity = item
+                };
+                await LoadDetailsAsync(entity, item.Id).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+
         internal override async Task<IEnumerable<E>> ExecuteGetEntityPageListAsync(int pageIndex, int pageSize)
         {
             var result = new List<E>();
@@ -166,15 +188,34 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
             foreach (var item in query)
             {
-                var entity = new E();
-
-                entity.OneEntity = item;
+                var entity = new E
+                {
+                    OneEntity = item
+                };
                 await LoadDetailsAsync(entity, item.Id).ConfigureAwait(false);
 
                 result.Add(entity);
             }
             return result;
         }
+        internal override async Task<IEnumerable<E>> ExecuteGetEntityPageListAsync(string orderBy, int pageIndex, int pageSize)
+        {
+            var result = new List<E>();
+            var query = await OneEntityController.GetEntityPageListAsync(orderBy, pageIndex, pageSize).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new E
+                {
+                    OneEntity = item
+                };
+                await LoadDetailsAsync(entity, item.Id).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+
         internal override async Task<IEnumerable<E>> ExecuteQueryEntityAllAsync(string predicate)
         {
             var result = new List<E>();
@@ -182,15 +223,34 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
             foreach (var item in query)
             {
-                var entity = new E();
-
-                entity.OneEntity = item;
+                var entity = new E
+                {
+                    OneEntity = item
+                };
                 await LoadDetailsAsync(entity, item.Id).ConfigureAwait(false);
 
                 result.Add(entity);
             }
             return result;
         }
+        internal override async Task<IEnumerable<E>> ExecuteQueryEntityAllAsync(string predicate, string orderBy)
+        {
+            var result = new List<E>();
+            var query = await OneEntityController.QueryEntityAllAsync(predicate, orderBy).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new E
+                {
+                    OneEntity = item
+                };
+                await LoadDetailsAsync(entity, item.Id).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+
         internal override async Task<IEnumerable<E>> ExecuteQueryEntityPageListAsync(string predicate, int pageIndex, int pageSize)
         {
             var result = new List<E>();
@@ -198,9 +258,27 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
             foreach (var item in query)
             {
-                var entity = new E();
+                var entity = new E
+                {
+                    OneEntity = item
+                };
+                await LoadDetailsAsync(entity, item.Id).ConfigureAwait(false);
 
-                entity.OneEntity = item;
+                result.Add(entity);
+            }
+            return result;
+        }
+        internal override async Task<IEnumerable<E>> ExecuteQueryEntityPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize)
+        {
+            var result = new List<E>();
+            var query = await OneEntityController.QueryEntityPageListAsync(predicate, orderBy, pageIndex, pageSize).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new E
+                {
+                    OneEntity = item
+                };
                 await LoadDetailsAsync(entity, item.Id).ConfigureAwait(false);
 
                 result.Add(entity);

@@ -28,6 +28,11 @@ namespace SnQMusicStore.AspMvc.Modules.View
             get => ViewBag.HasFilter != null ? (bool)ViewBag.HasFilter : true;
             set => ViewBag.HasFilter = value;
         }
+        public bool HasSorter
+        {
+            get => ViewBag.HasSorter != null ? (bool)ViewBag.HasSorter : true;
+            set => ViewBag.HasSorter = value;
+        }
         public ModelCategory ModelCategory
         {
             get
@@ -120,6 +125,28 @@ namespace SnQMusicStore.AspMvc.Modules.View
                 if (ViewBag.IgnoreNames is not List<string> result)
                 {
                     ViewBag.IgnoreNames = result = new List<string>();
+                }
+                return result;
+            }
+        }
+        public List<string> IgnoreFilters
+        {
+            get
+            {
+                if (ViewBag.IgnoreFilters is not List<string> result)
+                {
+                    ViewBag.IgnoreFilters = result = new List<string>();
+                }
+                return result;
+            }
+        }
+        public List<string> IgnoreOrders
+        {
+            get
+            {
+                if (ViewBag.IgnoreOrders is not List<string> result)
+                {
+                    ViewBag.IgnoreOrders = result = new List<string>();
                 }
                 return result;
             }

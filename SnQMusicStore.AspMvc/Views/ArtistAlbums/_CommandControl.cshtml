@@ -1,0 +1,15 @@
+﻿@*@CustomCode*@
+@{
+    @using SnQMusicStore.AspMvc.Models.Modules.Common
+    @model SnQMusicStore.AspMvc.Models.IdentityModel
+
+    @await Html.PartialAsync("../Shared/_CommandControl", Model)
+
+    if (Model is SnQMusicStore.AspMvc.Models.Persistence.App.Album album)
+    {
+        var viewBagInfo = Model.ViewBagInfo;
+        var action = Url.Action("Details", "AlbumTracks", new { id = album.Id });
+
+        <a type="button" href="@action" class="btn btn-outline-secondary" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Tracks")"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i></a>
+    }
+}

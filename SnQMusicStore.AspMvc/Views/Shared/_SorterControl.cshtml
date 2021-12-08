@@ -1,0 +1,17 @@
+﻿@*@CodeCopy*@
+@{
+    @using SnQMusicStore.AspMvc.Models.Modules.View
+    @using SnQMusicStore.AspMvc.Modules.Session
+    @using SnQMusicStore.AspMvc.Modules.View
+    @model IndexViewModel
+
+    var viewBagInfo = Model?.ViewBagInfo;
+    var sessionInfo = new SessionWrapper(Context.Session);
+    var sorterModel = new SorterModel(sessionInfo, Model);
+        
+    <form asp-action="Sorter" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @await Html.PartialAsync("_SorterModel", sorterModel)
+        @await Html.PartialAsync("_Submit", new SubmitCmd() { SubmitText = viewBagInfo.TranslateFor("Apply") })
+    </form>
+}

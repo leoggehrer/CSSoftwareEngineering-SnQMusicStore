@@ -1,8 +1,8 @@
 ﻿//@CodeCopy
-
+//MdStart
 namespace CommonBase.Attributes
 {
-	public enum ContentType : byte
+    public enum ContentType : byte
     {
         Undefined = byte.MaxValue,
         //
@@ -75,3 +75,4 @@ namespace CommonBase.Attributes
         Upload = 16
     }
 }
+//MdEnd

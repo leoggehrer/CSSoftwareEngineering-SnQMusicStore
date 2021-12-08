@@ -10,9 +10,12 @@ using System.Reflection;
 
 namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
-    public abstract partial class ViewModel
+    public abstract partial class ViewModel : IViewModel
     {
         public ViewBagWrapper ViewBagInfo { get; init; }
+        public Type ModelType { get; }
+        public Type DisplayType { get; }
+
         public List<string> HiddenNames { get; } = new List<string>()
         {
             nameof(IdentityModel.Id),
@@ -41,17 +44,14 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             get { return DisplayNames.Union(ViewBagInfo.DisplayNames).Distinct(); }
         }
 
-        public Type ModelType { get; }
-        public Type DisplayType { get; }
-
-        protected ViewModel(ViewBagWrapper viewBagWrapper, Type modelType, Type displayType)
+        protected ViewModel(ViewBagWrapper viewBagInfo, Type modelType, Type displayType)
         {
-            viewBagWrapper.CheckArgument(nameof(viewBagWrapper));
+            viewBagInfo.CheckArgument(nameof(viewBagInfo));
             modelType.CheckArgument(nameof(modelType));
             displayType.CheckArgument(nameof(displayType));
 
             Constructing();
-            ViewBagInfo = viewBagWrapper;
+            ViewBagInfo = viewBagInfo;
             ModelType = modelType;
             DisplayType = displayType;
             Constructed();
@@ -128,6 +128,33 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
             return propertyInfo.Name;
         }
+
+        public virtual object GetValue(Object model, PropertyInfo propertyInfo)
+        {
+            model.CheckArgument(nameof(model));
+            propertyInfo.CheckArgument(nameof(propertyInfo));
+
+            return propertyInfo.GetValue(model);
+        }
+        public virtual string GetDisplayValue(Object model, PropertyInfo propertyInfo)
+        {
+            model.CheckArgument(nameof(model));
+            propertyInfo.CheckArgument(nameof(propertyInfo));
+
+            var result = string.Empty;
+            var value = propertyInfo.GetValue(model);
+
+            if (value is DateTime dt)
+            {
+                result = dt.ToString("yyyy-MM-ddTHH:mm");
+            }
+            else if (value != null)
+            {
+                result = value.ToString();
+            }
+            return result;
+        }
+
     }
 }
 //MdEnd

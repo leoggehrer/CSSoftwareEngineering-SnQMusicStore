@@ -27,5 +27,10 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             }
             return result;
         }
+        public override IndexDisplayViewModel CreateDisplayViewModel(ModelObject model)
+        {
+            return new AlbumIndexDisplayViewModel(ViewBagInfo, ModelType, DisplayType, model, GetDisplayProperties());
+        }
+
     }
 }

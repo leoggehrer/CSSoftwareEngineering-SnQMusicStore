@@ -12,6 +12,9 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
     public partial class IndexViewModel : ViewModel
     {
         private IEnumerable<IdentityModel> displayModels = null;
+        private IEnumerable<PropertyInfo> displayProperties = null;
+        private IEnumerable<PropertyInfo> filterProperties = null;
+        private IEnumerable<PropertyInfo> orderProperties = null;
 
         public IEnumerable<IdentityModel> Models { get; init; }
         public IEnumerable<IdentityModel> DisplayModels
@@ -32,9 +35,29 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
                 return displayModels;
             }
         }
+        public List<string> IgnoreFilters { get; } = new List<string>();
+        public IEnumerable<string> AllIgnoreFilters
+        {
+            get 
+            {
+                return IgnoreNames.Union(IgnoreFilters)
+                                  .Union(ViewBagInfo.IgnoreFilters)
+                                  .Distinct(); 
+            }
+        }
+        public List<string> IgnoreOrders { get; } = new List<string>();
+        public IEnumerable<string> AllIgnoreOrders
+        {
+            get
+            {
+                return IgnoreNames.Union(IgnoreOrders)
+                                  .Union(ViewBagInfo.IgnoreOrders)
+                                  .Distinct();
+            }
+        }
 
-        public IndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models, Type modelType, Type displayType)
-            : base(viewBagWrapper, modelType, displayType)
+        public IndexViewModel(ViewBagWrapper viewBagInfo, IEnumerable<IdentityModel> models, Type modelType, Type displayType)
+            : base(viewBagInfo, modelType, displayType)
         {
             models.CheckArgument(nameof(models));
 
@@ -45,21 +68,82 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         partial void Constructing();
         partial void Constructed();
 
-        private IEnumerable<PropertyInfo> displayProperties = null;
         public virtual IEnumerable<PropertyInfo> GetHiddenProperties()
         {
             return GetHiddenProperties(DisplayType);
         }
         public virtual IEnumerable<PropertyInfo> GetDisplayProperties()
         {
-            if (displayProperties == null)
+            return displayProperties ??= GetDisplayProperties(DisplayType);
+        }
+        public virtual IEnumerable<PropertyInfo> GetFilterProperties()
+        {
+            return filterProperties ??= GetFilterProperties(DisplayType);
+        }
+        public virtual IEnumerable<PropertyInfo> GetOrderProperties()
+        {
+            return orderProperties ??= GetOrderProperties(DisplayType);
+        }
+        public virtual IEnumerable<PropertyInfo> GetFilterProperties(Type type)
+        {
+            type.CheckArgument(nameof(type));
+
+            var result = new List<PropertyInfo>();
+            var typeProperties = type.GetAllPropertyInfos();
+
+            foreach (var item in type.GetAllInterfacePropertyInfos())
             {
-                displayProperties = GetDisplayProperties(DisplayType);
+                var typeProperty = default(PropertyInfo);
+                var mapName = ViewBagInfo.GetMapping(item.Name);
+
+                typeProperty = typeProperties.FirstOrDefault(p => p.Name.Equals(mapName, StringComparison.OrdinalIgnoreCase));
+                if (typeProperty != null)
+                {
+                    ViewBagInfo.AddMappingProperty(mapName, typeProperty);
+                }
+
+                if (item.CanRead && AllDisplayNames.Any(e => e.Equals(item.Name)))
+                {
+                    result.Add(item);
+                }
+                else if (item.CanRead && AllDisplayNames.Any() == false && AllIgnoreFilters.Any(e => e.Equals(item.Name)) == false)
+                {
+                    result.Add(item);
+                }
             }
-            return displayProperties;
+            return result;
+        }
+        public virtual IEnumerable<PropertyInfo> GetOrderProperties(Type type)
+        {
+            type.CheckArgument(nameof(type));
+
+            var result = new List<PropertyInfo>();
+            var typeProperties = type.GetAllPropertyInfos();
+
+            foreach (var item in type.GetAllInterfacePropertyInfos())
+            {
+                var typeProperty = default(PropertyInfo);
+                var mapName = ViewBagInfo.GetMapping(item.Name);
+
+                typeProperty = typeProperties.FirstOrDefault(p => p.Name.Equals(mapName, StringComparison.OrdinalIgnoreCase));
+                if (typeProperty != null)
+                {
+                    ViewBagInfo.AddMappingProperty(mapName, typeProperty);
+                }
+
+                if (item.CanRead && AllDisplayNames.Any(e => e.Equals(item.Name)))
+                {
+                    result.Add(item);
+                }
+                else if (item.CanRead && AllDisplayNames.Any() == false && AllIgnoreOrders.Any(e => e.Equals(item.Name)) == false)
+                {
+                    result.Add(item);
+                }
+            }
+            return result;
         }
 
-        public virtual object GetValue(object model, PropertyInfo propertyInfo)
+        public override object GetValue(object model, PropertyInfo propertyInfo)
         {
             model.CheckArgument(nameof(model));
             propertyInfo.CheckArgument(nameof(propertyInfo));
@@ -70,14 +154,14 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             BeforeGetValue(model, propertyInfo, ref result, ref handled);
             if (handled == false)
             {
-                result = propertyInfo.GetValue(model);
+                result = base.GetValue(model, propertyInfo);
             }
             AfterGetValue(model, propertyInfo, result);
             return result;
         }
         partial void BeforeGetValue(object model, PropertyInfo propertyInfo, ref object result, ref bool handled);
         partial void AfterGetValue(object model, PropertyInfo propertyInfo, object result);
-        public virtual string GetDisplayValue(object model, PropertyInfo propertyInfo)
+        public override string GetDisplayValue(object model, PropertyInfo propertyInfo)
         {
             model.CheckArgument(nameof(model));
             propertyInfo.CheckArgument(nameof(propertyInfo));
@@ -88,13 +172,18 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             BeforeGetDisplayValue(model, propertyInfo, ref result, ref handled);
             if (handled == false)
             {
-                result = propertyInfo.GetValue(model);
+                result = base.GetDisplayValue(model, propertyInfo);
             }
             AfterGetDisplayValue(model, propertyInfo, result);
             return result != null ? result.ToString() : string.Empty;
         }
         partial void BeforeGetDisplayValue(object model, PropertyInfo propertyInfo, ref object result, ref bool handled);
         partial void AfterGetDisplayValue(object model, PropertyInfo propertyInfo, object result);
+
+        public virtual IndexDisplayViewModel CreateDisplayViewModel(ModelObject model)
+        {
+            return new IndexDisplayViewModel(ViewBagInfo, ModelType, DisplayType, model, GetDisplayProperties());
+        }
     }
 }
 //MdEnd

@@ -1,5 +1,6 @@
 ﻿@*@CodeCopy*@
 @{
+    @using SnQMusicStore.AspMvc.Models.Modules.Common
     @using SnQMusicStore.AspMvc.Modules.Handler
     @using SnQMusicStore.AspMvc.Modules.Language
     @using SnQMusicStore.AspMvc.Modules.Session
@@ -41,7 +42,7 @@
         </div>
     }
 
-    <form asp-action="@viewBagInfo.Action">
+    <form asp-action="@nameof(ActionMode.Delete)">
         @await Html.PartialAsync("_Display", Model)
         @await Html.PartialAsync("_SubmitBack", new SubmitBackCmd() { SubmitText = viewBagInfo.TranslateFor("Delete"), BackText = viewBagInfo.TranslateFor("Back to List"), SubmitCss = "btn btn-danger", FromSubmitToBack = true })
     </form>

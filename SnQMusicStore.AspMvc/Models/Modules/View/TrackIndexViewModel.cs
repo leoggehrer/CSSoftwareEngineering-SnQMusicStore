@@ -8,9 +8,11 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public class TrackIndexViewModel : IndexViewModel
     {
-        public TrackIndexViewModel(ViewBagWrapper viewBagWrapper, IEnumerable<IdentityModel> models, Type modelType, Type displayType)
-            : base(viewBagWrapper, models, modelType, displayType)
+        public TrackIndexViewModel(ViewBagWrapper viewBagInfo, IEnumerable<IdentityModel> models, Type modelType, Type displayType)
+            : base(viewBagInfo, models, modelType, displayType)
         {
+            ViewBagInfo.IgnoreFilters.AddRange(new string[] { "AlbumId", "GenreId" });
+            ViewBagInfo.IgnoreOrders.AddRange(new string[] { "AlbumId", "GenreId" });
         }
 
         public override string GetDisplayValue(object model, PropertyInfo propertyInfo)
@@ -30,6 +32,10 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
                 result = base.GetDisplayValue(model, propertyInfo);
             }
             return result;
+        }
+        public override IndexDisplayViewModel CreateDisplayViewModel(ModelObject model)
+        {
+            return new TrackIndexDisplayViewModel(ViewBagInfo, ModelType, DisplayType, model, GetDisplayProperties());
         }
     }
 }

@@ -1,17 +1,16 @@
 ﻿@{
+    @using SnQMusicStore.AspMvc.Models.Modules.View
     @using SnQMusicStore.AspMvc.Modules.View
-    @model SnQMusicStore.AspMvc.Models.Persistence.App.Album
+    @model EditViewModel
 
     var viewBagInfo = Model.ViewBagInfo;
     var property = viewBagInfo.DisplayProperty;
 
-    if (property.Name.Equals(nameof(Model.ArtistId)))
+    if (property.Name.Equals("ArtistId"))
     {
-        var editViewModel = ViewModelCreator.CreateEditViewModel(viewBagInfo, Model);
-
-        @if (Model.Artists != null)
+        @if (Model.DisplayModel is SnQMusicStore.AspMvc.Models.Persistence.App.Album album)
         {
-            @Html.DropDownListFor(m => m.ArtistId, new SelectList(Model.Artists, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
+            @Html.DropDownList("ArtistId", new SelectList(album.Artists, "Id", "Name"), null, new { @class = "form-control", style = "min-width: 400px;" })
         }
         Model.ViewBagInfo.Handled = true;
     }
