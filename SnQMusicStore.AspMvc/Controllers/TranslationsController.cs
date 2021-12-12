@@ -17,7 +17,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         static partial void ClassConstructing();
         static partial void ClassConstructed();
 
-        internal TranslationsController()
+        public TranslationsController()
         {
             Constructing();
             Constructed();
