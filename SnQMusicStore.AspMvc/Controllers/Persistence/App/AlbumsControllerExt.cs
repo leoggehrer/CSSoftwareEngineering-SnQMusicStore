@@ -37,17 +37,17 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
         protected override async Task<Album> BeforeViewAsync(Album model, ActionMode action)
         {
-            var result = await LoadModelReferencesAsync(SessionWrapper.SessionToken, model, action).ConfigureAwait(false);
+            var result = await LoadModelReferencesAsync(SessionInfo.SessionToken, model, action).ConfigureAwait(false);
 
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
         }
         protected override async Task<IEnumerable<Album>> BeforeViewAsync(IEnumerable<Album> models, ActionMode action)
         {
             var viewBagWrapper = new ViewBagWrapper(ViewBag);
-            var sessionToken = SessionWrapper.LoginSession.SessionToken;
+            var sessionToken = SessionInfo.LoginSession.SessionToken;
             var result = await LoadModelsReferencesAsync(sessionToken, models).ConfigureAwait(false);
 
-            viewBagWrapper.CommandMode = viewBagWrapper.CommandMode | CommandMode.Details;
+            viewBagWrapper.CommandMode |= CommandMode.Details;
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
         }
 
@@ -60,8 +60,8 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             var modelType = model.GetType();
             var displayType = modelType;
 
-            await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
-            await TracksController.LoadModelsReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
+            await LoadModelReferencesAsync(SessionInfo.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
+            await TracksController.LoadModelsReferencesAsync(SessionInfo.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
 
             viewBagInfo.CommandMode = CommandMode.None;
             return View("Details", ViewModelCreator.CreateDisplayViewModel(viewBagInfo, model, modelType, displayType));

@@ -43,13 +43,13 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
         protected override async Task<Track> BeforeViewAsync(Track model, ActionMode action)
         {
-            var result = await LoadModelReferencesAsync(SessionWrapper.SessionToken, model, action).ConfigureAwait(false);
+            var result = await LoadModelReferencesAsync(SessionInfo.SessionToken, model, action).ConfigureAwait(false);
 
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
         }
         protected override async Task<IEnumerable<Track>> BeforeViewAsync(IEnumerable<Track> models, ActionMode action)
         {
-            var sessionToken = SessionWrapper.LoginSession.SessionToken;
+            var sessionToken = SessionInfo.LoginSession.SessionToken;
             var result = await LoadModelsReferencesAsync(sessionToken, models).ConfigureAwait(false);
 
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
@@ -64,8 +64,8 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
             if (model != null)
             {
-                await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.ConnectorModel, ActionMode.Details).ConfigureAwait(false);
-                await AlbumsController.LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
+                await LoadModelReferencesAsync(SessionInfo.LoginSession.SessionToken, model.ConnectorModel, ActionMode.Details).ConfigureAwait(false);
+                await AlbumsController.LoadModelReferencesAsync(SessionInfo.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
             }
             viewBagWrapper.CommandMode = Models.Modules.Common.CommandMode.None;
             return View("Composite", model);

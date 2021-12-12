@@ -34,13 +34,13 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.App
         }
         protected override async Task<AlbumTracks> BeforeViewAsync(AlbumTracks model, ActionMode action)
         {
-            model = await LoadModelReferencesAsync(SessionWrapper.LoginSession.SessionToken, model, action);
+            model = await LoadModelReferencesAsync(SessionInfo.LoginSession.SessionToken, model, action);
 
             return await base.BeforeViewAsync(model, action).ConfigureAwait(false);
         }
         protected override async Task<IEnumerable<AlbumTracks>> BeforeViewAsync(IEnumerable<AlbumTracks> models, ActionMode action)
         {
-            models = await LoadModelsReferencesAsync(SessionWrapper.LoginSession.SessionToken, models);
+            models = await LoadModelsReferencesAsync(SessionInfo.LoginSession.SessionToken, models);
 
             return await base.BeforeViewAsync(models, action).ConfigureAwait(false);
         }

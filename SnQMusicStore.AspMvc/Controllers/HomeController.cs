@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using SnQMusicStore.AspMvc.Models;
-using SnQMusicStore.AspMvc.Modules.Language;
 using System.Diagnostics;
 
 namespace SnQMusicStore.AspMvc.Controllers
