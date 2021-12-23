@@ -23,6 +23,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence.Account
 		{
 			return QueryableSet().Where(e => e.LogoutTime.HasValue == false)
 								 .Include(e => e.Identity)
+                                 .AsNoTracking()
 								 .ToArrayAsync();
 		}
 	}

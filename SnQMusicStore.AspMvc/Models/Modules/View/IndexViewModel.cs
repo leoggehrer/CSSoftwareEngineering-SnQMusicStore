@@ -1,9 +1,7 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using SnQMusicStore.AspMvc.Modules.View;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -11,6 +9,13 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public partial class IndexViewModel : ViewModel
     {
+        static IndexViewModel()
+        {
+            ClassConstructing();
+            ClassConstructed();
+        }
+        static partial void ClassConstructing();
+        static partial void ClassConstructed();
         private IEnumerable<IdentityModel> displayModels = null;
         private IEnumerable<PropertyInfo> displayProperties = null;
         private IEnumerable<PropertyInfo> filterProperties = null;

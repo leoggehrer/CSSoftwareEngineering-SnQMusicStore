@@ -368,7 +368,6 @@ FodyWeavers.xsd
 /SnQMusicStore.Transfer/Models/Persistence/_GeneratedCode.cs
 /SnQMusicStore.Transfer/Models/Modules/_GeneratedCode.cs
 /SnQMusicStore.Transfer/Models/Business/_GeneratedCode.cs
-/SnQMusicStore.AspMvc/Controllers/_GeneratedCode.cs
 /SnQMusicStore.Logic/Entities/Persistence/_GeneratedCode.cs
 /SnQMusicStore.Logic/Entities/Modules/_GeneratedCode.cs
 /SnQMusicStore.Logic/Entities/Business/_GeneratedCode.cs
@@ -379,6 +378,7 @@ FodyWeavers.xsd
 /SnQMusicStore.AspMvc/Models/Modules/_GeneratedCode.cs
 /SnQMusicStore.AspMvc/Models/Business/_GeneratedCode.cs
 /SnQMusicStore.Logic/DataContext/_GeneratedCode.cs
+/SnQMusicStore.AspMvc/Controllers/_GeneratedCode.cs
 /SnQMusicStore.Logic/_GeneratedCode.cs
 /SnQMusicStore.Adapters/_GeneratedCode.cs
 #QnSCodeIgnoreEnd

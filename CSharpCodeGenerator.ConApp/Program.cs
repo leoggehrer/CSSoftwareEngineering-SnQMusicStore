@@ -6,33 +6,48 @@ using System.Linq;
 
 namespace CSharpCodeGenerator.ConApp
 {
-    class Program
-	{
-		static void Main(string[] args)
-		{
-			Console.WriteLine(nameof(CSharpCodeGenerator));
+    internal partial class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine(nameof(CSharpCodeGenerator));
             var solutionPath = GetCurrentSolutionPath();
             var solutionName = GetSolutionNameByFile(solutionPath);
             var contractsFilePath = GetContractsFilePath(solutionPath);
             var solutionProperties = Logic.Factory.GetSolutionProperties(solutionName, contractsFilePath);
             var appGenerationUnits = Logic.Common.UnitType.AllApps;
+            var contractsFileInfo = GetContractsFileInfo(contractsFilePath);
+            var generationInfo = ReadGenerationInfo(StaticLiterals.GeneratorInfoFileName);
 
-            Logic.Generator.DeleteGenerationFiles(solutionPath);
-            var generatedItems = Logic.Generator.Generate(solutionName, contractsFilePath, appGenerationUnits);
+            if ((generationInfo.GenerationDate.HasValue == false && contractsFileInfo != null)
+                || generationInfo.GenerationDate.Value < contractsFileInfo.LastWriteTimeUtc)
+            {
+                if (generationInfo.GenerationDate.HasValue)
+                {
+                    Console.WriteLine($"Generation: {generationInfo.GenerationDate}");
+                }
+                Console.WriteLine($"Contracts: {contractsFileInfo.LastWriteTimeUtc}");
 
-            Writer.WriteAll(solutionPath, solutionProperties, generatedItems);
+                Logic.Generator.DeleteGenerationFiles(solutionPath);
+                var generatedItems = Logic.Generator.Generate(solutionName, contractsFilePath, appGenerationUnits);
 
-            Console.WriteLine("Excluding Files from Git...");
-            Logic.Git.GitIgnoreManager.Run($"{nameof(CSharpCodeGenerator)}.{nameof(ConApp)}");
+                Writer.WriteAll(solutionPath, solutionProperties, generatedItems);
+
+                Console.WriteLine("Excluding Files from Git...");
+                Logic.Git.GitIgnoreManager.Run($"{nameof(CSharpCodeGenerator)}.{nameof(ConApp)}");
+
+                generationInfo.GenerationDate = DateTime.UtcNow;
+                generationInfo.ContractFilePath = contractsFilePath;
+                WriteGenerationInfo(StaticLiterals.GeneratorInfoFileName, generationInfo);
+            }
         }
         private static string GetCurrentSolutionPath()
         {
             int endPos = AppContext.BaseDirectory
                                    .IndexOf($"{nameof(CSharpCodeGenerator)}", StringComparison.CurrentCultureIgnoreCase);
 
-            return AppContext.BaseDirectory.Substring(0, endPos);
+            return AppContext.BaseDirectory[..endPos];
         }
-
         private static string GetCurrentSolutionName()
         {
             var solutionPath = GetCurrentSolutionPath();
@@ -79,6 +94,36 @@ namespace CSharpCodeGenerator.ConApp
                 }
             }
             return result;
+        }
+        private static FileInfo GetContractsFileInfo(string filePath)
+        {
+            var result = default(FileInfo);
+
+            if (File.Exists(filePath))
+            {
+                result = new FileInfo(filePath);
+            }
+            return result;
+        }
+        private static Models.GeneratorInfo ReadGenerationInfo(string filePath)
+        {
+            var result = default(Models.GeneratorInfo);
+
+            if (File.Exists(filePath))
+            {
+                var text = File.ReadAllText(filePath);
+
+                result = System.Text.Json.JsonSerializer.Deserialize<Models.GeneratorInfo>(text);
+            }
+            return result ?? new Models.GeneratorInfo();
+        }
+        private static void WriteGenerationInfo(string filePath, Models.GeneratorInfo model)
+        {
+            model.CheckArgument(nameof(model));
+
+            var text = System.Text.Json.JsonSerializer.Serialize(model);
+
+            File.WriteAllText(filePath, text);
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace SnQMusicStore.AspMvc.Models
@@ -68,6 +66,12 @@ namespace SnQMusicStore.AspMvc.Models
             ManyModels.Clear();
         }
         public virtual TManyModel CreateManyModel() => new();
+        public virtual void AddManyModel(TManyModel manyModel)
+        {
+            manyModel.CheckArgument(nameof(manyModel));
+
+            ManyModels.Add(manyModel);
+        }
         public virtual TManyModel GetManyModelById(int id) => ManyModels.FirstOrDefault(x => x.Id == id);
         public void RemoveManyModel(int id)
         {

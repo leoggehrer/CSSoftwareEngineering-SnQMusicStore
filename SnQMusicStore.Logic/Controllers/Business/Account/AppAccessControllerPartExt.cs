@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using SnQMusicStore.Logic.Controllers.Persistence.Account;
 using SnQMusicStore.Logic.Entities.Business.Account;
 using SnQMusicStore.Logic.Entities.Persistence.Account;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,6 +21,7 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
 
             var query = await IdentityXRoleController.QueryableSet()
                                                      .Where(p => p.IdentityId == masterId)
+                                                     .AsNoTracking()
                                                      .ToArrayAsync()
                                                      .ConfigureAwait(false);
 
@@ -120,6 +120,7 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
             //Delete all costs that are no longer included in the list.
             var identityXRoles = await IdentityXRoleController.QueryableSet()
                                                               .Where(e => e.IdentityId == entity.Id)
+                                                              .AsNoTracking()
                                                               .ToArrayAsync()
                                                               .ConfigureAwait(false);
 
@@ -175,6 +176,7 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
             //Delete all costs that are no longer included in the list.
             var identXRoles = await IdentityXRoleController.QueryableSet()
                                                            .Where(e => e.IdentityId == entity.Id)
+                                                           .AsNoTracking()
                                                            .ToArrayAsync()
                                                            .ConfigureAwait(false);
 

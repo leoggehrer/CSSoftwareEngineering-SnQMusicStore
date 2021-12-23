@@ -5,8 +5,9 @@ using CommonStaticLiterals = CommonBase.StaticLiterals;
 
 namespace CSharpCodeGenerator.ConApp
 {
-	public static class StaticLiterals
+	public static partial class StaticLiterals
 	{
+        public static string GeneratorInfoFileName => "GeneratorInfo.json";
         public static string GeneratedCodeFileName => "_GeneratedCode.cs";
         public static string SolutionFileExtension => ".sln";
         public static string ProjectFileExtension => ".csproj";

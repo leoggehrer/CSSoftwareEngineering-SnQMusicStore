@@ -1,15 +1,21 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using SnQMusicStore.AspMvc.Modules.View;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public partial class DisplayViewModel : ViewModel, IDisplayViewModel
     {
+        static DisplayViewModel()
+        {
+            ClassConstructing();
+            ClassConstructed();
+        }
+        static partial void ClassConstructing();
+        static partial void ClassConstructed();
+
         private ModelObject model;
         private ModelObject displayModel;
         private IEnumerable<PropertyInfo> displayProperties;

@@ -4,7 +4,6 @@
 using SnQMusicStore.Contracts.Persistence.Account;
 using SnQMusicStore.Logic.Modules.Security;
 using System;
-using System.Collections.Generic;
 
 namespace SnQMusicStore.Logic.Entities.Persistence.Account
 {

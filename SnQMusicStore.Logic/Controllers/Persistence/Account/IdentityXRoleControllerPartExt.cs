@@ -15,6 +15,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence.Account
 			return QueryableSet().Where(e => e.IdentityId == identityId)
 								 .Include(e => e.Role)
 								 .Select(e => e.Role)
+								 .AsNoTracking()
 								 .ToArrayAsync();
 		}
 	}

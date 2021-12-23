@@ -1,4 +1,5 @@
-﻿@*@CodeCopy*@
+@*@CodeCopy*@
+@*#if ACCOUNT_ON*@
 @{
     @using SnQMusicStore.AspMvc.Models.Modules.View
     @using SnQMusicStore.AspMvc.Models.Persistence.Account
@@ -33,3 +34,4 @@
         @await Html.PartialAsync("../Shared/_EditGroup", Model)
     }
 }
+@*#endif*@

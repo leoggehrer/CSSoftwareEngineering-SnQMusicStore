@@ -47,18 +47,18 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         partial void CanCreateModel(Type type, ref bool create);
         partial void CreateModelAttributes(Type type, List<string> codeLines);
-        protected virtual void CreateModelPropertyAttributes(Type type, PropertyInfo propertyInfo, List<string> codeLines)
+        protected virtual void CreateModelPropertyAttributes(ContractPropertyHelper propertyHelper, List<string> codeLines)
         {
             var handled = false;
 
-            BeforeCreateModelPropertyAttributes(type, propertyInfo, codeLines, ref handled);
+            BeforeCreateModelPropertyAttributes(propertyHelper, codeLines, ref handled);
             if (handled == false)
             {
             }
-            AfterCreateModelPropertyAttributes(type, propertyInfo, codeLines);
+            AfterCreateModelPropertyAttributes(propertyHelper, codeLines);
         }
-        partial void BeforeCreateModelPropertyAttributes(Type type, PropertyInfo propertyInfo, List<string> codeLines, ref bool handled);
-        partial void AfterCreateModelPropertyAttributes(Type type, PropertyInfo propertyInfo, List<string> codeLines);
+        partial void BeforeCreateModelPropertyAttributes(ContractPropertyHelper propertyHelper, List<string> codeLines, ref bool handled);
+        partial void AfterCreateModelPropertyAttributes(ContractPropertyHelper propertyHelper, List<string> codeLines);
 
         public virtual IEnumerable<Contracts.IGeneratedItem> GenerateAll()
         {
@@ -255,9 +255,10 @@ namespace CSharpCodeGenerator.Logic.Generation
         {
             type.CheckArgument(nameof(type));
 
+            var interfaces = GetInterfaces(type);
             var modelName = CreateModelNameFromInterface(type);
             var typeProperties = ContractHelper.GetAllProperties(type);
-            var interfaces = GetInterfaces(type);
+            var generateProperties = default(IEnumerable<PropertyInfo>);
             var result = new Models.GeneratedItem(unitType, itemType)
             {
                 FullName = CreateModelFullNameFromInterface(type),
@@ -269,10 +270,21 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.Add("{");
             result.AddRange(CreatePartialStaticConstrutor(modelName));
             result.AddRange(CreatePartialConstrutor("public", modelName));
-            foreach (var item in ContractHelper.FilterPropertiesForGeneration(typeProperties))
+
+            if (itemType == Common.ItemType.ShadowModel)
             {
-                CreateModelPropertyAttributes(type, item, result.Source);
-                result.AddRange(CreateProperty(item));
+                generateProperties = ContractHelper.FilterShadowPropertiesForGeneration(type, typeProperties); 
+            }
+            else
+            {
+                generateProperties = ContractHelper.FilterPropertiesForGeneration(type, typeProperties);
+            }
+            foreach (var item in generateProperties)
+            {
+                var propertyHelper = new ContractPropertyHelper(type, item);
+
+                CreateModelPropertyAttributes(propertyHelper, result.Source);
+                result.AddRange(CreateProperty(propertyHelper));
             }
             result.AddRange(CreateCopyProperties(type));
             foreach (var item in interfaces.Where(e => ContractHelper.HasCopyable(e)))
@@ -334,14 +346,14 @@ namespace CSharpCodeGenerator.Logic.Generation
             CreateModelAttributes(type, result.Source);
             result.Add($"public partial class {modelName}");
             result.Add("{");
-            foreach (var item in ContractHelper.FilterPropertiesForGeneration(typeProperties))
+            foreach (var item in ContractHelper.FilterPropertiesForGeneration(type, typeProperties))
             {
-                var propertyType = GetPropertyType(item);
+                var propertyHelper = new ContractPropertyHelper(type, item);
 
                 if (item.CanRead || item.CanWrite)
                 {
-                    CreateModelPropertyAttributes(delegateType, item, result.Source);
-                    result.Add($"public {propertyType} {item.Name}");
+                    CreateModelPropertyAttributes(propertyHelper, result.Source);
+                    result.Add($"public {propertyHelper.PropertyFieldType} {item.Name}");
                     result.Add("{");
                     if (item.CanRead)
                     {

@@ -1,7 +1,6 @@
 ﻿//@CodeCopy
 //MdStart
 using SnQMusicStore.Logic.Modules.Exception;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -49,11 +48,11 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
         protected virtual PropertyInfo GetNavigationToOne()
         {
-            return typeof(TAnotherEntity).GetProperty(typeof(TOneEntity).Name);
+            return typeof(TAnother).GetInterfaceProperty(typeof(TOneEntity).Name);
         }
         protected virtual PropertyInfo GetForeignKeyToOne()
         {
-            return typeof(TAnother).GetProperty($"{typeof(TOneEntity).Name}Id");
+            return typeof(TAnother).GetInterfaceProperty($"{typeof(TOneEntity).Name}Id");
         }
         protected virtual async Task LoadAnotherAsync(E entity, int masterId)
         {

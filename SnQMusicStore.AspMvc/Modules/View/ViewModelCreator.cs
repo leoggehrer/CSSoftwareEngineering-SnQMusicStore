@@ -1,9 +1,7 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using SnQMusicStore.AspMvc.Models.Modules.View;
 using System;
-using System.Collections.Generic;
 
 namespace SnQMusicStore.AspMvc.Modules.View
 {

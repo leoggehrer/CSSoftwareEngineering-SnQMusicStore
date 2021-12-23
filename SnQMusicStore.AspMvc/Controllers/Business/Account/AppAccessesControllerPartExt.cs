@@ -1,14 +1,11 @@
 ﻿//@CodeCopy
 //MdStart
 #if ACCOUNT_ON
-using CommonBase.Extensions;
-using Microsoft.AspNetCore.Mvc.Filters;
 using SnQMusicStore.AspMvc.Models;
 using SnQMusicStore.AspMvc.Models.Business.Account;
 using SnQMusicStore.AspMvc.Models.Modules.Common;
 using SnQMusicStore.AspMvc.Models.Persistence.Account;
 using SnQMusicStore.AspMvc.Modules.View;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
