@@ -2,7 +2,6 @@
 //MdStart
 using SnQMusicStore.Logic.Modules.Exception;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -53,19 +52,19 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
         protected virtual PropertyInfo GetNavigationToOne()
         {
-            return typeof(TConnectorEntity).GetProperty(typeof(TOneEntity).Name);
+            return typeof(TConnector).GetInterfaceProperty(typeof(TOneEntity).Name);
         }
         protected virtual PropertyInfo GetNavigationToAnother()
         {
-            return typeof(TConnectorEntity).GetProperty(typeof(TAnotherEntity).Name);
+            return typeof(TConnector).GetInterfaceProperty(typeof(TAnotherEntity).Name);
         }
         protected virtual PropertyInfo GetForeignKeyToOne()
         {
-            return typeof(TConnectorEntity).GetProperties().SingleOrDefault(pi => pi.Name.Equals($"{typeof(TOneEntity).Name}Id"));
+            return typeof(TConnector).GetInterfaceProperty($"{typeof(TOneEntity).Name}Id");
         }
         protected virtual PropertyInfo GetForeignKeyToAnother()
         {
-            return typeof(TConnectorEntity).GetProperties().SingleOrDefault(pi => pi.Name.Equals($"{typeof(TAnotherEntity).Name}Id"));
+            return typeof(TConnector).GetInterfaceProperty($"{typeof(TAnotherEntity).Name}Id");
         }
         protected virtual async Task LoadChildsAsync(E entity)
         {

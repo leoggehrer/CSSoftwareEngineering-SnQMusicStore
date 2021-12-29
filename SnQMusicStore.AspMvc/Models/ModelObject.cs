@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace SnQMusicStore.AspMvc.Models
 {
-    public class ModelObject
+    public partial class ModelObject
     {
         private CommandMode commandMode = CommandMode.All;
 

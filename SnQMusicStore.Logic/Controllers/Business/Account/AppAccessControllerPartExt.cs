@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using SnQMusicStore.Logic.Controllers.Persistence.Account;
 using SnQMusicStore.Logic.Entities.Business.Account;
 using SnQMusicStore.Logic.Entities.Persistence.Account;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 

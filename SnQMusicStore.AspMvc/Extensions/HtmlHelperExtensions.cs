@@ -1,15 +1,13 @@
 ﻿//@CodeCopy
 //MdStart
 using System;
-using System.Collections.Generic;
 using System.Text;
-using CommonBase.Extensions;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SnQMusicStore.AspMvc.Extensions
 {
-    public static class HtmlHelperExtensions
+    public static partial class HtmlHelperExtensions
     {
         public static HtmlString ToSelect(this IHtmlHelper htmlHelper, string css, string id, string name, IEnumerable<KeyValuePair<Enum, string>> options, Enum selVal)
         {

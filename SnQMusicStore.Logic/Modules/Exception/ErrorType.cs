@@ -4,26 +4,30 @@ namespace SnQMusicStore.Logic.Modules.Exception
 {
     public enum ErrorType : int
     {
+#if ACCOUNT_ON
         InitAppAccess,
         InvalidAccount,
-        NotLogedIn,
-        NotAuthorized,
-        InvalidToken,
-        InvalidId,
-        InvalidPageSize,
+        InvalidIdentityName,
 
+        InvalidToken,
         InvalidSessionToken,
         InvalidJsonWebToken,
-        AuthorizationTimeOut,
-        InvalidIdentityName,
+
         InvalidEmail,
         InvalidPassword,
+        NotLogedIn,
+        NotAuthorized,
+        AuthorizationTimeOut,
+#endif
+        InvalidId,
+        InvalidPageSize,
 
         InvalidEntityInsert,
         InvalidEntityUpdate,
         InvalidEntityContent,
 
         InvalidControllerType,
+        InvalidOperation,
     }
 }
 //MdEnd

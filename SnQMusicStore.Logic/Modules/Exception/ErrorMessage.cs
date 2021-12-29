@@ -1,20 +1,21 @@
 ﻿//@CodeCopy
 //MdStart
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace SnQMusicStore.Logic.Modules.Exception
 {
-	internal static partial class ErrorMessage
+    internal static partial class ErrorMessage
 	{
 		static ErrorMessage()
 		{
 			ClassConstructing();
 			Messages = new Dictionary<ErrorType, string>
 			{
+#if ACCOUNT_ON
 				{ ErrorType.InitAppAccess, "The initialization of the app access is not permitted because an app access has already been initialized." },
 				{ ErrorType.InvalidAccount, "Invalid identity or password." }
+#endif
 			};
 
 			InitMessages();

@@ -1,9 +1,7 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using SnQMusicStore.AspMvc.Modules.View;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -11,6 +9,13 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 {
     public partial class IndexViewModel : ViewModel
     {
+        static IndexViewModel()
+        {
+            ClassConstructing();
+            ClassConstructed();
+        }
+        static partial void ClassConstructing();
+        static partial void ClassConstructed();
         private IEnumerable<IdentityModel> displayModels = null;
         private IEnumerable<PropertyInfo> displayProperties = null;
         private IEnumerable<PropertyInfo> filterProperties = null;
@@ -33,6 +38,16 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
                     }
                 }
                 return displayModels;
+            }
+        }
+        public List<string> IgnoreSearchItems { get; } = new List<string>();
+        public IEnumerable<string> AllIgnoreSearchItems
+        {
+            get
+            {
+                return IgnoreNames.Union(IgnoreSearchItems)
+                                  .Union(ViewBagInfo.IgnoreSearchItems)
+                                  .Distinct();
             }
         }
         public List<string> IgnoreFilters { get; } = new List<string>();
@@ -83,6 +98,35 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         public virtual IEnumerable<PropertyInfo> GetOrderProperties()
         {
             return orderProperties ??= GetOrderProperties(DisplayType);
+        }
+        public virtual IEnumerable<PropertyInfo> GetSearchProperties(Type type)
+        {
+            type.CheckArgument(nameof(type));
+
+            var result = new List<PropertyInfo>();
+            var typeProperties = type.GetAllPropertyInfos();
+
+            foreach (var item in type.GetAllInterfacePropertyInfos())
+            {
+                var typeProperty = default(PropertyInfo);
+                var mapName = ViewBagInfo.GetMapping(item.Name);
+
+                typeProperty = typeProperties.FirstOrDefault(p => p.Name.Equals(mapName, StringComparison.OrdinalIgnoreCase));
+                if (typeProperty != null)
+                {
+                    ViewBagInfo.AddMappingProperty(mapName, typeProperty);
+                }
+
+                if (item.CanRead && AllDisplayNames.Any(e => e.Equals(item.Name)))
+                {
+                    result.Add(item);
+                }
+                else if (item.CanRead && AllDisplayNames.Any() == false && AllIgnoreSearchItems.Any(e => e.Equals(item.Name)) == false)
+                {
+                    result.Add(item);
+                }
+            }
+            return result;
         }
         public virtual IEnumerable<PropertyInfo> GetFilterProperties(Type type)
         {

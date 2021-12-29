@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using SnQMusicStore.Contracts;
 using SnQMusicStore.Logic.Entities;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
@@ -37,6 +36,8 @@ namespace SnQMusicStore.Logic.DataContext
 		partial void Constructed();
 
 		public static string ConnectionString { get; protected set; }
+
+		public EntityState GetEntityState<T>(T entity) => Entry(entity).State;
 
 		public DbSet<E> Set<C, E>()
 			where C : IIdentifiable

@@ -3,7 +3,6 @@
 #if ACCOUNT_ON
 using SnQMusicStore.Contracts.Client;
 using SnQMusicStore.Contracts.Persistence.Account;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SnQMusicStore.Logic.Modules.Account

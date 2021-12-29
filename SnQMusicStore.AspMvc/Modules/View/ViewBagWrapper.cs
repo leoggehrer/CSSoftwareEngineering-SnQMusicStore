@@ -1,11 +1,9 @@
 ﻿//@CodeCopy
 //MdStart
 
-using CommonBase.Extensions;
 using SnQMusicStore.AspMvc.Models;
 using SnQMusicStore.AspMvc.Models.Modules.Common;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace SnQMusicStore.AspMvc.Modules.View
@@ -18,6 +16,16 @@ namespace SnQMusicStore.AspMvc.Modules.View
             ViewBag = viewBag;
         }
 
+        public bool HasSearchBox
+        {
+            get => ViewBag.HasSearchBox != null ? (bool)ViewBag.HasSearchBox : true;
+            set => ViewBag.HasSearchBox = value;
+        }
+        public bool HasSorter
+        {
+            get => ViewBag.HasSorter != null ? (bool)ViewBag.HasSorter : true;
+            set => ViewBag.HasSorter = value;
+        }
         public bool HasPager
         {
             get => ViewBag.HasPager != null ? (bool)ViewBag.HasPager : true;
@@ -25,27 +33,8 @@ namespace SnQMusicStore.AspMvc.Modules.View
         }
         public bool HasFilter
         {
-            get => ViewBag.HasFilter != null ? (bool)ViewBag.HasFilter : true;
+            get => ViewBag.HasFilter != null ? (bool)ViewBag.HasFilter : false;
             set => ViewBag.HasFilter = value;
-        }
-        public bool HasSorter
-        {
-            get => ViewBag.HasSorter != null ? (bool)ViewBag.HasSorter : true;
-            set => ViewBag.HasSorter = value;
-        }
-        public ModelCategory ModelCategory
-        {
-            get
-            {
-                var result = ModelCategory.Single;
-
-                if (ViewBag.ModelCategory != null)
-                {
-                    result = ViewBag.ModelCategory;
-                }
-                return result;
-            }
-            set => ViewBag.ModelCategory = value;
         }
         public EditMode EditMode
         {
@@ -129,6 +118,17 @@ namespace SnQMusicStore.AspMvc.Modules.View
                 return result;
             }
         }
+        public List<string> IgnoreSearchItems
+        {
+            get
+            {
+                if (ViewBag.IgnoreSearchItems is not List<string> result)
+                {
+                    ViewBag.IgnoreSearchItems = result = new List<string>();
+                }
+                return result;
+            }
+        }
         public List<string> IgnoreFilters
         {
             get
@@ -190,6 +190,23 @@ namespace SnQMusicStore.AspMvc.Modules.View
             }
         }
 
+        public void AddIgnoreHidden(string name)
+        {
+            if (IgnoreNames.Contains(name) == false)
+                IgnoreNames.Add(name);
+
+            if (HiddenNames.Contains(name) == false)
+                HiddenNames.Add(name);
+        }
+        public void AddIgnoreFilterOrder(string name)
+        {
+            if (IgnoreFilters.Contains(name) == false)
+                IgnoreFilters.Add(name);
+
+            if (IgnoreOrders.Contains(name) == false)
+                IgnoreOrders.Add(name);
+        }
+
         public string GetMapping(string key)
         {
             if (MappingNames.TryGetValue(key, out var result) == false)
@@ -205,15 +222,6 @@ namespace SnQMusicStore.AspMvc.Modules.View
                MappingNames.Add(key, value);
             }
         }
-        public void AddIgnoreHidden(string name)
-        {
-            if (IgnoreNames.Contains(name) == false)
-                IgnoreNames.Add(name);
-
-            if (HiddenNames.Contains(name) == false)
-                HiddenNames.Add(name);
-        }
-
         public bool GetMappingProperty(string key, out PropertyInfo propertyInfo)
         {
             return MappingProperties.TryGetValue(key, out propertyInfo);

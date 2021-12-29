@@ -1,0 +1,31 @@
+﻿@*@CodeCopy*@
+@{
+    @using SnQMusicStore.AspMvc.Models.Modules.View
+    @using SnQMusicStore.AspMvc.Modules.Session
+    @using SnQMusicStore.AspMvc.Modules.View
+    @model IndexViewModel
+
+    var viewBagInfo = Model?.ViewBagInfo;
+    var sessionInfo = new SessionWrapper(Context.Session);
+    var searchModel = new SearchModel(sessionInfo, Model);
+    var searchValue = sessionInfo.GetSearchValue(viewBagInfo.Controller);
+
+    <form asp-action="Search" method="post">
+        <div class="input-group mb-3">
+            @Html.DropDownList(searchModel.GetSearchItemsName(), searchModel.GetSearchItems(), null, new { disabled="disabled" })
+            <input type="text" id="@searchModel.GetSearchValueId()" name="@searchModel.GetSearchValueName()" value="@searchValue" class="form-control" aria-label="Searchbox">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-search"></i>
+            </button>
+            @if (viewBagInfo.HasSorter)
+            {
+                var sorterValues = sessionInfo.GetSorterValues(viewBagInfo.Controller);
+                var sorterText = sorterValues?.Count > 0 ? "*" : string.Empty;
+
+                <button type="button" class="btn btn-outline-primary" data-toggle="collapse" href="#collapseSorter" aria-expanded="false" aria-controls="collapseSorter">
+                    <i class="fa fa-sort">@sorterText</i>
+                </button>
+            }
+        </div>
+    </form>
+}

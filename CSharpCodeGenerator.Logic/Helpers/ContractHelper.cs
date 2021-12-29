@@ -243,19 +243,38 @@ namespace CSharpCodeGenerator.Logic.Helpers
             var typeProperties = GetAllProperties(type);
             var baseProperties = baseType != null ? GetAllProperties(baseType) : Array.Empty<PropertyInfo>();
 
-            return FilterPropertiesForGeneration(typeProperties.Except(baseProperties));
+            return FilterPropertiesForGeneration(type, typeProperties.Except(baseProperties));
         }
-        public static IEnumerable<PropertyInfo> FilterPropertiesForGeneration(IEnumerable<PropertyInfo> properties)
+        public static IEnumerable<PropertyInfo> FilterPropertiesForGeneration(Type type, IEnumerable<PropertyInfo> properties)
         {
+            type.CheckArgument(nameof(type));
             properties.CheckArgument(nameof(properties));
 
-            return properties.Select(e => new ContractPropertyHelper(e))
+            return properties.Select(e => new ContractPropertyHelper(type, e))
                              .Where(e => e.Property.DeclaringType.Name.Equals(StaticLiterals.IVersionableName) == false
                                       && e.Property.DeclaringType.Name.Equals(StaticLiterals.IIdentifiableName) == false
                                       && e.Property.DeclaringType.Name.Equals(StaticLiterals.ICompositeName) == false
                                       && e.Property.DeclaringType.Name.Equals(StaticLiterals.IOneToAnotherName) == false
                                       && e.Property.DeclaringType.Name.Equals(StaticLiterals.IOneToManyName) == false
                                       && e.Property.DeclaringType.Name.Equals(StaticLiterals.IShadowName) == false
+                                      && e.HasImplementation == false)
+                             .OrderBy(e => e.Order)
+                             .Select(e => e.Property);
+        }
+        public static IEnumerable<PropertyInfo> FilterShadowPropertiesForGeneration(Type type, IEnumerable<PropertyInfo> properties)
+        {
+            return FilterPropertiesByForGeneration(type, properties, new string[] {
+                                                                                    StaticLiterals.IIdentifiableName,
+                                                                                    StaticLiterals.IShadowName,
+                                                                                  });
+        }
+        public static IEnumerable<PropertyInfo> FilterPropertiesByForGeneration(Type type, IEnumerable<PropertyInfo> properties, params string[] excludeDeclaringTypes)
+        {
+            type.CheckArgument(nameof(type));
+            properties.CheckArgument(nameof(properties));
+
+            return properties.Select(e => new ContractPropertyHelper(type, e))
+                             .Where(e => excludeDeclaringTypes.Any(dt => e.Property.DeclaringType.Name.Equals(dt)) == false
                                       && e.HasImplementation == false)
                              .OrderBy(e => e.Order)
                              .Select(e => e.Property);

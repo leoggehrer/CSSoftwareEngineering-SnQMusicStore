@@ -1,6 +1,5 @@
 ﻿//@CodeCopy
 //MdStart
-using System.Collections.Generic;
 using System.Text;
 
 namespace SnQMusicStore.AspMvc.Models.Modules.View
@@ -32,7 +31,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             var result = default(string);
 
             if (operation.Equals(StaticLiterals.OperationEquals))
-
             {
                 result = $"{name} == \"{value}\"";
             }

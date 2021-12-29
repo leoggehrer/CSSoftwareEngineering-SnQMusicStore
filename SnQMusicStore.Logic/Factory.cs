@@ -5,13 +5,21 @@ namespace SnQMusicStore.Logic
 {
     public static partial class Factory
     {
+        static Factory()
+        {
+            ClassConstructing();
+            ClassConstructed();
+        }
+        static partial void ClassConstructing();
+        static partial void ClassConstructed();
+
         internal static DataContext.IContext CreateContext()
         {
             return new DataContext.SnQMusicStoreDbContext();
         }
 
         public static IControllerAccess<C> Create<C>()
-            where C : SnQMusicStore.Contracts.IIdentifiable
+            where C : Contracts.IIdentifiable
         {
             var result = default(IControllerAccess<C>);
 
@@ -19,7 +27,7 @@ namespace SnQMusicStore.Logic
             return result;
         }
         public static IControllerAccess<C> Create<C>(object controllerObject)
-            where C : SnQMusicStore.Contracts.IIdentifiable
+            where C : Contracts.IIdentifiable
         {
             var result = default(IControllerAccess<C>);
 
@@ -28,7 +36,7 @@ namespace SnQMusicStore.Logic
         }
 #if ACCOUNT_ON
         public static IControllerAccess<C> Create<C>(string sessionToken)
-            where C : SnQMusicStore.Contracts.IIdentifiable
+            where C : Contracts.IIdentifiable
         {
             var result = default(IControllerAccess<C>);
 
@@ -39,8 +47,8 @@ namespace SnQMusicStore.Logic
         public static IAccountManager CreateAccountManager() => new Modules.Account.AccountManagerWrapper();
 #endif
         static partial void CreateController<C>(ref IControllerAccess<C> controller)
-            where C : SnQMusicStore.Contracts.IIdentifiable;
+            where C : Contracts.IIdentifiable;
         static partial void CreateController<C>(object sharedController, ref IControllerAccess<C> controller)
-            where C : SnQMusicStore.Contracts.IIdentifiable;
+            where C : Contracts.IIdentifiable;
     }
 }

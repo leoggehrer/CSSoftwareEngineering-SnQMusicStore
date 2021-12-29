@@ -1,6 +1,5 @@
 ﻿//@CodeCopy
 //MdStart
-using CommonBase.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -8,12 +7,10 @@ using SnQMusicStore.AspMvc.Models.Modules.Csv;
 using SnQMusicStore.AspMvc.Modules.Language;
 using SnQMusicStore.AspMvc.Modules.Session;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SnQMusicStore.AspMvc.Controllers
 {
@@ -103,7 +100,7 @@ namespace SnQMusicStore.AspMvc.Controllers
 
                     if (value != null)
                     {
-                        exportLine.Append(value.ToString());
+                        exportLine.Append(value.ToString().Remove("\r", string.Empty));
                     }
                     else
                     {

@@ -2,10 +2,9 @@
 //MdStart
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Threading.Tasks;
 using System.Linq.Expressions;
 using SnQMusicStore.Logic.Modules.Exception;
 
@@ -64,6 +63,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
             {
                 var qry = await QueryableSet().Skip(idx++ * MaxPageSize)
                                               .Take(MaxPageSize)
+                                              .AsNoTracking()
                                               .ToArrayAsync()
                                               .ConfigureAwait(false);
 
@@ -80,6 +80,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
                 var qry = await QueryableSet().OrderBy(orderBy)
                                               .Skip(idx++ * MaxPageSize)
                                               .Take(MaxPageSize)
+                                              .AsNoTracking()
                                               .ToArrayAsync()
                                               .ConfigureAwait(false);
 
@@ -105,6 +106,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
                 var qry = await QueryableSet().Where(predicate)
                                               .Skip(idx++ * MaxPageSize)
                                               .Take(MaxPageSize)
+                                              .AsNoTracking()
                                               .ToArrayAsync()
                                               .ConfigureAwait(false);
 
@@ -120,6 +122,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
 
             var result = await QueryableSet().Skip(pageIndex * pageSize)
                                              .Take(pageSize)
+                                             .AsNoTracking()
                                              .ToArrayAsync()
                                              .ConfigureAwait(false);
 
@@ -133,6 +136,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
             var result = await QueryableSet().OrderBy(orderBy)
                                              .Skip(pageIndex * pageSize)
                                              .Take(pageSize)
+                                             .AsNoTracking()
                                              .ToArrayAsync()
                                              .ConfigureAwait(false);
 
@@ -147,6 +151,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
             var result = await QueryableSet().Where(predicate)
                                              .Skip(pageIndex * pageSize)
                                              .Take(pageSize)
+                                             .AsNoTracking()
                                              .ToArrayAsync()
                                              .ConfigureAwait(false);
             return result;
@@ -160,6 +165,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
                                              .OrderBy(orderBy)
                                              .Skip(pageIndex * pageSize)
                                              .Take(pageSize)
+                                             .AsNoTracking()
                                              .ToArrayAsync()
                                              .ConfigureAwait(false);
             return result;
@@ -172,6 +178,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
             var result = await QueryableSet().Where(predicate)
                                              .Skip(pageIndex * pageSize)
                                              .Take(pageSize)
+                                             .AsNoTracking()
                                              .ToArrayAsync()
                                              .ConfigureAwait(false);
             return result;

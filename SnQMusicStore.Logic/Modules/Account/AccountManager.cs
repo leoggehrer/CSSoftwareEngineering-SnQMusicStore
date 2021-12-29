@@ -10,7 +10,6 @@ using SnQMusicStore.Logic.Entities.Persistence.Account;
 using SnQMusicStore.Logic.Modules.Exception;
 using SnQMusicStore.Logic.Modules.Security;
 using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Reflection;
