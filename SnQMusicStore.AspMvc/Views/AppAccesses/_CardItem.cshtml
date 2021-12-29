@@ -1,5 +1,5 @@
-﻿@*@CodeCopy*@
-@*#if ACCOUNT_ON*@@*
+@*@CodeCopy*@
+@*#if ACCOUNT_ON*@
 @{
     @using SnQMusicStore.AspMvc.Models.Persistence.Account
     @using SnQMusicStore.AspMvc.Modules.View
@@ -15,4 +15,4 @@
         <p><span style="color: blue;">@($"{viewBagInfo.TranslateFor("Has access to")}: ")</span><strong>@($"{displayViewModel.GetDisplayValue(property)}")</strong></p>
     }
 }
-*@@*#endif*@
+@*#endif*@
