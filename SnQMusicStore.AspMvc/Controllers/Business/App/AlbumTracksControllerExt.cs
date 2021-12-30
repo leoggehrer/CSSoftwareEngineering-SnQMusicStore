@@ -44,5 +44,37 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.App
 
             return await base.BeforeViewAsync(models, action).ConfigureAwait(false);
         }
+
+        protected override async Task<IEnumerable<AlbumTracks>> QueryModelPageListAsync(int pageIndex, int pageSize, bool applyFilter)
+        {
+            var result = new List<AlbumTracks>();
+            var searchValue = SessionInfo.GetSearchValue(ControllerName)?.ToLower();
+
+            result.AddRange(await base.QueryModelPageListAsync(pageIndex, pageSize, applyFilter).ConfigureAwait(false));
+
+            if (searchValue.HasContent() && result.Count < pageSize)
+            {
+                var counter = 0;
+                var models = default(IEnumerable<AlbumTracks>);
+
+                do
+                {
+                    models = await base.QueryModelPageListAsync(pageIndex + counter++, pageSize, false).ConfigureAwait(false);
+
+                    foreach (var model in models)
+                    {
+                        if (model.ToString().ToLower().Contains(searchValue))
+                        {
+                            if (result.Any(e => e.Id == model.Id) == false)
+                            {
+                                result.Add(model);
+                            }
+                        }
+                    }
+                } while (models.Any());
+                SetSessionPageData(result.Count, pageIndex, pageSize);
+            }
+            return result.Take(pageSize);
+        }
     }
 }
