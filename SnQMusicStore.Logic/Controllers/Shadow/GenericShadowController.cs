@@ -11,9 +11,9 @@ namespace SnQMusicStore.Logic.Controllers.Shadow
 
     [Authorize(AllowModify = true)]
 #endif
-    internal abstract partial class GenericShadowController<I, E, TSourceContract, TSourceEntity> : GenericController<I, E>
-        where I : Contracts.IIdentifiable
-        where E : Entities.ShadowEntity, I, Contracts.ICopyable<I>, new()
+    internal abstract partial class GenericShadowController<C, E, TSourceContract, TSourceEntity> : GenericController<C, E>
+        where C : Contracts.IIdentifiable
+        where E : Entities.ShadowEntity, C, Contracts.ICopyable<C>, new()
         where TSourceContract : Contracts.IIdentifiable, Contracts.ICopyable<TSourceContract>
         where TSourceEntity : Entities.IdentityEntity, TSourceContract, Contracts.ICopyable<TSourceContract>, new()
     {
@@ -61,7 +61,7 @@ namespace SnQMusicStore.Logic.Controllers.Shadow
 
             var result = new E();
 
-            result.CopyFrom(contract);
+            result.SetSource(contract);
             return result;
         }
         protected virtual IEnumerable<E> ConvertTo(IEnumerable<TSourceContract> contracts)
@@ -158,7 +158,7 @@ namespace SnQMusicStore.Logic.Controllers.Shadow
         #endregion Query
 
         #region Create
-        internal override async Task<E> ExecuteCreateEntityAsync()
+        internal override async Task<E> CreateEntityAsync()
         {
             var entity = await SourceEntityController.CreateEntityAsync().ConfigureAwait(false);
 

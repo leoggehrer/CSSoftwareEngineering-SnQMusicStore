@@ -14,7 +14,9 @@ namespace SnQMusicStore.ConApp
     {
         private static async Task ImportDataAsync()
         {
-            Adapters.Factory.Adapter = Adapters.AdapterType.Service;
+            Adapters.Factory.BaseUri = "https://localhost:5003" + "/api";
+            Adapters.Factory.Adapter = Adapters.AdapterType.Controller;
+
             using var genreCtrl = Create<Contracts.Persistence.MasterData.IGenre>();
             using var artistCtrl = Create<Contracts.Persistence.App.IArtist>();
             using var albumCtrl = Create<Contracts.Persistence.App.IAlbum>();

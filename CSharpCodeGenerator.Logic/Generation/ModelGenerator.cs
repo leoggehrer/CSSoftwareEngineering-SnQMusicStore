@@ -162,6 +162,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                 {
                     result.Add(CreateModelFromContract(type, UnitType, Common.ItemType.PersistenceModel));
                     result.Add(CreatePersistenceModel(type, UnitType));
+                    result.Add(CreateEditModelFromContract(type, UnitType, Common.ItemType.PersistenceModel));
                     //result.Add(CreateOverrideToString(type, UnitType));
                 }
             }
@@ -196,6 +197,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                 {
                     result.Add(CreateModelFromContract(type, UnitType, Common.ItemType.ShadowModel));
                     result.Add(CreateShadowModel(type, UnitType));
+                    result.Add(CreateEditModelFromContract(type, UnitType, Common.ItemType.ShadowModel));
                 }
             }
             return result;
@@ -229,6 +231,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                 {
                     result.Add(CreateModelFromContract(type, UnitType, Common.ItemType.ThridPartyModel));
                     result.Add(CreateThirdPartyModel(type, UnitType));
+                    result.Add(CreateEditModelFromContract(type, UnitType, Common.ItemType.ThridPartyModel));
                 }
             }
             return result;
@@ -297,38 +300,53 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.FormatCSharpCode();
             return result;
         }
+        protected virtual Contracts.IGeneratedItem CreateEditModelFromContract(Type type, Common.UnitType unitType, Common.ItemType itemType)
+        {
+            type.CheckArgument(nameof(type));
 
-        //private Contracts.IGeneratedItem CreateOverrideToString(Type type, Common.UnitType unitType)
-        //{
-        //    type.CheckArgument(nameof(type));
+            var interfaces = GetInterfaces(type);
+            var modelName = CreateEditModelNameFromInterface(type);
+            var typeProperties = ContractHelper.GetAllProperties(type);
+            var result = new Models.GeneratedItem(unitType, itemType)
+            {
+                FullName = CreateModelFullNameFromInterface(type),
+                FileExtension = StaticLiterals.CSharpFileExtension,
+                SubFilePath = CreateSubFilePathFromInterface(type, "Models", "", StaticLiterals.CSharpFileExtension),
+            };
+            IEnumerable<PropertyInfo> generateProperties;
 
-        //    var result = new Models.GeneratedItem(unitType, Common.ItemType.Model)
-        //    {
-        //        FullName = CreateModelFullNameFromInterface(type),
-        //        FileExtension = StaticLiterals.CSharpFileExtension,
-        //    };
-        //    result.SubFilePath = $"{result.FullName}PartA{result.FileExtension}";
-        //    result.Source.Add($"partial class {CreateModelNameFromInterface(type)}");
-        //    result.Source.Add("{");
-        //    result.Source.Add("public override string ToString()");
-        //    result.Source.Add("{");
-        //    result.Source.Add("var result = string.Empty;");
-        //    result.Source.Add("var handled = false;");
-        //    result.Source.Add("BeforeToString(ref result, ref handled);");
-        //    result.Source.Add("if (handled == false)");
-        //    result.Source.Add("{");
-        //    result.Source.Add("result = base.ToString();");
-        //    result.Source.Add("}");
-        //    result.Source.Add("AfterToString(ref result);");
-        //    result.Source.Add("return result;");
-        //    result.Source.Add("}");
-        //    result.Source.Add("partial void BeforeToString(ref string result, ref bool handled);");
-        //    result.Source.Add("partial void AfterToString(ref string result);");
-        //    result.Source.Add("}");
-        //    result.EnvelopeWithANamespace(CreateModelsNamespace(type));
-        //    result.FormatCSharpCode();
-        //    return result;
-        //}
+            CreateModelAttributes(type, result.Source);
+            result.Add($"public partial class {modelName}");
+            result.Add("{");
+            result.AddRange(CreatePartialStaticConstrutor(modelName));
+            result.AddRange(CreatePartialConstrutor("public", modelName));
+
+            if (itemType == Common.ItemType.ShadowModel)
+            {
+                generateProperties = ContractHelper.FilterShadowPropertiesForGeneration(type, typeProperties);
+            }
+            else
+            {
+                generateProperties = ContractHelper.FilterPropertiesForGeneration(type, typeProperties);
+            }
+            foreach (var item in generateProperties)
+            {
+                var propertyHelper = new ContractPropertyHelper(type, item);
+
+                CreateModelPropertyAttributes(propertyHelper, result.Source);
+                result.AddRange(CreateProperty(propertyHelper));
+            }
+            result.AddRange(CreateCopyProperties(type, pi => ContractHelper.VersionProperties.Contains(pi.Name) == false));
+            foreach (var item in interfaces.Where(e => ContractHelper.HasCopyable(e)))
+            {
+                result.AddRange(CreateCopyProperties(item, pi => ContractHelper.VersionProperties.Contains(pi.Name) == false));
+            }
+            result.AddRange(CreateFactoryMethods(type, false));
+            result.Add("}");
+            result.EnvelopeWithANamespace(CreateModelsNamespace(type), "using System;");
+            result.FormatCSharpCode();
+            return result;
+        }
 
         private Contracts.IGeneratedItem CreateDelegateProperties(Type type, Type delegateType, string delegateObjectName, Common.UnitType unitType, Common.ItemType itemType)
         {
@@ -493,6 +511,37 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.Source.Insert(0, $"// {nameof(CreateModelReferenceItems)}");
             return result;
         }
+        //private Contracts.IGeneratedItem CreateOverrideToString(Type type, Common.UnitType unitType)
+        //{
+        //    type.CheckArgument(nameof(type));
+
+        //    var result = new Models.GeneratedItem(unitType, Common.ItemType.Model)
+        //    {
+        //        FullName = CreateModelFullNameFromInterface(type),
+        //        FileExtension = StaticLiterals.CSharpFileExtension,
+        //    };
+        //    result.SubFilePath = $"{result.FullName}PartA{result.FileExtension}";
+        //    result.Source.Add($"partial class {CreateModelNameFromInterface(type)}");
+        //    result.Source.Add("{");
+        //    result.Source.Add("public override string ToString()");
+        //    result.Source.Add("{");
+        //    result.Source.Add("var result = string.Empty;");
+        //    result.Source.Add("var handled = false;");
+        //    result.Source.Add("BeforeToString(ref result, ref handled);");
+        //    result.Source.Add("if (handled == false)");
+        //    result.Source.Add("{");
+        //    result.Source.Add("result = base.ToString();");
+        //    result.Source.Add("}");
+        //    result.Source.Add("AfterToString(ref result);");
+        //    result.Source.Add("return result;");
+        //    result.Source.Add("}");
+        //    result.Source.Add("partial void BeforeToString(ref string result, ref bool handled);");
+        //    result.Source.Add("partial void AfterToString(ref string result);");
+        //    result.Source.Add("}");
+        //    result.EnvelopeWithANamespace(CreateModelsNamespace(type));
+        //    result.FormatCSharpCode();
+        //    return result;
+        //}
     }
 }
 //MdEnd
