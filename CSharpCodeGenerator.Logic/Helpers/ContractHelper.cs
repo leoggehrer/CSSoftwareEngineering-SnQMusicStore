@@ -16,14 +16,13 @@ namespace CSharpCodeGenerator.Logic.Helpers
         public static string PersistenceLabel => "Persistence";
         public static string ShadowLabel => "Shadow";
 
-        private Type Type { get; }
-        private ContractInfoAttribute Info { get; }
+        public Type Type { get; }
+        private ContractInfoAttribute? Info { get; }
 
         public bool IsVersionable { get; }
         public bool IsIdentifiable { get; }
         public bool IsCopyable { get; }
         public bool IsOneToMany { get; }
-        public bool IsPersistenType { get; }
         public string EntityType { get; }
         public string EntityName { get; }
         public string EntityFieldName => $"{char.ToLower(EntityName[0])}{EntityName[1..]}";
@@ -46,7 +45,7 @@ namespace CSharpCodeGenerator.Logic.Helpers
             {
                 var result = Info?.SchemaName;
 
-                return result.GetValue(GetModuleNameFromInterface(Type));
+                return result ?? GetModuleNameFromInterface(Type);
             }
         }
         public string ContextName
@@ -55,7 +54,7 @@ namespace CSharpCodeGenerator.Logic.Helpers
             {
                 var result = Info?.ContextName;
 
-                return result.GetValue(GeneratorObject.CreateEntityNameFromInterface(Type));
+                return result ?? GeneratorObject.CreateEntityNameFromInterface(Type);
             }
         }
         public string KeyName
@@ -64,15 +63,15 @@ namespace CSharpCodeGenerator.Logic.Helpers
             {
                 var result = Info?.KeyName;
 
-                return result.GetValue("Id");
+                return result ?? "Id";
             }
         }
-        public Type DelegateType => Info?.DelegateType;
+        public Type? DelegateType => Info?.DelegateType;
+        public bool HasLogicAccess => Info == null || Info.HasLogicAccess;
+        public bool HasWebApiAccess => Info == null || Info.HasWebApiAccess;
 
         public ContractHelper(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             Type = type;
             Info = Type.GetCustomAttribute<ContractInfoAttribute>();
 
@@ -87,8 +86,6 @@ namespace CSharpCodeGenerator.Logic.Helpers
                                                          && e.GetGenericArguments()[0].Name.Equals(type.Name)) != null;
             IsOneToMany = HasOneToMany(type);
 
-            IsPersistenType = type.FullName.Contains(StaticLiterals.PersistenceSubName);
-
             EntityName = GeneratorObject.CreateEntityNameFromInterface(Type);
             EntityType = $"{entityNameSpace}.{EntityName}";
         }
@@ -97,38 +94,55 @@ namespace CSharpCodeGenerator.Logic.Helpers
         #region Interface/Contract Helpers
         public static bool IsBusinessType(Type type)
         {
-            type.CheckArgument(nameof(type));
+            type.CheckInterface(nameof(type));
 
-            return type.IsInterface && type.FullName.Contains(StaticLiterals.BusinessSubName);
+            return type.FullName != null && type.FullName.Contains(StaticLiterals.BusinessSubName);
+        }
+        public static bool IsOneToManyType(Type type)
+        {
+            type.CheckInterface(nameof(type));
+
+            return type.FullName != null && type.GetInterfaces().Any(i => i.FullName != null && i.FullName.Contains(StaticLiterals.IOneToManyName));
+        }
+        public static bool IsOneToAnotherType(Type type)
+        {
+            type.CheckInterface(nameof(type));
+
+            return type.GetInterfaces().Any(i => i.FullName != null && i.FullName.Contains(StaticLiterals.IOneToAnotherName));
+        }
+        public static bool IsCompositeType(Type type)
+        {
+            type.CheckInterface(nameof(type));
+
+            return type.GetInterfaces().Any(i => i.FullName != null && i.FullName.Contains(StaticLiterals.ICompositeName));
         }
         public static bool IsModulesType(Type type)
         {
-            type.CheckArgument(nameof(type));
+            type.CheckInterface(nameof(type));
 
-            return type.IsInterface && type.FullName.Contains(StaticLiterals.ModulesSubName);
+            return type.FullName != null && type.FullName.Contains(StaticLiterals.ModulesSubName);
         }
         public static bool IsPersistenceType(Type type)
         {
-            type.CheckArgument(nameof(type));
+            type.CheckInterface(nameof(type));
 
-            return type.IsInterface && type.FullName.Contains(StaticLiterals.PersistenceSubName);
+            return type.FullName != null && type.FullName.Contains(StaticLiterals.PersistenceSubName);
         }
         public static bool IsShadowType(Type type)
         {
-            type.CheckArgument(nameof(type));
+            type.CheckInterface(nameof(type));
 
-            return type.IsInterface && type.FullName.Contains(StaticLiterals.ShadowSubName);
+            return type.FullName != null && type.FullName.Contains(StaticLiterals.ShadowSubName);
         }
         public static bool IsThirdPartyType(Type type)
         {
-            type.CheckArgument(nameof(type));
+            type.CheckInterface(nameof(type));
 
-            return type.IsInterface && type.FullName.Contains(StaticLiterals.ThirdPartySubName);
+            return type.FullName != null && type.FullName.Contains(StaticLiterals.ThirdPartySubName);
         }
 
         public static IEnumerable<Type> GetBaseInterfaces(Type type)
         {
-            type.CheckArgument(nameof(type));
             type.CheckInterface(nameof(type));
 
             var result = new List<Type>();
@@ -147,18 +161,16 @@ namespace CSharpCodeGenerator.Logic.Helpers
             GetInterfacesRec(type, result);
             return result;
         }
-        public static Type GetPersistenceBaseInterface(Type type)
+        public static Type? GetPersistenceBaseInterface(Type type)
         {
-            type.CheckArgument(nameof(type));
             type.CheckInterface(nameof(type));
 
             return type.GetInterfaces().FirstOrDefault(e => e.IsGenericType == false
-                                                         && e.FullName.Contains(StaticLiterals.PersistenceSubName));
+                                                         && e.FullName != null && e.FullName.Contains(StaticLiterals.PersistenceSubName));
         }
 
         public static IEnumerable<PropertyInfo> GetProperties(Type type)
         {
-            type.CheckArgument(nameof(type));
             type.CheckInterface(nameof(type));
 
             var result = new List<PropertyInfo>();
@@ -171,7 +183,6 @@ namespace CSharpCodeGenerator.Logic.Helpers
         }
         public static IEnumerable<PropertyInfo> GetAllProperties(Type type)
         {
-            type.CheckArgument(nameof(type));
             type.CheckInterface(nameof(type));
 
             var propertyInfos = new List<PropertyInfo>();
@@ -208,13 +219,10 @@ namespace CSharpCodeGenerator.Logic.Helpers
         }
         public static IEnumerable<PropertyInfo> GetAllProperties(Type type, params Type[] ignoreInterfaces)
         {
-            type.CheckArgument(nameof(type));
             type.CheckInterface(nameof(type));
 
             static IEnumerable<Type> FlattenInterfaces(IEnumerable<Type> types)
             {
-                types.CheckArgument(nameof(types));
-
                 var result = new List<Type>();
 
                 foreach (var type in types)
@@ -230,9 +238,6 @@ namespace CSharpCodeGenerator.Logic.Helpers
             }
             static void FlattenInterfacesRec(Type type, List<Type> types)
             {
-                type.CheckArgument(nameof(type));
-                types.CheckArgument(nameof(types));
-
                 foreach (var itf in type.GetInterfaces())
                 {
                     if (types.Contains(itf) == false)
@@ -268,8 +273,6 @@ namespace CSharpCodeGenerator.Logic.Helpers
         }
         public static IEnumerable<PropertyInfo> GetEntityProperties(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var baseType = GetPersistenceBaseInterface(type);
             var typeProperties = GetAllProperties(type);
             var baseProperties = baseType != null ? GetAllProperties(baseType) : Array.Empty<PropertyInfo>();
@@ -279,11 +282,9 @@ namespace CSharpCodeGenerator.Logic.Helpers
         public static IEnumerable<string> VersionProperties => new[] { "Id", "RowVersion" };
         public static IEnumerable<PropertyInfo> FilterPropertiesForGeneration(Type type, IEnumerable<PropertyInfo> properties)
         {
-            type.CheckArgument(nameof(type));
-            properties.CheckArgument(nameof(properties));
-
             return properties.Select(e => new ContractPropertyHelper(type, e))
-                             .Where(e => e.Property.DeclaringType.Name.Equals(StaticLiterals.IVersionableName) == false
+                             .Where(e => e.Property.DeclaringType != null
+                                      && e.Property.DeclaringType.Name.Equals(StaticLiterals.IVersionableName) == false
                                       && e.Property.DeclaringType.Name.Equals(StaticLiterals.IIdentifiableName) == false
                                       && e.Property.DeclaringType.Name.Equals(StaticLiterals.ICompositeName) == false
                                       && e.Property.DeclaringType.Name.Equals(StaticLiterals.IOneToAnotherName) == false
@@ -302,11 +303,9 @@ namespace CSharpCodeGenerator.Logic.Helpers
         }
         public static IEnumerable<PropertyInfo> FilterPropertiesByForGeneration(Type type, IEnumerable<PropertyInfo> properties, params string[] excludeDeclaringTypes)
         {
-            type.CheckArgument(nameof(type));
-            properties.CheckArgument(nameof(properties));
-
             return properties.Select(e => new ContractPropertyHelper(type, e))
-                             .Where(e => excludeDeclaringTypes.Any(dt => e.Property.DeclaringType.Name.Equals(dt)) == false
+                             .Where(e => excludeDeclaringTypes.Any(dt => e.Property.DeclaringType != null 
+                                                                      && e.Property.DeclaringType.Name.Equals(dt)) == false
                                       && e.HasImplementation == false)
                              .OrderBy(e => e.Order)
                              .Select(e => e.Property);
@@ -314,16 +313,17 @@ namespace CSharpCodeGenerator.Logic.Helpers
 
         public IEnumerable<Models.Relation> GetMasterTypes(IEnumerable<Type> types)
         {
-            types.CheckArgument(nameof(types));
-
             var result = new List<Models.Relation>();
-            IEnumerable<PropertyInfo> properties;
+            IEnumerable<PropertyInfo> properties = Array.Empty<PropertyInfo>();
 
             if (IsOneToMany)
             {
                 var (one, _) = GetOneToManyTypes(Type);
 
-                properties = GetAllProperties(one);
+                if (one != null)
+                {
+                    properties = GetAllProperties(one);
+                }
             }
             else
             {
@@ -359,8 +359,6 @@ namespace CSharpCodeGenerator.Logic.Helpers
         }
         public IEnumerable<Models.Relation> GetDetailTypes(IEnumerable<Type> types)
         {
-            types.CheckArgument(nameof(types));
-
             var result = new List<Models.Relation>();
             var entityName = EntityName;
 
@@ -368,7 +366,10 @@ namespace CSharpCodeGenerator.Logic.Helpers
             {
                 var (one, _) = GetOneToManyTypes(Type);
 
-                entityName = GeneratorObject.CreateEntityNameFromInterface(one);
+                if (one != null)
+                {
+                    entityName = GeneratorObject.CreateEntityNameFromInterface(one);
+                }
             }
 
             foreach (var other in types)
@@ -392,43 +393,40 @@ namespace CSharpCodeGenerator.Logic.Helpers
 
         public static bool HasCopyable(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             return type.GetInterfaces().FirstOrDefault(e => e.IsGenericType
                                                          && e.Name.Equals(StaticLiterals.ICopyableName)
                                                          && e.GetGenericArguments()[0].Name.Equals(type.Name)) != null;
         }
         public static bool HasOneToMany(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             return type.GetInterfaces().FirstOrDefault(e => e.IsGenericType
                                                          && e.Name.Equals(StaticLiterals.IOneToManyName)) != null;
         }
         public static bool HasOneToAnother(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             return type.GetInterfaces().FirstOrDefault(e => e.IsGenericType
                                                          && e.Name.Equals(StaticLiterals.IOneToAnotherName)) != null;
         }
-        public static (Type one, Type many) GetOneToManyTypes(Type type)
+        public static (Type? one, Type? many) GetOneToManyTypes(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var oneToMany = type.GetInterfaces()
                                 .FirstOrDefault(e => e.IsGenericType
                                                   && e.Name.Equals(StaticLiterals.IOneToManyName));
             return (oneToMany?.GetGenericArguments()[0], oneToMany?.GetGenericArguments()[1]);
         }
-        public static (Type one, Type many) GetOneToAnotherTypes(Type type)
+        public static (Type? one, Type? many) GetOneToAnotherTypes(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var oneToAnother = type.GetInterfaces()
                                 .FirstOrDefault(e => e.IsGenericType
                                                   && e.Name.Equals(StaticLiterals.IOneToAnotherName));
             return (oneToAnother?.GetGenericArguments()[0], oneToAnother?.GetGenericArguments()[1]);
+        }
+        public static Type? GetShadowtype(Type type)
+        {
+            var shadowType = type.GetInterfaces()
+                                 .FirstOrDefault(e => e.IsGenericType
+                                                   && e.Name.Equals(StaticLiterals.IShadowName));
+            return shadowType?.GetGenericArguments()[0];
         }
         public static bool HasPersistenceBaseInterface(Type type)
         {
@@ -444,9 +442,9 @@ namespace CSharpCodeGenerator.Logic.Helpers
         public static string CreateSubNamespaceFromType(Type type)
         {
             var result = string.Empty;
-            var data = type.Namespace.Split('.');
+            var data = type.Namespace?.Split('.');
 
-            for (var i = 2; i < data.Length; i++)
+            for (var i = 2; i < data?.Length; i++)
             {
                 if (string.IsNullOrEmpty(result))
                 {
@@ -467,24 +465,24 @@ namespace CSharpCodeGenerator.Logic.Helpers
         public static string GetModuleNameFromInterface(Type type)
         {
             var result = string.Empty;
-            var data = type.Namespace.Split('.');
-            var idx = data.FindIndex(i => i.Equals(BusinessLabel));
+            var data = type.Namespace?.Split('.');
+            var idx = data != null ? data.FindIndex(i => i.Equals(BusinessLabel)) : -1;
 
             if (idx == -1)
             {
-                idx = data.FindIndex(i => i.Equals(ModulesLabel));
+                idx = data != null ? data.FindIndex(i => i.Equals(ModulesLabel)) : -1;
             }
 
             if (idx == -1)
             {
-                idx = data.FindIndex(i => i.Equals(PersistenceLabel));
+                idx = data != null ? data.FindIndex(i => i.Equals(PersistenceLabel)) : -1 ;
             }
 
             if (idx > -1)
             {
                 var separator = string.Empty;
 
-                for (var i = idx + 1; i < data.Length; i++)
+                for (var i = idx + 1; i < data?.Length; i++)
                 {
                     result = $"{result}{separator}{data[i]}";
                     separator = ".";

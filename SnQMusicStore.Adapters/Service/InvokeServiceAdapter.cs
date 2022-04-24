@@ -39,7 +39,7 @@ namespace SnQMusicStore.Adapters.Service
             Constructed();
         }
         #region Account methods
-        public async Task<LoginSession> LogonAsync(JsonWebLogon logon)
+        public async Task<LoginSession?> LogonAsync(JsonWebLogon logon)
         {
             using var client = GetClient(BaseUri);
             var jsonData = JsonSerializer.Serialize(logon);
@@ -62,7 +62,7 @@ namespace SnQMusicStore.Adapters.Service
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
         }
-        public async Task<LoginSession> LogonAsync(Logon logon)
+        public async Task<LoginSession?> LogonAsync(Logon logon)
         {
             using var client = GetClient(BaseUri);
             var jsonData = JsonSerializer.Serialize(logon);
@@ -181,7 +181,7 @@ namespace SnQMusicStore.Adapters.Service
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
         }
-        public async Task<IEnumerable<string>> QueryRolesAsync(string sessionToken)
+        public async Task<IEnumerable<string>?> QueryRolesAsync(string sessionToken)
         {
             using var client = GetClient(BaseUri);
             HttpResponseMessage response = await client.GetAsync($"Account/QueryRoles/{sessionToken}").ConfigureAwait(false);
@@ -201,7 +201,7 @@ namespace SnQMusicStore.Adapters.Service
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
         }
-        public async Task<LoginSession> QueryLoginAsync(string sessionToken)
+        public async Task<LoginSession?> QueryLoginAsync(string sessionToken)
         {
             using var client = GetClient(BaseUri);
             HttpResponseMessage response = await client.GetAsync($"Account/QueryLogin/{sessionToken}").ConfigureAwait(false);

@@ -16,7 +16,7 @@ namespace SnQMusicStore.Adapters
         /// <summary>
         /// The base url like https://localhost:5001/api
         /// </summary>
-        public static string BaseUri { get; set; }
+        public static string BaseUri { get; set; } = string.Empty;
 
         public static AdapterType Adapter { get; set; } = AdapterType.Controller;
     }

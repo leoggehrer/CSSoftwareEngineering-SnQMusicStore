@@ -32,7 +32,7 @@ namespace SnQMusicStore.Adapters.Modules.Account
         partial void Constructing();
         partial void Constructed();
 
-        public async Task<ILoginSession> LogonAsync(string jsonWebToken)
+        public async Task<ILoginSession?> LogonAsync(string jsonWebToken)
         {
             var result = default(ILoginSession);
 
@@ -51,11 +51,11 @@ namespace SnQMusicStore.Adapters.Modules.Account
             }
             return result;
         }
-        public async Task<ILoginSession> LogonAsync(string email, string password)
+        public async Task<ILoginSession?> LogonAsync(string email, string password)
         {
             return await LogonAsync(email, password, string.Empty).ConfigureAwait(false);
         }
-        public async Task<ILoginSession> LogonAsync(string email, string password, string optionalInfo)
+        public async Task<ILoginSession?> LogonAsync(string email, string password, string optionalInfo)
         {
             var result = default(ILoginSession);
 
@@ -177,7 +177,7 @@ namespace SnQMusicStore.Adapters.Modules.Account
             }
             return result;
         }
-        public async Task<IEnumerable<string>> QueryRolesAsync(string sessionToken)
+        public async Task<IEnumerable<string>?> QueryRolesAsync(string sessionToken)
         {
             var result = default(IEnumerable<string>);
 
@@ -195,7 +195,7 @@ namespace SnQMusicStore.Adapters.Modules.Account
             }
             return result;
         }
-        public async Task<ILoginSession> QueryLoginAsync(string sessionToken)
+        public async Task<ILoginSession?> QueryLoginAsync(string sessionToken)
         {
             var result = default(ILoginSession);
 

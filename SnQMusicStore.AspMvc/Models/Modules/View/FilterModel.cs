@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SnQMusicStore.AspMvc.Modules.Session;
 using SnQMusicStore.AspMvc.Modules.View;
+using System;
 using System.Reflection;
 
 namespace SnQMusicStore.AspMvc.Models.Modules.View
@@ -16,17 +17,12 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public FilterModel(ISessionWrapper sessionInfo, IndexViewModel indexViewModel)
         {
-            sessionInfo.CheckArgument(nameof(sessionInfo));
-            indexViewModel.CheckArgument(nameof(indexViewModel));
-
             SessionInfo = sessionInfo;
             IndexViewModel = indexViewModel;
         }
 
         public virtual string GetId(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             if (ViewBagInfo.GetMappingProperty(propertyInfo.Name, out var property) == false)
             {
                 property = propertyInfo;
@@ -35,18 +31,16 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
             if (result.HasContent())
             {
-                result = $"{result}_{property.DeclaringType.Name}_{property.Name}";
+                result = $"{result}_{property?.DeclaringType?.Name}_{property?.Name}";
             }
             else
             {
-                result = $"{property.DeclaringType.Name}_{property.Name}";
+                result = $"{property?.DeclaringType?.Name}_{property?.Name}";
             }
             return result;
         }
         public virtual string GetName(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             if (ViewBagInfo.GetMappingProperty(propertyInfo.Name, out var property) == false)
             {
                 property = propertyInfo;
@@ -55,11 +49,11 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
             if (result.HasContent())
             {
-                result = $"{result}.{property.DeclaringType.Name}.{property.Name}";
+                result = $"{result}.{property?.DeclaringType?.Name}.{property?.Name}";
             }
             else
             {
-                result = $"{property.DeclaringType.Name}.{property.Name}";
+                result = $"{property?.DeclaringType?.Name}.{property?.Name}";
             }
             return result;
         }
@@ -90,9 +84,9 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             };
             return new SelectList(operations, "Value", "Text");
         }
-        public SelectList GetTypeOperations(PropertyInfo propertyInfo)
+        public SelectList GetTypeOperations(PropertyInfo? propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
+            _ = propertyInfo ?? throw new ArgumentNullException(nameof(propertyInfo));
 
             var translate = ViewBagInfo.Translate;
             var operationItems = new List<SelectListItem>();
@@ -103,7 +97,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             }
 
             operationItems.Add(new SelectListItem { Value = string.Empty, Text = string.Empty });
-            if (property.PropertyType == typeof(string))
+            if (property?.PropertyType == typeof(string))
             {
                 operationItems.Add(new SelectListItem { Value = StaticLiterals.OperationEquals, Text = translate(StaticLiterals.OperationEquals) });
                 operationItems.Add(new SelectListItem { Value = StaticLiterals.OperationNotEquals, Text = translate(StaticLiterals.OperationNotEquals) });
@@ -111,7 +105,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
                 operationItems.Add(new SelectListItem { Value = StaticLiterals.OperationStartsWith, Text = translate(StaticLiterals.OperationStartsWith) });
                 operationItems.Add(new SelectListItem { Value = StaticLiterals.OperationEndsWith, Text = translate(StaticLiterals.OperationEndsWith) });
             }
-            else if (property.PropertyType == typeof(int))
+            else if (property?.PropertyType == typeof(int))
             {
                 operationItems.Add(new SelectListItem { Value = StaticLiterals.OperationNumEquals, Text = translate(StaticLiterals.OperationNumEquals) });
                 operationItems.Add(new SelectListItem { Value = StaticLiterals.OperationNumIsGreater, Text = translate(StaticLiterals.OperationNumIsGreater) });
@@ -125,8 +119,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         }
         public FilterValues GetFilterValues(IFormCollection formCollection)
         {
-            formCollection.CheckArgument(nameof(formCollection));
-
             var result = new FilterValues();
 
             foreach (var property in IndexViewModel.GetDisplayProperties())

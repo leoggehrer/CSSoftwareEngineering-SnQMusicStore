@@ -1,8 +1,10 @@
 ﻿//@CodeCopy
 //MdStart
+using System;
+
 namespace SnQMusicStore.AspMvc.Models
 {
-    public abstract partial class OneToAnotherModel<TOne, TOneModel, TAnother, TAnotherModel> : IdentityModel, IFirstToSecond
+    public abstract partial class OneToAnotherModel<TOne, TOneModel, TAnother, TAnotherModel> : IdentityModel, ITwoPartView
         where TOne : Contracts.IIdentifiable
         where TAnother : Contracts.IIdentifiable
         where TOneModel : IdentityModel, Contracts.ICopyable<TOne>, TOne, new()
@@ -24,7 +26,7 @@ namespace SnQMusicStore.AspMvc.Models
                 if (OneModel is VersionModel ve)
                     result = ve.RowVersion;
 
-                return result;
+                return result ?? Array.Empty<byte>();
             }
             set
             {

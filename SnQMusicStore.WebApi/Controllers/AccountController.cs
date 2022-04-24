@@ -14,7 +14,7 @@ namespace SnQMusicStore.WebApi.Controllers
     [ApiController]
     public partial class AccountController : ControllerBase
     {
-        private IAccountManager accountManager = null;
+        private IAccountManager? accountManager = null;
         private IAccountManager AccountManager => accountManager ??= Logic.Factory.CreateAccountManager();
         private static ILoginSession ConvertTo(ILoginSession loginSession)
         {
@@ -70,9 +70,11 @@ namespace SnQMusicStore.WebApi.Controllers
             return AccountManager.QueryRolesAsync(sessionToken);
         }
         [HttpGet("/api/[controller]/QueryLogin/{sessionToken}")]
-        public async Task<ILoginSession> QueryLoginAsync(string sessionToken)
+        public async Task<ILoginSession?> QueryLoginAsync(string sessionToken)
         {
-            return ConvertTo(await AccountManager.QueryLoginAsync(sessionToken).ConfigureAwait(false));
+            var result = await AccountManager.QueryLoginAsync(sessionToken).ConfigureAwait(false);
+
+            return result != null ? ConvertTo(result) : result;
         }
     }
 }

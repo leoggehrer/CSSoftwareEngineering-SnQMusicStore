@@ -5,13 +5,11 @@ namespace CSharpCodeGenerator.Logic.Models.Configuration
 {
     internal record MenuItem
     {
-#pragma warning disable CA1822 // Mark members as static
-        public string Type => nameof(MenuItem);
-#pragma warning restore CA1822 // Mark members as static
-        public string Text { get; set; }
-        public string Value { get; set; }
-        public string Path { get; set; }
-        public string Icon { get; set; }
+        public static string Type => nameof(MenuItem);
+        public string Text { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+        public string Path { get; set; } = string.Empty;
+        public string Icon { get; set; } = string.Empty;
         public int Order { get; set; }
     }
 }

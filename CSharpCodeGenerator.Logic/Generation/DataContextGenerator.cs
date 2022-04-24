@@ -60,13 +60,13 @@ namespace CSharpCodeGenerator.Logic.Generation
             {
                 FullName = $"{nameSpace}.{SolutionProperties.SolutionName}DbContext",
                 FileExtension = StaticLiterals.CSharpFileExtension,
-                SubFilePath = System.IO.Path.Combine("DataContext", $"{SolutionProperties.SolutionName}DbContextPartA{StaticLiterals.CSharpFileExtension}"),
+                SubFilePath = System.IO.Path.Combine("DataContext", "ProjectDbContextPartA{StaticLiterals.CSharpFileExtension}"),
             };
             result.Add($"namespace {nameSpace}");
             result.Add("{");
             result.Add("using Microsoft.EntityFrameworkCore;");
             result.Add("using Microsoft.EntityFrameworkCore.Metadata.Builders;");
-            result.Add($"partial class {SolutionProperties.SolutionName}DbContext");
+            result.Add("partial class ProjectDbContext");
             result.Add("{");
 
             foreach (var type in contractsProject.PersistenceTypes)
@@ -139,12 +139,12 @@ namespace CSharpCodeGenerator.Logic.Generation
                     result.Add($"var {builder} = modelBuilder.Entity<{contractHelper.EntityType}>();");
                     if (contractHelper.ContextType == CommonBase.Attributes.ContextType.View)
                     {
-                        result.Add($"{builder}.ToView(\"{contractHelper.ContextName}\", \"{contractHelper.SchemaName}\");");
+                        result.Add($"{builder}.ToView(\"{contractHelper.ContextName}\"{(string.IsNullOrEmpty(contractHelper.SchemaName) ? string.Empty : $", \"{contractHelper.SchemaName}\"")})");
                         result.AddRange(CreateEntityConfigure(type));
                     }
                     else if (contractHelper.ContextType == CommonBase.Attributes.ContextType.Table)
                     {
-                        result.Add($"{builder}.ToTable(\"{contractHelper.ContextName}\", \"{contractHelper.SchemaName}\")");
+                        result.Add($"{builder}.ToTable(\"{contractHelper.ContextName}\"{(string.IsNullOrEmpty(contractHelper.SchemaName) ? string.Empty : $", \"{contractHelper.SchemaName}\"")})");
                         if (Helpers.ContractHelper.HasPersistenceBaseInterface(type) == false)
                         {
                             if (contractHelper.IsIdentifiable)

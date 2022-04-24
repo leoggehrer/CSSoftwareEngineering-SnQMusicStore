@@ -11,9 +11,6 @@ namespace SnQMusicStore.AspMvc.Extensions
     {
         public static HtmlString ToSelect(this IHtmlHelper htmlHelper, string css, string id, string name, IEnumerable<KeyValuePair<Enum, string>> options, Enum selVal)
         {
-            htmlHelper.CheckArgument(nameof(htmlHelper));
-            options.CheckArgument(nameof(options));
-
             var sb = new StringBuilder();
 
             sb.Append("<select");
@@ -39,9 +36,6 @@ namespace SnQMusicStore.AspMvc.Extensions
         }
         public static HtmlString ToSelect(this IHtmlHelper htmlHelper, string css, string id, string name, IEnumerable<KeyValuePair<string, string>> options, string selVal)
         {
-            htmlHelper.CheckArgument(nameof(htmlHelper));
-            options.CheckArgument(nameof(options));
-
             var sb = new StringBuilder();
 
             sb.Append("<select");

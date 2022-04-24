@@ -17,6 +17,9 @@ namespace CSharpCodeGenerator.ConApp
         public static IDictionary<string, string> SourceFileHeaders => CommonStaticLiterals.SourceFileHeaders;
 
         public static string ContractsExtension => ".Contracts";
+
+        public static string NullableEnableLabel => CommonStaticLiterals.NullableEnableLabel;
+        public static string NullableDisableLabel => CommonStaticLiterals.NullableDisableLabel;
     }
 }
 //MdEnd

@@ -16,8 +16,8 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public string BackText { get; set; } = "Back to List";
         public string BackAction { get; set; } = "Index";
-        public object BackRouteValues { get; set; }
-        public string BackController { get; set; }
+        public object? BackRouteValues { get; set; }
+        public string? BackController { get; set; }
         public string BackCss { get; set; } = "btn btn-outline-dark";
         public string BackStyle { get; set; } = "min-width: 8em;";
     }

@@ -8,11 +8,9 @@ namespace CommonBase.Extensions
 	{
         public static string GetError(this Exception source)
         {
-            source.CheckArgument(nameof(source));
-
             var tab = string.Empty;
             var errMsg = source.Message;
-            Exception innerException = source.InnerException;
+            Exception? innerException = source.InnerException;
 
             while (innerException != null)
             {

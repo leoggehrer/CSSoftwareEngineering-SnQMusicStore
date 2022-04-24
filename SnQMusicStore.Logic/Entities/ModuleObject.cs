@@ -6,11 +6,10 @@ namespace SnQMusicStore.Logic.Entities
 {
     internal partial class ModuleObject : EntityObject
     {
-        public void CopyProperties(Object other)
+        public void CopyProperties(object other)
         {
-            other.CheckArgument(nameof(other));
-
             bool handled = false;
+
             BeforeCopyProperties(other, ref handled);
             if (handled == false)
             {

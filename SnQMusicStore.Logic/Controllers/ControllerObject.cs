@@ -31,14 +31,14 @@ namespace SnQMusicStore.Logic.Controllers
         #region SessionToken
         protected event EventHandler ChangedSessionToken;
 
-        private string sessionToken;
+        private string? sessionToken;
 
         /// <summary>
         /// Sets the session token.
         /// </summary>
         public string SessionToken
         {
-            internal get => sessionToken;
+            internal get => sessionToken ?? string.Empty;
             set
             {
                 sessionToken = value;
@@ -78,27 +78,23 @@ namespace SnQMusicStore.Logic.Controllers
         #region Instance-Constructors
         public ControllerObject(DataContext.IContext context)
         {
-            context.CheckArgument(nameof(context));
-
             Constructing();
             contextOwner = true;
             Context = context;
 #if ACCOUNT_ON
-            ChangedSessionToken += HandleChangedSessionToken;
+            ChangedSessionToken += HandleChangedSessionToken!;
 #endif
             InitManagedMembers();
             Constructed();
         }
         public ControllerObject(ControllerObject other)
         {
-            other.CheckArgument(nameof(other));
-
             Constructing();
             contextOwner = false;
             Context = other.Context;
 #if ACCOUNT_ON
             SessionToken = other.SessionToken;
-            ChangedSessionToken += HandleChangedSessionToken;
+            ChangedSessionToken += HandleChangedSessionToken!;
 #endif
             InitManagedMembers();
             Constructed();
@@ -298,14 +294,13 @@ namespace SnQMusicStore.Logic.Controllers
 
 #if ACCOUNT_ON
         #region Authorization
-        protected virtual Task CheckAuthorizationAsync(Type subjectType, MethodBase methodBase, AccessType accessType)
+        protected virtual Task CheckAuthorizationAsync(Type subjectType, MethodBase? methodBase, AccessType accessType)
         {
-            return CheckAuthorizationAsync(subjectType, methodBase, accessType, null);
+            return CheckAuthorizationAsync(subjectType, methodBase, accessType, string.Empty);
         }
-        protected virtual async Task CheckAuthorizationAsync(Type subjectType, MethodBase methodBase, AccessType accessType, string infoData)
+        protected virtual async Task CheckAuthorizationAsync(Type subjectType, MethodBase? methodBase, AccessType accessType, string infoData)
         {
-            subjectType.CheckArgument(nameof(subjectType));
-            methodBase.CheckArgument(nameof(methodBase));
+            _ = methodBase ?? throw new ArgumentNullException(nameof(methodBase));
 
             bool handled = false;
 
@@ -331,7 +326,7 @@ namespace SnQMusicStore.Logic.Controllers
                 if (disposing)
                 {
 #if ACCOUNT_ON
-                    ChangedSessionToken -= HandleChangedSessionToken;
+                    ChangedSessionToken -= HandleChangedSessionToken!;
 #endif
                     // TODO: dispose managed state (managed objects).
                     if (contextOwner && Context != null)
@@ -343,7 +338,6 @@ namespace SnQMusicStore.Logic.Controllers
 
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
-                Context = null;
                 disposedValue = true;
             }
         }

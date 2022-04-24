@@ -16,7 +16,7 @@ namespace SnQMusicStore.AspMvc.Models
             get => commandMode & (ViewBagInfo != null ? ViewBagInfo.CommandMode : CommandMode.All); 
             set => commandMode = value; 
         }
-        public ViewBagWrapper ViewBagInfo { get; set; }
+        public ViewBagWrapper? ViewBagInfo { get; set; }
 
         protected static bool IsEqualsWith(object obj1, object obj2)
         {

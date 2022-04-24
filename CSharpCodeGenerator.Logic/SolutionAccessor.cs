@@ -14,13 +14,7 @@ namespace CSharpCodeGenerator.Logic
             int endPos = AppContext.BaseDirectory
                                    .IndexOf($"{solutionProjectName}", StringComparison.CurrentCultureIgnoreCase);
 
-            return AppContext.BaseDirectory.Substring(0, endPos);
-        }
-        public static string GetCurrentSolutionName(string solutionProjectName)
-        {
-            var solutionPath = GetCurrentSolutionPath(solutionProjectName);
-
-            return GetSolutionNameByFile(solutionPath);
+            return AppContext.BaseDirectory[..endPos];
         }
         public static string GetSolutionNameByFile(string solutionPath)
         {
@@ -28,30 +22,6 @@ namespace CSharpCodeGenerator.Logic
                                                           .SingleOrDefault(f => f.Extension.Equals(CommonStaticLiterals.SolutionFileExtension, StringComparison.CurrentCultureIgnoreCase));
 
             return fileInfo != null ? Path.GetFileNameWithoutExtension(fileInfo.Name) : string.Empty;
-        }
-        public static string GetContractsFilePath(string solutionPath)
-        {
-            var result = default(string);
-            var solutionName = GetSolutionNameByFile(solutionPath);
-            var projectName = $"{solutionName}{StaticLiterals.ContractsExtension}";
-            var binPath = Path.Combine(solutionPath, projectName, "bin");
-
-            if (Directory.Exists(binPath))
-            {
-                var fileName = $"{projectName}.dll";
-                var fileInfos = new DirectoryInfo(binPath).GetFiles(fileName, SearchOption.AllDirectories)
-                                                          .Where(f => f.FullName.EndsWith(fileName))
-                                                          .OrderByDescending(f => f.LastWriteTime);
-
-                var fileInfo = fileInfos.Where(f => f.FullName.ToLower().Contains("\\ref\\") == false)
-                                        .FirstOrDefault();
-
-                if (fileInfo != null)
-                {
-                    result = fileInfo.FullName;
-                }
-            }
-            return result;
         }
     }
 }

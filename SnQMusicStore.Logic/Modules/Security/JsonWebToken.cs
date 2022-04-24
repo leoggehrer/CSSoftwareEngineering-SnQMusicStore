@@ -32,8 +32,6 @@ namespace SnQMusicStore.Logic.Modules.Security
 
         internal static string GenerateToken(IEnumerable<Claim> claimsParam)
         {
-            claimsParam.CheckArgument(nameof(claimsParam));
-
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -52,7 +50,7 @@ namespace SnQMusicStore.Logic.Modules.Security
         {
             return CheckToken(token, out _);
         }
-        internal static bool CheckToken(string token, out SecurityToken validatedToken)
+        internal static bool CheckToken(string token, out SecurityToken? validatedToken)
         {
             var result = false;
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -66,7 +64,7 @@ namespace SnQMusicStore.Logic.Modules.Security
             }
             catch (System.Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error in {MethodBase.GetCurrentMethod()?.Name}: {ex.Message}");
             }
             return result;
         }

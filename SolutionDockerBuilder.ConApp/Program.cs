@@ -14,10 +14,10 @@ namespace SolutionDockerBuilder.ConApp
         static Program()
         {
             ClassConstructing();
-            HomePath = (Environment.OSVersion.Platform == PlatformID.Unix ||
-                        Environment.OSVersion.Platform == PlatformID.MacOSX)
-                       ? Environment.GetEnvironmentVariable("HOME")
-                       : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+            HomePath = ((Environment.OSVersion.Platform == PlatformID.Unix ||
+                         Environment.OSVersion.Platform == PlatformID.MacOSX)
+                        ? Environment.GetEnvironmentVariable("HOME")
+                        : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%")) ?? string.Empty;
 
             UserPath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             SourcePath = GetCurrentSolutionPath();
@@ -41,7 +41,7 @@ namespace SolutionDockerBuilder.ConApp
                 var dockerfiles = PrintHeader(path);
 
                 Console.Write($"Build [1..{dockerfiles.Count() + 1}|X...Quit]?: ");
-                input = Console.ReadLine().ToLower();
+                input = Console.ReadLine()?.ToLower() ?? string.Empty;
 
                 running = input.Equals("x") == false;
                 if (running)
@@ -87,13 +87,13 @@ namespace SolutionDockerBuilder.ConApp
 
 			Console.WriteLine($"Cuurent path: {path}");
 			Console.Write("Do you want to change the path [y|Y]?: ");
-            input = Console.ReadLine();
+            input = Console.ReadLine() ?? string.Empty;
             if (input.Equals("y", StringComparison.CurrentCultureIgnoreCase))
 			{
 				Console.Write("Path: ");
                 result = Console.ReadLine();
 			}
-            return result;
+            return result ?? path;
         }
 
         private static IEnumerable<string> PrintHeader(string path)
@@ -112,7 +112,7 @@ namespace SolutionDockerBuilder.ConApp
             foreach (var dockerfile in GetDockerfiles(path))
             {
                 var dockerfileInfo = new FileInfo(dockerfile);
-                var directoryName = dockerfileInfo.Directory.Name;
+                var directoryName = dockerfileInfo.Directory?.Name;
 
                 result.Add(dockerfileInfo.FullName);
                 Console.WriteLine($"Build docker image for: [{++index,2}] {directoryName}");
@@ -125,7 +125,7 @@ namespace SolutionDockerBuilder.ConApp
         {
             var maxWaiting = 10 * 60 * 1000;    // 10 minutes
             var arguments = string.Empty;       // arguments for process start
-            var slnPath = Directory.GetParent(Path.GetDirectoryName(dockerfile)).FullName;
+            var slnPath = Directory.GetParent(Path.GetDirectoryName(dockerfile) ?? string.Empty)?.FullName;
             var contractsCsproj = GetContractProjectFileFromDockerfile(dockerfile);
             var codeGeneratorCsproj = GetCSharpCodeGeneratorProjectFileFromDockerfile(dockerfile);
             var contractsCsprojLines = default(string[]);
@@ -148,7 +148,7 @@ namespace SolutionDockerBuilder.ConApp
                             //WorkingDirectory = projectPath,
                             UseShellExecute = false
                         };
-                        Process.Start(csprojStartInfo).WaitForExit(maxWaiting);
+                        Process.Start(csprojStartInfo)?.WaitForExit(maxWaiting);
 
                         if (string.IsNullOrEmpty(codeGeneratorCsproj) == false)
                         {
@@ -161,7 +161,7 @@ namespace SolutionDockerBuilder.ConApp
                                 //WorkingDirectory = projectPath,
                                 UseShellExecute = false
                             };
-                            Process.Start(csprojStartInfo).WaitForExit(maxWaiting);
+                            Process.Start(csprojStartInfo)?.WaitForExit(maxWaiting);
                         }
                     }
                 }
@@ -172,9 +172,9 @@ namespace SolutionDockerBuilder.ConApp
                 }
             }
             var dockerfileInfo = new FileInfo(dockerfile);
-            var directoryName = dockerfileInfo.Directory.Name;
-            var directoryFullName = dockerfileInfo.Directory.FullName;
-            var tagLabel = $"{directoryName.Replace(".", string.Empty).ToLower()}";
+            var directoryName = dockerfileInfo?.Directory?.Name;
+            var directoryFullName = dockerfileInfo?.Directory?.FullName;
+            var tagLabel = $"{directoryName?.Replace(".", string.Empty).ToLower()}";
 
             try
             {
@@ -187,7 +187,7 @@ namespace SolutionDockerBuilder.ConApp
                     WorkingDirectory = directoryFullName,
                     UseShellExecute = false
                 };
-                Process.Start(buildStartInfo).WaitForExit(maxWaiting);
+                Process.Start(buildStartInfo)?.WaitForExit(maxWaiting);
 
                 //arguments = $"scan {tagLabel}";
                 //Console.WriteLine(arguments);
@@ -207,7 +207,7 @@ namespace SolutionDockerBuilder.ConApp
             }
             if (contractsCsprojLines != null)
             {
-                File.WriteAllLines(contractsCsproj, contractsCsprojLines, Encoding.Default);
+                File.WriteAllLines(contractsCsproj ?? string.Empty, contractsCsprojLines, Encoding.Default);
             }
         }
         private static void BuildDockerfiles(string solutionPath)
@@ -225,25 +225,25 @@ namespace SolutionDockerBuilder.ConApp
             int endPos = AppContext.BaseDirectory
                                    .IndexOf($"{nameof(SolutionDockerBuilder)}", StringComparison.CurrentCultureIgnoreCase);
 
-            return AppContext.BaseDirectory.Substring(0, endPos);
+            return AppContext.BaseDirectory[..endPos];
         }
-        private static string GetContractProjectFileFromSolutionPath(string path)
+        private static string? GetContractProjectFileFromSolutionPath(string path)
         {
             return Directory.GetFiles(path, "*.Contracts.*proj", SearchOption.AllDirectories).FirstOrDefault();
         }
-        private static string GetContractProjectFileFromDockerfile(string dockerfile)
+        private static string? GetContractProjectFileFromDockerfile(string dockerfile)
         {
             var path = Path.GetDirectoryName(dockerfile);
-            var dirInfo = Directory.GetParent(path);
-            var fileInfo = dirInfo.GetFiles("*.Contracts.*proj", SearchOption.AllDirectories).FirstOrDefault();
+            var dirInfo = Directory.GetParent(path ?? dockerfile);
+            var fileInfo = dirInfo?.GetFiles("*.Contracts.*proj", SearchOption.AllDirectories).FirstOrDefault();
 
             return fileInfo?.FullName;
         }
-        private static string GetCSharpCodeGeneratorProjectFileFromDockerfile(string dockerfile)
+        private static string? GetCSharpCodeGeneratorProjectFileFromDockerfile(string dockerfile)
         {
             var path = Path.GetDirectoryName(dockerfile);
-            var dirInfo = Directory.GetParent(path);
-            var fileInfo = dirInfo.GetFiles("CSharpCodeGenerator.ConApp.csproj", SearchOption.AllDirectories).FirstOrDefault();
+            var dirInfo = Directory.GetParent(path ?? dockerfile);
+            var fileInfo = dirInfo?.GetFiles("CSharpCodeGenerator.ConApp.csproj", SearchOption.AllDirectories).FirstOrDefault();
 
             return fileInfo?.FullName;
         }

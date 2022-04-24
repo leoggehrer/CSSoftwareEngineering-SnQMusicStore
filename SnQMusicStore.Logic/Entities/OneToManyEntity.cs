@@ -1,5 +1,6 @@
 ﻿//@CodeCopy
 //MdStart
+using System;
 using System.Linq;
 
 namespace SnQMusicStore.Logic.Entities
@@ -26,14 +27,10 @@ namespace SnQMusicStore.Logic.Entities
         }
         internal virtual void AddManyEntity(TManyEntity manyEntity)
         {
-            manyEntity.CheckArgument(nameof(manyEntity));
-
             ManyEntities.Add(manyEntity);
         }
         public virtual void AddManyItem(TMany manyItem)
         {
-            manyItem.CheckArgument(nameof(manyItem));
-
             var newSecond = new TManyEntity();
 
             newSecond.CopyProperties(manyItem);
@@ -41,8 +38,6 @@ namespace SnQMusicStore.Logic.Entities
         }
         public virtual void RemoveManyItem(TMany manyItem)
         {
-            manyItem.CheckArgument(nameof(manyItem));
-
             var item = ManyEntities.FirstOrDefault(i => i.Id == manyItem.Id);
 
             if (item != null)
@@ -61,7 +56,7 @@ namespace SnQMusicStore.Logic.Entities
                 if (OneEntity is VersionEntity ve)
                     result = ve.RowVersion;
 
-                return result;
+                return result ?? Array.Empty<byte>();
             }
             set
             {

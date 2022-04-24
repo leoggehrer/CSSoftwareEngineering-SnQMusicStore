@@ -1,8 +1,10 @@
 ﻿//@CodeCopy
 //MdStart
+using System;
+
 namespace SnQMusicStore.AspMvc.Models
 {
-    public abstract partial class CompositeModel<TConnector, TConnectorModel, TOne, TOneModel, TAnother, TAnotherModel> : IdentityModel
+    public abstract partial class CompositeModel<TConnector, TConnectorModel, TOne, TOneModel, TAnother, TAnotherModel> : IdentityModel, IThreePartView
         where TConnector : Contracts.IIdentifiable
         where TOne : Contracts.IIdentifiable
         where TAnother : Contracts.IIdentifiable
@@ -15,11 +17,11 @@ namespace SnQMusicStore.AspMvc.Models
 
         public virtual TOneModel OneModel { get; } = new TOneModel();
         public virtual TOne OneItem => OneModel;
-        public bool OneItemIncludeSave { get; set; }
+        public bool OneItemIncludeSave { get; set; } = true;
 
         public virtual TAnotherModel AnotherModel { get; } = new TAnotherModel();
         public virtual TAnother AnotherItem => AnotherModel;
-        public bool AnotherItemIncludeSave { get; set; }
+        public bool AnotherItemIncludeSave { get; set; } = true;
 
         public override int Id { get => ConnectorModel.Id; set => ConnectorModel.Id = value; }
         public byte[] RowVersion
@@ -28,10 +30,10 @@ namespace SnQMusicStore.AspMvc.Models
             {
                 var result = default(byte[]);
 
-                if (ConnectorModel is VersionModel ve)
-                    result = ve.RowVersion;
+                if (ConnectorModel is VersionModel vm)
+                    result = vm.RowVersion;
 
-                return result;
+                return result ?? Array.Empty<byte>();
             }
             set
             {
@@ -39,6 +41,10 @@ namespace SnQMusicStore.AspMvc.Models
                     ve.RowVersion = value;
             }
         }
+
+        public IdentityModel FirstModel => ConnectorModel;
+        public IdentityModel SecondModel => OneModel;
+        public IdentityModel ThirdModel => AnotherModel;
     }
 }
 //MdEnd

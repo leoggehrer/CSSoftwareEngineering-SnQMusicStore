@@ -16,26 +16,18 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         static partial void ClassConstructing();
         static partial void ClassConstructed();
 
-        private ModelObject model;
-        private ModelObject displayModel;
-        private IEnumerable<PropertyInfo> displayProperties;
+        private ModelObject? displayModel;
+        private IEnumerable<PropertyInfo>? displayProperties;
 
-        public ModelObject Model
-        {
-            get => model;
-            set
-            {
-                model = value ?? model;
-            }
-        }
+        public ModelObject Model { get; set; }
         public ModelObject DisplayModel
         {
-            get => displayModel ?? model;
+            get => displayModel ?? Model;
             set => displayModel = value;
         }
         public IEnumerable<PropertyInfo> DisplayProperties 
         {
-            get => displayProperties; 
+            get => displayProperties ?? Array.Empty<PropertyInfo>(); 
             set => displayProperties = value ?? displayProperties; 
         }
 
@@ -43,9 +35,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             : base(viewBagInfo, modelType, displayType)
         {
             Constructing();
-            model.CheckArgument(nameof(model));
-            displayProperties.CheckArgument(nameof(displayProperties));
-
             Model = model;
             DisplayProperties = displayProperties;
             Constructed();
@@ -57,35 +46,35 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             return DisplayProperties;
         }
 
-        public virtual object GetValue(PropertyInfo propertyInfo)
+        public virtual object? GetValue(PropertyInfo? propertyInfo)
         {
-            var handled = false;
+             var handled = false;
             var result = default(object);
 
             BeforeGetValue(propertyInfo, ref result, ref handled);
-            if (handled == false)
+            if (handled == false && propertyInfo != null)
             {
                 result = GetValue(DisplayModel, propertyInfo);
             }
             AfterGetValue(result);
             return result;
         }
-        partial void BeforeGetValue(PropertyInfo propertyInfo, ref object value, ref bool handled);
-        partial void AfterGetValue(Object value);
-        public virtual string GetDisplayValue(PropertyInfo propertyInfo)
+        partial void BeforeGetValue(PropertyInfo? propertyInfo, ref object? value, ref bool handled);
+        partial void AfterGetValue(object? value);
+        public virtual string GetDisplayValue(PropertyInfo? propertyInfo)
         {
             var handled = false;
             var result = string.Empty;
 
             BeforeGetDisplayValue(propertyInfo, ref result, ref handled);
-            if (handled == false)
+            if (handled == false && propertyInfo != null)
             {
                 result = GetDisplayValue(DisplayModel, propertyInfo);
             }
             AfterGetDisplayValue(result);
             return result;
         }
-        partial void BeforeGetDisplayValue(PropertyInfo propertyInfo, ref string value, ref bool handled);
+        partial void BeforeGetDisplayValue(PropertyInfo? propertyInfo, ref string value, ref bool handled);
         partial void AfterGetDisplayValue(string value);
     }
 }

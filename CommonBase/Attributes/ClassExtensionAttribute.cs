@@ -10,7 +10,7 @@ namespace CommonBase.Attributes
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public partial class ClassExtensionAttribute : Attribute
     {
-        public string MappingName { get; set; }
+        public string MappingName { get; set; } = string.Empty;
     }
 }
 //MdEnd

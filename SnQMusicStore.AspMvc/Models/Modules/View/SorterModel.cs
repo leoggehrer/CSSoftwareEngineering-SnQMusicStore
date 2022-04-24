@@ -16,17 +16,12 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public SorterModel(ISessionWrapper sessionInfo, IndexViewModel indexViewModel)
         {
-            sessionInfo.CheckArgument(nameof(sessionInfo));
-            indexViewModel.CheckArgument(nameof(indexViewModel));
-
             SessionInfo = sessionInfo;
             IndexViewModel = indexViewModel;
         }
 
         public virtual string GetId(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             if (ViewBagInfo.GetMappingProperty(propertyInfo.Name, out var property) == false)
             {
                 property = propertyInfo;
@@ -35,18 +30,16 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
             if (result.HasContent())
             {
-                result = $"{result}_{property.DeclaringType.Name}_{property.Name}";
+                result = $"{result}_{property?.DeclaringType?.Name}_{property?.Name}";
             }
             else
             {
-                result = $"{property.DeclaringType.Name}_{property.Name}";
+                result = $"{property?.DeclaringType?.Name}_{property?.Name}";
             }
             return result;
         }
         public virtual string GetName(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             if (ViewBagInfo.GetMappingProperty(propertyInfo.Name, out var property) == false)
             {
                 property = propertyInfo;
@@ -55,11 +48,11 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
             if (result.HasContent())
             {
-                result = $"{result}.{property.DeclaringType.Name}.{property.Name}";
+                result = $"{result}.{property?.DeclaringType?.Name}.{property?.Name}";
             }
             else
             {
-                result = $"{property.DeclaringType.Name}.{property.Name}";
+                result = $"{property?.DeclaringType?.Name}.{property?.Name}";
             }
             return result;
         }
@@ -72,14 +65,12 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             return $"{GetName(propertyInfo)}.{StaticLiterals.SortOperationPostfix}";
         }
 
-        public SelectList GetSortOperations(PropertyInfo propertyInfo)
+        public SelectList GetSortOperations(PropertyInfo? propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             var translate = ViewBagInfo.Translate;
             var operations = new List<SelectListItem>();
 
-            if (ViewBagInfo.GetMappingProperty(propertyInfo.Name, out var property) == false)
+            if (propertyInfo != null && ViewBagInfo.GetMappingProperty(propertyInfo.Name, out var property) == false)
             {
                 property = propertyInfo;
             }
@@ -91,8 +82,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         }
         public SorterValues GetSorterValues(IFormCollection formCollection)
         {
-            formCollection.CheckArgument(nameof(formCollection));
-
             var result = new SorterValues();
 
             foreach (var property in IndexViewModel.GetDisplayProperties())

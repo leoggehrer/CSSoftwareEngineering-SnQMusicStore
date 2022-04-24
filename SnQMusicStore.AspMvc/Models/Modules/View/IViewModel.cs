@@ -15,7 +15,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         string GetId(PropertyInfo propertyInfo);
         string GetLabel(PropertyInfo propertyInfo);
         string GetName(PropertyInfo propertyInfo);
-        object GetValue(object model, PropertyInfo propertyInfo);
+        object? GetValue(object model, PropertyInfo propertyInfo);
     }
 }
 //MdEnd

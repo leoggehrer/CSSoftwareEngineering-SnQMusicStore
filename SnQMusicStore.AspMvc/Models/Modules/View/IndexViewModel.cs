@@ -16,10 +16,10 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         }
         static partial void ClassConstructing();
         static partial void ClassConstructed();
-        private IEnumerable<IdentityModel> displayModels = null;
-        private IEnumerable<PropertyInfo> displayProperties = null;
-        private IEnumerable<PropertyInfo> filterProperties = null;
-        private IEnumerable<PropertyInfo> orderProperties = null;
+        private IEnumerable<IdentityModel>? displayModels = null;
+        private IEnumerable<PropertyInfo>? displayProperties = null;
+        private IEnumerable<PropertyInfo>? filterProperties = null;
+        private IEnumerable<PropertyInfo>? orderProperties = null;
 
         public IEnumerable<IdentityModel> Models { get; init; }
         public IEnumerable<IdentityModel> DisplayModels
@@ -74,8 +74,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         public IndexViewModel(ViewBagWrapper viewBagInfo, IEnumerable<IdentityModel> models, Type modelType, Type displayType)
             : base(viewBagInfo, modelType, displayType)
         {
-            models.CheckArgument(nameof(models));
-
             Constructing();
             Models = models;
             Constructed();
@@ -83,7 +81,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         partial void Constructing();
         partial void Constructed();
 
-        public virtual IEnumerable<PropertyInfo> GetHiddenProperties()
+        public virtual IEnumerable<PropertyInfo?> GetHiddenProperties()
         {
             return GetHiddenProperties(DisplayType);
         }
@@ -101,8 +99,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         }
         public virtual IEnumerable<PropertyInfo> GetSearchProperties(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new List<PropertyInfo>();
             var typeProperties = type.GetAllPropertyInfos();
 
@@ -130,8 +126,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         }
         public virtual IEnumerable<PropertyInfo> GetFilterProperties(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new List<PropertyInfo>();
             var typeProperties = type.GetAllPropertyInfos();
 
@@ -159,8 +153,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         }
         public virtual IEnumerable<PropertyInfo> GetOrderProperties(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new List<PropertyInfo>();
             var typeProperties = type.GetAllPropertyInfos();
 
@@ -187,13 +179,10 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             return result;
         }
 
-        public override object GetValue(object model, PropertyInfo propertyInfo)
+        public override object? GetValue(object model, PropertyInfo propertyInfo)
         {
-            model.CheckArgument(nameof(model));
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
-            bool handled = false;
-            object result = null;
+            var handled = false;
+            object? result = null;
 
             BeforeGetValue(model, propertyInfo, ref result, ref handled);
             if (handled == false)
@@ -203,25 +192,22 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             AfterGetValue(model, propertyInfo, result);
             return result;
         }
-        partial void BeforeGetValue(object model, PropertyInfo propertyInfo, ref object result, ref bool handled);
-        partial void AfterGetValue(object model, PropertyInfo propertyInfo, object result);
+        partial void BeforeGetValue(object model, PropertyInfo propertyInfo, ref object? result, ref bool handled);
+        partial void AfterGetValue(object model, PropertyInfo propertyInfo, object? result);
         public override string GetDisplayValue(object model, PropertyInfo propertyInfo)
         {
-            model.CheckArgument(nameof(model));
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
-            bool handled = false;
-            object result = null;
+            var handled = false;
+            object? result = null;
 
             BeforeGetDisplayValue(model, propertyInfo, ref result, ref handled);
-            if (handled == false)
+            if (handled == false || result == null)
             {
                 result = base.GetDisplayValue(model, propertyInfo);
             }
             AfterGetDisplayValue(model, propertyInfo, result);
-            return result != null ? result.ToString() : string.Empty;
+            return result?.ToString() ?? string.Empty;
         }
-        partial void BeforeGetDisplayValue(object model, PropertyInfo propertyInfo, ref object result, ref bool handled);
+        partial void BeforeGetDisplayValue(object model, PropertyInfo propertyInfo, ref object? result, ref bool handled);
         partial void AfterGetDisplayValue(object model, PropertyInfo propertyInfo, object result);
 
         public virtual IndexDisplayViewModel CreateDisplayViewModel(ModelObject model)

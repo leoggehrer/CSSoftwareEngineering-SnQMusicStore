@@ -35,7 +35,7 @@ namespace SnQMusicStore.AspMvc.Modules.Language
         partial void Constructing();
         partial void Constructed();
 
-        private static Translator instance = null;
+        private static Translator? instance = null;
         public static Translator Instance => instance ??= new Translator();
 
         protected List<Translation> translations = new();
@@ -98,7 +98,7 @@ namespace SnQMusicStore.AspMvc.Modules.Language
                     }
                     catch (Exception ex)
                     {
-                        ErrorHandler.LastLogicError = $"{System.Reflection.MethodBase.GetCurrentMethod().Name}: {ex.GetError()}";
+                        ErrorHandler.LastLogicError = $"{System.Reflection.MethodBase.GetCurrentMethod()?.Name}: {ex.GetError()}";
                         System.Diagnostics.Debug.WriteLine(ErrorHandler.LastLogicError);
                     }
                 }
@@ -136,8 +136,6 @@ namespace SnQMusicStore.AspMvc.Modules.Language
         }
         protected virtual string Translate(string key, string defaultValue)
         {
-            key.CheckArgument(nameof(key));
-
             LoadTranslations();
             var result = defaultValue;
             var translation = translations.FirstOrDefault(e => e.Key.Equals(key));

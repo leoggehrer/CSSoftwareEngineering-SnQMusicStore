@@ -3,21 +3,24 @@
     @using SnQMusicStore.AspMvc.Modules.View
     @model SnQMusicStore.AspMvc.Models.IdentityModel
 
-    var index = 0;
-    var viewBagInfo = Model.ViewBagInfo;
-    var editViewModel = ViewModelCreator.CreateEditViewModel(viewBagInfo, Model);
-
-    @foreach (var property in editViewModel.GetHiddenProperties())
+    if (Model != null)
     {
-        <input type="hidden" id="@editViewModel.GetId(property)" name="@editViewModel.GetName(property)" value="@editViewModel.GetDisplayValue(property)" />
-    }
+        var index = 0;
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var editViewModel = ViewModelCreator.CreateEditViewModel(viewBagInfo, Model);
 
-    @foreach (var item in editViewModel.GetDisplayProperties())
-    {
-        Model.ViewBagInfo.Index = index++;
-        Model.ViewBagInfo.Handled = false;
-        Model.ViewBagInfo.DisplayProperty = item;
-        @await Html.PartialAsync("_EditGroup", editViewModel)
+        @foreach (var property in editViewModel.GetHiddenProperties())
+        {
+            <input type="hidden" id="@editViewModel.GetId(property)" name="@editViewModel.GetName(property)" value="@editViewModel.GetDisplayValue(property)" />
+        }
+
+        @foreach (var item in editViewModel.GetDisplayProperties())
+        {
+            viewBagInfo.Index = index++;
+            viewBagInfo.Handled = false;
+            viewBagInfo.DisplayProperty = item;
+            @await Html.PartialAsync("_EditGroup", editViewModel)
+        }
     }
 }
 

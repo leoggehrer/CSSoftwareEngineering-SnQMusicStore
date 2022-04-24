@@ -45,8 +45,6 @@ namespace SolutionPreprocessorHelper.ConApp
 
         private static void PrintSolutionDirectives(params string[] excludeDirectives)
         {
-            excludeDirectives.CheckArgument(nameof(excludeDirectives));
-
             var path = SolutionAccessor.GetCurrentSolutionPath(nameof(SolutionPreprocessorHelper));
             var files = Directory.GetFiles(path, "*.cs", SearchOption.AllDirectories);
 
@@ -71,8 +69,6 @@ namespace SolutionPreprocessorHelper.ConApp
 
         private static int SetPreprocessorDirectivesInProjectFiles(params string[] directiveItems)
         {
-            directiveItems.CheckArgument(nameof(directiveItems));
-
             var path = SolutionAccessor.GetCurrentSolutionPath(nameof(SolutionPreprocessorHelper));
             var files = Directory.GetFiles(path, "*.csproj", SearchOption.AllDirectories);
             var directives = string.Join(";", directiveItems);
@@ -119,9 +115,6 @@ namespace SolutionPreprocessorHelper.ConApp
         }
         private static void EditPreprocessorDirectivesInRazorFiles(params string[] directiveItems)
         {
-            directiveItems.CheckArgument(nameof(directiveItems));
-
-
             foreach (var directive in directiveItems)
             {
                 var analyzeDirective = directive.ToUpper();
@@ -140,8 +133,6 @@ namespace SolutionPreprocessorHelper.ConApp
         }
         private static void SetPreprocessorDirectivesCommentsInRazorFiles(params string[] directiveItems)
         {
-            directiveItems.CheckArgument(nameof(directiveItems));
-
             var path = SolutionAccessor.GetCurrentSolutionPath(nameof(SolutionPreprocessorHelper));
             var files = Directory.GetFiles(path, "*.cshtml", SearchOption.AllDirectories);
 
@@ -196,8 +187,6 @@ namespace SolutionPreprocessorHelper.ConApp
         }
         private static void RemovePreprocessorDirectivesCommentsInRazorFiles(params string[] directiveItems)
         {
-            directiveItems.CheckArgument(nameof(directiveItems));
-
             var path = SolutionAccessor.GetCurrentSolutionPath(nameof(SolutionPreprocessorHelper));
             var files = Directory.GetFiles(path, "*.cshtml", SearchOption.AllDirectories);
 
@@ -244,8 +233,6 @@ namespace SolutionPreprocessorHelper.ConApp
         }
         private static void ReplacePreprocessorDirectivesInRazorFiles(params string[] directiveItems)
         {
-            directiveItems.CheckArgument(nameof(directiveItems));
-
             var path = SolutionAccessor.GetCurrentSolutionPath(nameof(SolutionPreprocessorHelper));
             var files = Directory.GetFiles(path, "*.cshtml", SearchOption.AllDirectories);
 

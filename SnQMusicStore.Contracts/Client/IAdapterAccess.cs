@@ -40,7 +40,7 @@ namespace SnQMusicStore.Contracts.Client
         /// </summary>
         /// <param name="id">The identification.</param>
         /// <returns>The element of the type T with the corresponding identification.</returns>
-        Task<T> GetByIdAsync(int id);
+        ValueTask<T?> GetByIdAsync(int id);
         /// <summary>
         /// Returns all interfaces of the entities in the collection.
         /// </summary>

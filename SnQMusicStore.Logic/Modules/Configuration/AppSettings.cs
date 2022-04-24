@@ -6,7 +6,7 @@ namespace SnQMusicStore.Logic.Modules.Configuration
 {
     public static partial class AppSettings
     {
-        private static IConfiguration configuration;
+        private static IConfiguration? configuration;
 
         private static IConfiguration Configuration
         {
@@ -16,14 +16,12 @@ namespace SnQMusicStore.Logic.Modules.Configuration
 
         public static void SetConfiguration(IConfiguration configuration)
         {
-            configuration.CheckArgument(nameof(configuration));
-
             Configuration = configuration;
         }
 
         public static string Get(string key)
         {
-            var result = default(string);
+            var result = string.Empty;
 
             if (Configuration != null)
             {
@@ -41,7 +39,7 @@ namespace SnQMusicStore.Logic.Modules.Configuration
             }
             return result;
         }
-        public static IConfigurationSection GetSection(string key)
+        public static IConfigurationSection? GetSection(string key)
         {
             var result = default(IConfigurationSection);
 

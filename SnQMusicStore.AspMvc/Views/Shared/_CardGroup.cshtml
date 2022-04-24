@@ -2,12 +2,13 @@
 @{
     @using SnQMusicStore.AspMvc.Models.Modules.Common
     @using SnQMusicStore.AspMvc.Models.Modules.View
+    @using SnQMusicStore.AspMvc.Modules.View
     @model IDisplayViewModel
 
     if (Model != null)
     {
         var index = 0;
-        var viewBagInfo = Model.ViewBagInfo;
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
 
         Model.DisplayModel.ViewBagInfo = viewBagInfo;
         <li class="list-group-item">

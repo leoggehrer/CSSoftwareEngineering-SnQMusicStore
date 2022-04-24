@@ -9,17 +9,12 @@
     @using SnQMusicStore.AspMvc.Modules.View
     @model IndexViewModel
 
-    var viewBagInfo = Model?.ViewBagInfo;
+    var viewBagInfo = Model?.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
     var sessionInfo = new SessionWrapper(Context.Session);
 
-    if (viewBagInfo == null)
-    {
-        viewBagInfo = new ViewBagWrapper(ViewBag);
-    }
-
     viewBagInfo.Translate = Translator.TranslateIt;
-    viewBagInfo.Controller = ViewContext.RouteData.Values["controller"].ToString();
-    viewBagInfo.Action = ViewContext.RouteData.Values["action"].ToString();
+    viewBagInfo.Controller = ViewContext.RouteData?.Values["controller"]?.ToString() ?? string.Empty;
+    viewBagInfo.Action = ViewContext.RouteData?.Values["action"]?.ToString() ?? string.Empty;
 
     ViewData["Title"] = viewBagInfo.Title;
     <div class="row">

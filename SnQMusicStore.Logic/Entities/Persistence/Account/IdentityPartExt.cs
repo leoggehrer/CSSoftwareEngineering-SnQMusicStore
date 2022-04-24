@@ -4,16 +4,13 @@
 
 namespace SnQMusicStore.Logic.Entities.Persistence.Account
 {
-    using CommonBase.Extensions;
     internal partial class Identity
     {
-        public byte[] PasswordHash { get; set; }
-        public byte[] PasswordSalt { get; set; }
+        public byte[] PasswordHash { get; set; } = System.Array.Empty<byte>();
+        public byte[] PasswordSalt { get; set; } = System.Array.Empty<byte>();
 
         public void CopyProperties(Identity identity)
         {
-            identity.CheckArgument(nameof(identity));
-
             CopyProperties(identity as Contracts.Persistence.Account.IIdentity);
 
             PasswordHash = identity.PasswordHash;

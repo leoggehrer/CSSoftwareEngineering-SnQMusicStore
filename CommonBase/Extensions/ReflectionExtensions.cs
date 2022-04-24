@@ -10,22 +10,22 @@ namespace CommonBase.Extensions
     {
         public static MethodBase GetAsyncOriginal(this MethodBase method)
         {
-            if (method != null
+            var result = default(MethodBase);
+
+            if (method.DeclaringType != null
                 && method.DeclaringType.GetInterfaces().Any(i => i == typeof(IAsyncStateMachine)))
             {
                 var generatedType = method.DeclaringType;
                 var originalType = generatedType.DeclaringType;
-                return originalType.GetMethods(BindingFlags.Instance
-                                             | BindingFlags.Static
-                                             | BindingFlags.Public
-                                             | BindingFlags.NonPublic
-                                             | BindingFlags.DeclaredOnly)
-                    .First(m => m.GetCustomAttribute<AsyncStateMachineAttribute>()?.StateMachineType == generatedType);
+
+                result = originalType?.GetMethods(BindingFlags.Instance
+                                                  | BindingFlags.Static
+                                                  | BindingFlags.Public
+                                                  | BindingFlags.NonPublic
+                                                  | BindingFlags.DeclaredOnly)
+                                      .First(m => m.GetCustomAttribute<AsyncStateMachineAttribute>()?.StateMachineType == generatedType);
             }
-            else
-            {
-                return method;
-            }
+            return result ?? method;
         }
     }
 }

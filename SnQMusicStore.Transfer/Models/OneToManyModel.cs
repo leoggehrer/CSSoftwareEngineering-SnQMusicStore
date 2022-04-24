@@ -1,5 +1,6 @@
 ﻿//@CodeCopy
 //MdStart
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -30,8 +31,6 @@ namespace SnQMusicStore.Transfer.Models
         }
         public virtual void AddManyItem(TMany manyItem)
         {
-            manyItem.CheckArgument(nameof(manyItem));
-
             var newDetail = new TManyModel();
 
             newDetail.CopyProperties(manyItem);
@@ -39,8 +38,6 @@ namespace SnQMusicStore.Transfer.Models
         }
         public virtual void RemoveManyItem(TMany manyItem)
         {
-            manyItem.CheckArgument(nameof(manyItem));
-
             var removeDetail = ManyModels.FirstOrDefault(i => i.Id == manyItem.Id);
 
             if (removeDetail != null)
@@ -59,7 +56,7 @@ namespace SnQMusicStore.Transfer.Models
                 if (OneModel is VersionModel ve)
                     result = ve.RowVersion;
 
-                return result;
+                return result ?? Array.Empty<byte>();
             }
             set
             {

@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace SnQMusicStore.Logic.DataContext
 {
-    internal partial class SnQMusicStoreDbContext : DbContext, IContext
+    internal partial class ProjectDbContext : DbContext, IContext
 	{
-		static SnQMusicStoreDbContext()
+		static ProjectDbContext()
 		{
 			ClassConstructing();
 			ConnectionString = CommonBase.Modules.Configuration.AppSettings.Configuration[StaticLiterals.EnvironmentConnectionStringKey];
@@ -27,7 +27,7 @@ namespace SnQMusicStore.Logic.DataContext
 		static partial void ClassConstructing();
 		static partial void ClassConstructed();
 
-		public SnQMusicStoreDbContext()
+		public ProjectDbContext()
 		{
 			Constructing();
 			Constructed();
@@ -37,28 +37,28 @@ namespace SnQMusicStore.Logic.DataContext
 
 		public static string ConnectionString { get; protected set; }
 
-		public EntityState GetEntityState<T>(T entity) => Entry(entity).State;
+		public EntityState GetEntityState<T>(T entity) => entity != null ? Entry(entity).State : EntityState.Unchanged;
 
 		public DbSet<E> Set<C, E>()
 			where C : IIdentifiable
 			where E : IdentityEntity, C
 		{
-			DbSet<E> result = null;
-
-			GetDbSet<C, E>(ref result);	
-			
-			return result;
-		}
-		IQueryable<E> IContext.QueryableSet<C, E>()
-		{
-			DbSet<E> result = null;
+			DbSet<E>? result = null;
 
 			GetDbSet<C, E>(ref result);
 
-			return result;
+			return result ?? Set<E>();
+		}
+		IQueryable<E> IContext.QueryableSet<C, E>()
+		{
+			DbSet<E>? result = null;
+
+			GetDbSet<C, E>(ref result);
+
+			return result ?? Set<E>();
 		}
 
-		partial void GetDbSet<C, E>(ref DbSet<E> dbSet) where E : class;
+		partial void GetDbSet<C, E>(ref DbSet<E>? dbSet) where E : class;
 
 		public Task<int> CountAsync<C, E>()
 			where C : IIdentifiable
@@ -73,11 +73,11 @@ namespace SnQMusicStore.Logic.DataContext
 			return Set<E>().Where(predicate).CountAsync();
 		}
 
-		public Task<E> GetByIdAsync<C, E>(int id)
+		public async ValueTask<E?> GetByIdAsync<C, E>(int id)
 			where C : IIdentifiable
 			where E : IdentityEntity, C
 		{
-			return Set<C, E>().FindAsync(id).AsTask();
+			return await Set<C, E>().FindAsync(id).ConfigureAwait(false);
 		}
 		public async Task<IEnumerable<E>> GetAllAsync<C, E>()
 			where C : IIdentifiable
@@ -126,7 +126,7 @@ namespace SnQMusicStore.Logic.DataContext
 		{
 			return Task.Run(() =>
 			{
-				E result = Set<E>().SingleOrDefault(i => i.Id == id);
+				var result = Set<E>().SingleOrDefault(i => i.Id == id);
 
 				if (result != null)
 				{

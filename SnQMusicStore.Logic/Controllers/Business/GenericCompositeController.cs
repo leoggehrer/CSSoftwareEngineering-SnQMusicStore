@@ -13,15 +13,15 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
     [Authorize(AllowModify = true)]
 #endif
-    internal abstract partial class GenericCompositeController<C, E, TConnector, TConnectorEntity, TOne, TOneEntity, TAnother, TAnotherEntity> : BusinessControllerAdapter<C, E>
-        where C : Contracts.IComposite<TConnector, TOne, TAnother>
-        where E : Entities.CompositeEntity<TConnector, TConnectorEntity, TOne, TOneEntity, TAnother, TAnotherEntity>, C, Contracts.ICopyable<C>, new()
-        where TConnector : Contracts.IIdentifiable, Contracts.ICopyable<TConnector>
-        where TConnectorEntity : Entities.IdentityEntity, TConnector, Contracts.ICopyable<TConnector>, new()
-        where TOne : Contracts.IIdentifiable, Contracts.ICopyable<TOne>
-        where TOneEntity : Entities.IdentityEntity, TOne, Contracts.ICopyable<TOne>, new()
-        where TAnother : Contracts.IIdentifiable, Contracts.ICopyable<TAnother>
-        where TAnotherEntity : Entities.IdentityEntity, TAnother, Contracts.ICopyable<TAnother>, new()
+    internal abstract partial class GenericCompositeController<TContract, TEntity, TConnectorContract, TConnectorEntity, TOneContract, TOneEntity, TAnotherContract, TAnotherEntity> : BusinessControllerAdapter<TContract, TEntity>
+        where TContract : Contracts.IComposite<TConnectorContract, TOneContract, TAnotherContract>
+        where TEntity : Entities.CompositeEntity<TConnectorContract, TConnectorEntity, TOneContract, TOneEntity, TAnotherContract, TAnotherEntity>, TContract, Contracts.ICopyable<TContract>, new()
+        where TConnectorContract : Contracts.IIdentifiable, Contracts.ICopyable<TConnectorContract>
+        where TConnectorEntity : Entities.IdentityEntity, TConnectorContract, Contracts.ICopyable<TConnectorContract>, new()
+        where TOneContract : Contracts.IIdentifiable, Contracts.ICopyable<TOneContract>
+        where TOneEntity : Entities.IdentityEntity, TOneContract, Contracts.ICopyable<TOneContract>, new()
+        where TAnotherContract : Contracts.IIdentifiable, Contracts.ICopyable<TAnotherContract>
+        where TAnotherEntity : Entities.IdentityEntity, TAnotherContract, Contracts.ICopyable<TAnotherContract>, new()
     {
         static GenericCompositeController()
         {
@@ -31,9 +31,9 @@ namespace SnQMusicStore.Logic.Controllers.Business
         static partial void ClassConstructing();
         static partial void ClassConstructed();
 
-        protected abstract GenericController<TConnector, TConnectorEntity> ConnectorEntityController { get; set; }
-        protected abstract GenericController<TOne, TOneEntity> OneEntityController { get; set; }
-        protected abstract GenericController<TAnother, TAnotherEntity> AnotherEntityController { get; set; }
+        protected abstract GenericController<TConnectorContract, TConnectorEntity> ConnectorEntityController { get; set; }
+        protected abstract GenericController<TOneContract, TOneEntity> OneEntityController { get; set; }
+        protected abstract GenericController<TAnotherContract, TAnotherEntity> AnotherEntityController { get; set; }
 
         public override bool IsTransient => true;
 
@@ -50,23 +50,23 @@ namespace SnQMusicStore.Logic.Controllers.Business
             Constructed();
         }
 
-        protected virtual PropertyInfo GetNavigationToOne()
+        protected virtual PropertyInfo? GetNavigationToOne()
         {
-            return typeof(TConnector).GetInterfaceProperty(typeof(TOneEntity).Name);
+            return typeof(TConnectorEntity).GetProperty(typeof(TOneEntity).Name);
         }
-        protected virtual PropertyInfo GetNavigationToAnother()
+        protected virtual PropertyInfo? GetNavigationToAnother()
         {
-            return typeof(TConnector).GetInterfaceProperty(typeof(TAnotherEntity).Name);
+            return typeof(TConnectorEntity).GetProperty(typeof(TAnotherEntity).Name);
         }
-        protected virtual PropertyInfo GetForeignKeyToOne()
+        protected virtual PropertyInfo? GetForeignKeyToOne()
         {
-            return typeof(TConnector).GetInterfaceProperty($"{typeof(TOneEntity).Name}Id");
+            return typeof(TConnectorContract).GetInterfaceProperty($"{typeof(TOneEntity).Name}Id");
         }
-        protected virtual PropertyInfo GetForeignKeyToAnother()
+        protected virtual PropertyInfo? GetForeignKeyToAnother()
         {
-            return typeof(TConnector).GetInterfaceProperty($"{typeof(TAnotherEntity).Name}Id");
+            return typeof(TConnectorContract).GetInterfaceProperty($"{typeof(TAnotherEntity).Name}Id");
         }
-        protected virtual async Task LoadChildsAsync(E entity)
+        protected virtual async Task LoadChildsAsync(TEntity entity)
         {
             var piOneFK = GetForeignKeyToOne();
             var piAnotherFK = GetForeignKeyToAnother();
@@ -77,12 +77,7 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
                 if (value != null)
                 {
-                    var child = await OneEntityController.GetEntityByIdAsync((int)Convert.ChangeType(value, piOneFK.PropertyType)).ConfigureAwait(false);
-
-                    if (child != null)
-                    {
-                        entity.OneEntity.CopyProperties(child);
-                    }
+                    entity.OneEntity = await OneEntityController.GetEntityByIdAsync((int)Convert.ChangeType(value, piOneFK.PropertyType)).ConfigureAwait(false);
                 }
             }
             if (piAnotherFK != null)
@@ -91,12 +86,7 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
                 if (value != null)
                 {
-                    var child = await AnotherEntityController.GetEntityByIdAsync((int)Convert.ChangeType(value, piAnotherFK.PropertyType)).ConfigureAwait(false);
-
-                    if (child != null)
-                    {
-                        entity.AnotherEntity.CopyProperties(child);
-                    }
+                    entity.AnotherEntity = await AnotherEntityController.GetEntityByIdAsync((int)Convert.ChangeType(value, piAnotherFK.PropertyType)).ConfigureAwait(false);
                 }
             }
         }
@@ -104,24 +94,26 @@ namespace SnQMusicStore.Logic.Controllers.Business
         #region Count
         internal override Task<int> ExecuteCountAsync()
         {
-            return OneEntityController.ExecuteCountAsync();
+            return ConnectorEntityController.ExecuteCountAsync();
         }
         internal override Task<int> ExecuteCountByAsync(string predicate)
         {
-            return OneEntityController.ExecuteCountByAsync(predicate);
+            return ConnectorEntityController.ExecuteCountByAsync(predicate);
         }
         #endregion Count
 
         #region Query
-        internal override async Task<E> ExecuteGetEntityByIdAsync(int id)
+        internal override async ValueTask<TEntity?> ExecuteGetEntityByIdAsync(int id)
         {
-            E result;
-            var entity = await ConnectorEntityController.GetEntityByIdAsync(id).ConfigureAwait(false);
+            TEntity result;
+            var entity = await ConnectorEntityController.ExecuteGetEntityByIdAsync(id).ConfigureAwait(false);
 
             if (entity != null)
             {
-                result = new E();
-                result.ConnectorEntity.CopyProperties(entity);
+                result = new TEntity
+                {
+                    ConnectorEntity = entity
+                };
                 await LoadChildsAsync(result).ConfigureAwait(false);
             }
             else
@@ -130,14 +122,14 @@ namespace SnQMusicStore.Logic.Controllers.Business
             }
             return result;
         }
-        internal override async Task<IEnumerable<E>> ExecuteGetEntityAllAsync()
+        internal override async Task<IEnumerable<TEntity>> ExecuteGetEntityAllAsync()
         {
-            var result = new List<E>();
-            var query = await ConnectorEntityController.GetEntityAllAsync().ConfigureAwait(false);
+            var result = new List<TEntity>();
+            var query = await ConnectorEntityController.ExecuteGetEntityAllAsync().ConfigureAwait(false);
 
             foreach (var item in query)
             {
-                var entity = new E();
+                var entity = new TEntity();
 
                 entity.ConnectorEntity.CopyProperties(item);
                 await LoadChildsAsync(entity).ConfigureAwait(false);
@@ -146,14 +138,112 @@ namespace SnQMusicStore.Logic.Controllers.Business
             }
             return result;
         }
-        internal override async Task<IEnumerable<E>> ExecuteQueryEntityAllAsync(string predicate)
+        internal override async Task<IEnumerable<TEntity>> ExecuteGetEntityAllAsync(string orderBy)
         {
-            var result = new List<E>();
-            var query = await ConnectorEntityController.QueryEntityAllAsync(predicate).ConfigureAwait(false);
+            var result = new List<TEntity>();
+            var query = await ConnectorEntityController.ExecuteGetEntityAllAsync(orderBy).ConfigureAwait(false);
 
             foreach (var item in query)
             {
-                var entity = new E();
+                var entity = new TEntity();
+
+                entity.ConnectorEntity.CopyProperties(item);
+                await LoadChildsAsync(entity).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+
+        internal override async Task<IEnumerable<TEntity>> ExecuteGetEntityPageListAsync(int pageIndex, int pageSize)
+        {
+            var result = new List<TEntity>();
+            var query = await ConnectorEntityController.ExecuteGetEntityPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new TEntity();
+
+                entity.ConnectorEntity.CopyProperties(item);
+                await LoadChildsAsync(entity).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+        internal override async Task<IEnumerable<TEntity>> ExecuteGetEntityPageListAsync(string orderBy, int pageIndex, int pageSize)
+        {
+            var result = new List<TEntity>();
+            var query = await ConnectorEntityController.ExecuteGetEntityPageListAsync(orderBy, pageIndex, pageSize).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new TEntity();
+
+                entity.ConnectorEntity.CopyProperties(item);
+                await LoadChildsAsync(entity).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+
+        internal override async Task<IEnumerable<TEntity>> ExecuteQueryEntityAllAsync(string predicate)
+        {
+            var result = new List<TEntity>();
+            var query = await ConnectorEntityController.ExecuteQueryEntityAllAsync(predicate).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new TEntity();
+
+                entity.ConnectorEntity.CopyProperties(item);
+                await LoadChildsAsync(entity).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+        internal override async Task<IEnumerable<TEntity>> ExecuteQueryEntityAllAsync(string predicate, string orderBy)
+        {
+            var result = new List<TEntity>();
+            var query = await ConnectorEntityController.ExecuteQueryEntityAllAsync(predicate, orderBy).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new TEntity();
+
+                entity.ConnectorEntity.CopyProperties(item);
+                await LoadChildsAsync(entity).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+        internal override async Task<IEnumerable<TEntity>> ExecuteQueryEntityPageListAsync(string predicate, int pageIndex, int pageSize)
+        {
+            var result = new List<TEntity>();
+            var query = await ConnectorEntityController.ExecuteQueryEntityPageListAsync(predicate, pageIndex, pageSize).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new TEntity();
+
+                entity.ConnectorEntity.CopyProperties(item);
+                await LoadChildsAsync(entity).ConfigureAwait(false);
+
+                result.Add(entity);
+            }
+            return result;
+        }
+        internal override async Task<IEnumerable<TEntity>> ExecuteQueryEntityPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize)
+        {
+            var result = new List<TEntity>();
+            var query = await ConnectorEntityController.ExecuteQueryEntityPageListAsync(predicate, orderBy, pageIndex, pageSize).ConfigureAwait(false);
+
+            foreach (var item in query)
+            {
+                var entity = new TEntity();
 
                 entity.ConnectorEntity.CopyProperties(item);
                 await LoadChildsAsync(entity).ConfigureAwait(false);
@@ -165,13 +255,8 @@ namespace SnQMusicStore.Logic.Controllers.Business
         #endregion Query
 
         #region Insert
-        internal override async Task<E> ExecuteInsertEntityAsync(E entity)
+        internal override async Task<TEntity> ExecuteInsertEntityAsync(TEntity entity)
         {
-            entity.CheckArgument(nameof(entity));
-            entity.ConnectorEntity.CheckArgument(nameof(entity.ConnectorEntity));
-            entity.OneEntity.CheckArgument(nameof(entity.OneEntity));
-            entity.AnotherEntity.CheckArgument(nameof(entity.AnotherEntity));
-
             if (entity.OneItemIncludeSave)
             {
                 if (entity.OneEntity.Id == 0)
@@ -215,12 +300,8 @@ namespace SnQMusicStore.Logic.Controllers.Business
         #endregion Insert
 
         #region Update
-        internal override async Task<E> ExecuteUpdateEntityAsync(E entity)
+        internal override async Task<TEntity> ExecuteUpdateEntityAsync(TEntity entity)
         {
-            entity.CheckArgument(nameof(entity));
-            entity.OneEntity.CheckArgument(nameof(entity.OneEntity));
-            entity.AnotherEntity.CheckArgument(nameof(entity.AnotherEntity));
-
             if (entity.OneItemIncludeSave)
             {
                 if (entity.OneEntity.Id == 0)
@@ -264,7 +345,7 @@ namespace SnQMusicStore.Logic.Controllers.Business
         #endregion Update
 
         #region Delete
-        internal override async Task ExecuteDeleteEntityAsync(E entity)
+        internal override async Task ExecuteDeleteEntityAsync(TEntity entity)
         {
             await ConnectorEntityController.DeleteEntityAsync(entity.ConnectorEntity).ConfigureAwait(false);
         }

@@ -11,14 +11,16 @@ namespace CommonBase
 
 		public static string[] ProjectExtensions { get; } = new string[]
 		{
-			".Contracts",
-			".Logic",
-			".Transfer",
-			".WebApi",
 			".Adapters",
 			".AspMvc",
+			".BlazorServerApp",
+			".ConApp",
+			".Contracts",
+			".Logic",
 			".Logic.UnitTest",
-			".ConApp"
+			".TelerikBlazorServerApp",
+			".Transfer",
+			".WebApi",
 		};
 		public static string[] GeneratorProjects { get; } = new string[]
 		{
@@ -53,6 +55,9 @@ namespace CommonBase
 		public static string IgnoreLabel => "@Ignore";
 		public static string BaseCodeLabel => "@BaseCode";
 		public static string CodeCopyLabel => "@CodeCopy";
+
+		public static string NullableEnableLabel => "#nullable enable";
+		public static string NullableDisableLabel => "#nullable disable";
 	}
 }
 //MdEnd

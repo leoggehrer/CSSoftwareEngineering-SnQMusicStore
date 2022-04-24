@@ -17,7 +17,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence.Account
         }
         public static string ClearRoleDesignation(string name)
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
 
             if (name.HasContent())
             {
@@ -29,7 +29,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence.Account
                     }
                 }
             }
-            return result.Length > 0 ? result.ToString() : null;
+            return result.Length > 0 ? result.ToString() : string.Empty;
         }
     }
 }

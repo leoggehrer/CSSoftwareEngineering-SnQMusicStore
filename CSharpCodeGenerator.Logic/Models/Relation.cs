@@ -14,10 +14,6 @@ namespace CSharpCodeGenerator.Logic.Models
 
         public Relation(Type from, Type to, PropertyInfo reference)
         {
-            from.CheckArgument(nameof(from));
-            to.CheckArgument(nameof(to));
-            reference.CheckArgument(nameof(reference));
-
             From = from;
             To = to;
             Reference = reference;

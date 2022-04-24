@@ -51,10 +51,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         protected ViewModel(ViewBagWrapper viewBagInfo, Type modelType, Type displayType)
         {
-            viewBagInfo.CheckArgument(nameof(viewBagInfo));
-            modelType.CheckArgument(nameof(modelType));
-            displayType.CheckArgument(nameof(displayType));
-
             Constructing();
             ViewBagInfo = viewBagInfo;
             ModelType = modelType;
@@ -74,17 +70,19 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         }
         public virtual IEnumerable<PropertyInfo> GetHiddenProperties(Type type)
         {
-            type.CheckArgument(nameof(type));
+            var result = new List<PropertyInfo>();
 
-            return AllHiddenNames.Select(n => ViewBagInfo.GetMapping(n))
-                                 .Select(n => type.GetProperty(n))
-                                 .Where(p => p != null && p.CanRead)
-                                 .ToArray();
+            foreach (PropertyInfo? property in AllHiddenNames.Select(n => ViewBagInfo.GetMapping(n)).Select(mn => type.GetProperty(mn)))
+            {
+                if (property != null && property.CanRead)
+                {
+                    result.Add(property);
+                }
+            }
+            return result;
         }
         public virtual IEnumerable<PropertyInfo> GetDisplayProperties(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new List<PropertyInfo>();
             var typeProperties = type.GetAllPropertyInfos();
 
@@ -113,32 +111,23 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public virtual string GetId(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             var itemPrefix = ViewBagInfo.ItemPrefix;
 
             return string.IsNullOrEmpty(itemPrefix) ? propertyInfo.Name : $"{itemPrefix}_{propertyInfo.Name}";
         }
         public virtual string GetName(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             var itemPrefix = ViewBagInfo.ItemPrefix;
 
             return string.IsNullOrEmpty(itemPrefix) ? propertyInfo.Name : $"{itemPrefix}.{propertyInfo.Name}";
         }
-        public virtual string GetLabel(PropertyInfo propertyInfo)
+        public virtual string GetLabel(PropertyInfo? propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
-            return propertyInfo.Name;
+            return propertyInfo?.Name ?? String.Empty;
         }
 
-        public virtual object GetValue(Object model, PropertyInfo propertyInfo)
+        public virtual object? GetValue(object model, PropertyInfo propertyInfo)
         {
-            model.CheckArgument(nameof(model));
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             var handled = false;
             var result = default(object);
 
@@ -150,15 +139,12 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             AfterGetValue(model, result);
             return result;
         }
-        partial void BeforeGetValue(Object model, PropertyInfo propertyInfo, ref object value, ref bool handled);
-        partial void AfterGetValue(Object model, Object value);
-        public virtual string GetDisplayValue(Object model, PropertyInfo propertyInfo)
+        partial void BeforeGetValue(object model, PropertyInfo propertyInfo, ref object? value, ref bool handled);
+        partial void AfterGetValue(object model, object? value);
+        public virtual string GetDisplayValue(object model, PropertyInfo propertyInfo)
         {
-            model.CheckArgument(nameof(model));
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             var handled = false;
-            var result = string.Empty;
+            var result = default(string);
 
             BeforeGetDisplayValue(model, propertyInfo, ref result, ref handled);
             if (handled == false)
@@ -175,10 +161,10 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
                 }
             }
             AfterGetDisplayValue(model, result);
-            return result;
+            return result ?? string.Empty;
         }
-        partial void BeforeGetDisplayValue(Object model, PropertyInfo propertyInfo, ref string value, ref bool handled);
-        partial void AfterGetDisplayValue(Object model, string value);
+        partial void BeforeGetDisplayValue(object model, PropertyInfo propertyInfo, ref string? value, ref bool handled);
+        partial void AfterGetDisplayValue(object model, string? value);
 
     }
 }

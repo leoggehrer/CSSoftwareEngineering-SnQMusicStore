@@ -18,7 +18,7 @@ namespace SnQMusicStore.Contracts.Client
         Task<ILoginSession> LogonAsync(string email, string password);
         Task<ILoginSession> LogonAsync(string email, string password, string optionalInfo);
         Task LogoutAsync(string sessionToken);
-        Task<ILoginSession> QueryLoginAsync(string sessionToken);
+        Task<ILoginSession?> QueryLoginAsync(string sessionToken);
         Task<IEnumerable<string>> QueryRolesAsync(string sessionToken);
         Task ResetFailedCountForAsync(string sessionToken, string email);
     }

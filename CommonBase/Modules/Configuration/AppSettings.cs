@@ -6,7 +6,7 @@ namespace CommonBase.Modules.Configuration
 {
     public partial class AppSettings
     {
-        private static IConfiguration configuration;
+        private static IConfiguration? configuration;
 
         public static IConfiguration Configuration
         {
@@ -14,7 +14,7 @@ namespace CommonBase.Modules.Configuration
             set => configuration = value;
         }
 
-        public static string Get(string key)
+        public static string? Get(string key)
         {
             var result = default(string);
 
@@ -24,7 +24,7 @@ namespace CommonBase.Modules.Configuration
             }
             return result;
         }
-        public static IConfigurationSection GetSection(string key)
+        public static IConfigurationSection? GetSection(string key)
         {
             var result = default(IConfigurationSection);
 

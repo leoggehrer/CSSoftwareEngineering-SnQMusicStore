@@ -16,8 +16,6 @@ namespace CommonBase.Extensions
         }
         public static IEnumerable<string> FormatCSharpCode(this IEnumerable<string> lines, int indent, bool removeBlockComments, bool removeLineComments)
         {
-            lines.CheckArgument(nameof(lines));
-
             var result = new List<string>();
             var text = lines.ToText();
 
@@ -47,8 +45,6 @@ namespace CommonBase.Extensions
         #region Helpers
         private static string RemoveLineComments(this string source)
         {
-            source.CheckArgument(nameof(source));
-
             var sb = new StringBuilder();
             int idx = 0, sIdx = 0, eIdx = -1;
 
@@ -81,8 +77,6 @@ namespace CommonBase.Extensions
         }
         private static string RemoveBlockComments(this string source)
         {
-            source.CheckArgument(nameof(source));
-
             var sb = new StringBuilder();
             int idx = 0, sIdx = 0, eIdx = -1;
 
@@ -187,8 +181,6 @@ namespace CommonBase.Extensions
 
         private static IEnumerable<string> SplitSourceLine(this string line)
         {
-            line.CheckArgument(nameof(line));
-
             var result = new List<string>();
             var splitLines = line.Split("\r\n", StringSplitOptions.RemoveEmptyEntries);
 
@@ -210,8 +202,6 @@ namespace CommonBase.Extensions
         }
         private static IEnumerable<string> SplitCSharpAssignments(this string line)
         {
-            line.CheckArgument(nameof(line));
-
             var result = new List<string>();
             var startIdx = -1;
             var partialStartIdx = -1;
@@ -240,8 +230,6 @@ namespace CommonBase.Extensions
         }
         private static IEnumerable<string> SplitCSharpLine(this string line)
         {
-            line.CheckArgument(nameof(line));
-
             var result = new List<string>();
             var lines = new List<string>(line.SplitSourceLine());
             string blockBegin = "/*", blockEnd = "*/";
@@ -317,8 +305,6 @@ namespace CommonBase.Extensions
         }
         private static IEnumerable<string> SplitCSharpLine(this string line, char left, char right)
         {
-            line.CheckArgument(nameof(line));
-
             var lastIdx = -1;
             var startIdx = -1;
             var result = new List<string>();
@@ -357,20 +343,14 @@ namespace CommonBase.Extensions
 
         private static bool IsAssignmentSemicolon(string text, int pos)
         {
-            text.CheckArgument(nameof(text));
-
             return IsLiteralCharacter(text, pos) == false && IsSourceString(text, pos) == false;
         }
         private static bool IsLiteralCharacter(string text, int pos)
         {
-            text.CheckArgument(nameof(text));
-
             return pos > 0 && pos + 1 < text.Length && text[pos - 1] == '\'' && text[pos + 1] == '\'';
         }
         private static bool IsSourceString(string text, int pos)
         {
-            text.CheckArgument(nameof(text));
-
             var limiterCount = 0;
 
             for (var i = 0; i < pos && i < text.Length; i++)
@@ -383,9 +363,6 @@ namespace CommonBase.Extensions
 
         private static void FormatCSharpCodeBlock(this string text, int indent, List<string> lines)
         {
-            text.CheckArgument(nameof(text));
-            lines.CheckArgument(nameof(lines));
-
             var beginPos = 0;
             var endPos = 0;
 

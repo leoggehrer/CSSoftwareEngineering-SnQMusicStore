@@ -21,8 +21,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         public EditViewModel(ViewBagWrapper viewBagInfo, IdentityModel model, Type modelType, Type displayType)
             : base(viewBagInfo, modelType, displayType)
         {
-            model.CheckArgument(nameof(model));
-
             Constructing();
             Model = model;
             Constructed();
@@ -38,7 +36,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         {
             return GetDisplayProperties(DisplayType);
         }
-        public virtual object GetValue(PropertyInfo propertyInfo)
+        public virtual object? GetValue(PropertyInfo propertyInfo)
         {
             return GetValue(Model, propertyInfo);
         }

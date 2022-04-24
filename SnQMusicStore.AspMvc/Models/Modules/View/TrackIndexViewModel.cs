@@ -17,7 +17,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public override string GetDisplayValue(object model, PropertyInfo propertyInfo)
         {
-            string result;
+            string? result;
 
             if (propertyInfo.Name.Equals(nameof(Track.GenreId)))
             {
@@ -31,7 +31,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             {
                 result = base.GetDisplayValue(model, propertyInfo);
             }
-            return result;
+            return result ?? string.Empty;
         }
         public override IndexDisplayViewModel CreateDisplayViewModel(ModelObject model)
         {

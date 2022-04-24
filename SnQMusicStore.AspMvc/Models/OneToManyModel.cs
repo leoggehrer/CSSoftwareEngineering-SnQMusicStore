@@ -21,7 +21,7 @@ namespace SnQMusicStore.AspMvc.Models
                 if (OneModel is VersionModel ve)
                     result = ve.RowVersion;
 
-                return result;
+                return result ?? Array.Empty<byte>();
             }
             set
             {
@@ -42,8 +42,6 @@ namespace SnQMusicStore.AspMvc.Models
         }
         public virtual void AddManyItem(TMany manyItem)
         {
-            manyItem.CheckArgument(nameof(manyItem));
-
             var newDetail = new TManyModel();
 
             newDetail.CopyProperties(manyItem);
@@ -51,8 +49,6 @@ namespace SnQMusicStore.AspMvc.Models
         }
         public virtual void RemoveManyItem(TMany manyItem)
         {
-            manyItem.CheckArgument(nameof(manyItem));
-
             var removeDetail = ManyModels.FirstOrDefault(i => i.Id == manyItem.Id);
 
             if (removeDetail != null)
@@ -68,11 +64,9 @@ namespace SnQMusicStore.AspMvc.Models
         public virtual TManyModel CreateManyModel() => new();
         public virtual void AddManyModel(TManyModel manyModel)
         {
-            manyModel.CheckArgument(nameof(manyModel));
-
             ManyModels.Add(manyModel);
         }
-        public virtual TManyModel GetManyModelById(int id) => ManyModels.FirstOrDefault(x => x.Id == id);
+        public virtual TManyModel? GetManyModelById(int id) => ManyModels.FirstOrDefault(x => x.Id == id);
         public void RemoveManyModel(int id)
         {
             var removeDetail = ManyModels.FirstOrDefault(i => i.Id == id);
@@ -90,8 +84,20 @@ namespace SnQMusicStore.AspMvc.Models
 
         public void ClearDetails() => ClearManyItems();
         public IdentityModel CreateDetail() => new TManyModel();
-        public void AddDetail(IdentityModel model) => ManyModels.Add(model as TManyModel);
-        public void RemoveDetail(IdentityModel model) => ManyModels.Remove(model as TManyModel);
+        public void AddDetail(IdentityModel model)
+        {
+            if (model is TManyModel mm)
+            {
+                ManyModels.Add(mm);
+            }
+        }
+        public void RemoveDetail(IdentityModel model)
+        {
+            if (model is TManyModel mm)
+            {
+                ManyModels.Remove(mm);
+            }
+        }
         public void RemoveDetailById(int id)
         {
             var manyModel = ManyModels.FirstOrDefault(e => e.Id == id);

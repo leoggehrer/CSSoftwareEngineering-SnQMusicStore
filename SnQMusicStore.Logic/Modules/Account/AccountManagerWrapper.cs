@@ -38,7 +38,7 @@ namespace SnQMusicStore.Logic.Modules.Account
         {
             return AccountManager.HasRoleAsync(sessionToken, role);
         }
-        public Task<ILoginSession> QueryLoginAsync(string sessionToken)
+        public Task<ILoginSession?> QueryLoginAsync(string sessionToken)
         {
             return AccountManager.QueryLoginAsync(sessionToken);
         }

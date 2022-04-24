@@ -29,11 +29,9 @@ namespace CommonBase.Extensions
         /// Otherwise just the raw name as string.</returns>
         public static string Description(this Enum value)
         {
-            value.CheckArgument(nameof(value));
-
             string description = value.ToString();
-            FieldInfo fieldInfo = value.GetType().GetField(description);
-            DescriptionAttribute[] attributes = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+            FieldInfo? fieldInfo = value.GetType().GetField(description);
+            DescriptionAttribute[]? attributes = (DescriptionAttribute[]?)fieldInfo?.GetCustomAttributes(typeof(DescriptionAttribute), false);
 
             if (attributes != null && attributes.Length > 0)
             {
@@ -91,9 +89,7 @@ namespace CommonBase.Extensions
             var type = typeof(T);
 
             if (type.IsEnum == false)
-            {
                 throw new ArgumentException("T must be an enum");
-            }
 
             foreach (var field in type.GetFields())
             {
@@ -101,14 +97,18 @@ namespace CommonBase.Extensions
                 {
                     if (attribute.Description.Equals(description))
                     {
-                        return (T)field.GetValue(null);
+                        var value = field.GetValue(null);
+
+                        return value != null ? (T)value : default;
                     }
                 }
                 else
                 {
                     if (field.Name.Equals(description))
                     {
-                        return (T)field.GetValue(null);
+                        var value = field.GetValue(null);
+
+                        return value != null ? (T)value : default;
                     }
                 }
             }

@@ -34,7 +34,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         {
             Session.Set<object>(key, value);
         }
-        public object GetValue(string key)
+        public object? GetValue(string key)
         {
             return Session.Get<object>(key);
         }
@@ -52,11 +52,11 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         #endregion Int-Access
 
         #region String-Access
-        public void SetStringValue(string key, string value)
+        public void SetStringValue(string key, string? value)
         {
             Session.Set<string>(key, value);
         }
-        public string GetStringValue(string key)
+        public string? GetStringValue(string key)
         {
             return Session.Get<string>(key);
         }
@@ -69,7 +69,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         #endregion String-Access
 
         #region Properties
-        public string ReturnUrl
+        public string? ReturnUrl
         {
             get
             {
@@ -77,10 +77,10 @@ namespace SnQMusicStore.AspMvc.Modules.Session
             }
             set
             {
-                SetStringValue(nameof(ReturnUrl), value);
+                SetStringValue(nameof(ReturnUrl), value ?? string.Empty);
             }
         }
-        public string ReturnController
+        public string? ReturnController
         {
             get
             {
@@ -91,7 +91,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
                 SetStringValue(nameof(ReturnController), value);
             }
         }
-        public string ReturnAction
+        public string? ReturnAction
         {
             get
             {
@@ -102,7 +102,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
                 SetStringValue(nameof(ReturnAction), value);
             }
         }
-        public string Hint
+        public string? Hint
         {
             get
             {
@@ -113,7 +113,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
                 SetStringValue(nameof(Hint), value);
             }
         }
-        public string Error
+        public string? Error
         {
             get
             {
@@ -133,7 +133,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         }
         public string GetSearchValue(string controllerName)
         {
-            return GetStringValue($"{StaticLiterals.SearchFilterKeyPrefix}{controllerName}");
+            return GetStringValue($"{StaticLiterals.SearchFilterKeyPrefix}{controllerName}") ?? string.Empty;
         }
         public void SetFilterPredicate(string controllerName, string value)
         {
@@ -141,13 +141,13 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         }
         public string GetFilterPredicate(string controllerName)
         {
-            return GetStringValue($"{StaticLiterals.FilterPredicateKeyPrefix}{controllerName}");
+            return GetStringValue($"{StaticLiterals.FilterPredicateKeyPrefix}{controllerName}") ?? string.Empty;
         }
         public void SetFilterModel(string controllerName, FilterModel filterModel)
         {
             Session.Set<FilterModel>($"{StaticLiterals.FilterModelKey}{controllerName}", filterModel);
         }
-        public FilterModel GetFilterModel(string controllerName)
+        public FilterModel? GetFilterModel(string controllerName)
         {
             return Session.Get<FilterModel>($"{StaticLiterals.FilterModelKey}{controllerName}");
         }
@@ -155,7 +155,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         {
             Session.Set<FilterValues>($"{StaticLiterals.FilterValuesKey}{controllerName}", filterValues);
         }
-        public FilterValues GetFilterValues(string controllerName)
+        public FilterValues? GetFilterValues(string controllerName)
         {
             return Session.Get<FilterValues>($"{StaticLiterals.FilterValuesKey}{controllerName}");
         }
@@ -166,7 +166,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         {
             Session.Set<SorterValues>($"{StaticLiterals.SorterValuesKey}{controllerName}", sorterValues);
         }
-        public SorterValues GetSorterValues(string controllerName)
+        public SorterValues? GetSorterValues(string controllerName)
         {
             return Session.Get<SorterValues>($"{StaticLiterals.SorterValuesKey}{controllerName}");
         }
@@ -213,7 +213,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
 
 #if ACCOUNT_ON
         #region Authentication
-        public Models.Persistence.Account.LoginSession LoginSession
+        public Models.Persistence.Account.LoginSession? LoginSession
         {
             get => Session.Get<Models.Persistence.Account.LoginSession>(nameof(LoginSession));
             set => Session.Set(nameof(LoginSession), value);

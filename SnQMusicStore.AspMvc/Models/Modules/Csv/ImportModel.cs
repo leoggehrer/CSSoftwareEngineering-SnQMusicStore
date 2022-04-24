@@ -8,7 +8,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.Csv
     {
         public ImportAction Action { get; set; }
         public int Id { get; set; }
-        public T Model { get; set; }
+        public T? Model { get; set; }
     }
 }
 //MdEnd

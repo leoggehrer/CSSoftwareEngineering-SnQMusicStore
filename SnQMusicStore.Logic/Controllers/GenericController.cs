@@ -11,9 +11,9 @@ using System.Reflection;
 
 namespace SnQMusicStore.Logic.Controllers
 {
-    internal abstract partial class GenericController<C, E> : ControllerObject, Contracts.Client.IControllerAccess<C>
-        where C : Contracts.IIdentifiable
-        where E : Entities.IdentityEntity, C, Contracts.ICopyable<C>, new()
+    internal abstract partial class GenericController<TContact, TEntity> : ControllerObject, Contracts.Client.IControllerAccess<TContact>
+        where TContact : Contracts.IIdentifiable
+        where TEntity : Entities.IdentityEntity, TContact, Contracts.ICopyable<TContact>, new()
     {
         #region Class-Constructors
         static GenericController()
@@ -46,20 +46,16 @@ namespace SnQMusicStore.Logic.Controllers
         #endregion Instance-Constructors
 
         #region Converter
-        protected virtual E ConvertTo(C contract)
+        protected virtual TEntity ConvertTo(TContact contract)
         {
-            contract.CheckArgument(nameof(contract));
-
-            var result = new E();
+            var result = new TEntity();
 
             result.CopyProperties(contract);
             return result;
         }
-        protected virtual IQueryable<E> ConvertTo(IQueryable<C> contracts)
+        protected virtual IQueryable<TEntity> ConvertTo(IQueryable<TContact> contracts)
         {
-            contracts.CheckArgument(nameof(contracts));
-
-            var result = new List<E>();
+            var result = new List<TEntity>();
 
             foreach (var item in contracts)
             {
@@ -90,10 +86,10 @@ namespace SnQMusicStore.Logic.Controllers
         #endregion Count
 
         #region Before-Return
-        protected virtual E BeforeReturn(E entity) { return entity; }
-        protected virtual IEnumerable<E> BeforeReturn(IEnumerable<E> entities)
+        protected virtual TEntity BeforeReturn(TEntity entity) { return entity; }
+        protected virtual IEnumerable<TEntity> BeforeReturn(IEnumerable<TEntity> entities)
         {
-            var result = new List<E>();
+            var result = new List<TEntity>();
 
             foreach (var item in entities)
             {
@@ -101,10 +97,10 @@ namespace SnQMusicStore.Logic.Controllers
             }
             return result;
         }
-        protected virtual Task<E> BeforeReturnAsync(E entity) => Task.FromResult(entity);
-        protected virtual async Task<IEnumerable<E>> BeforeReturnAsync(IEnumerable<E> entities)
+        protected virtual Task<TEntity> BeforeReturnAsync(TEntity entity) => Task.FromResult(entity);
+        protected virtual async Task<IEnumerable<TEntity>> BeforeReturnAsync(IEnumerable<TEntity> entities)
         {
-            var result = new List<E>();
+            var result = new List<TEntity>();
 
             foreach (var item in entities)
             {
@@ -115,14 +111,14 @@ namespace SnQMusicStore.Logic.Controllers
         #endregion Before-Return
 
         #region Query
-        public virtual async Task<C> GetByIdAsync(int id)
+        public virtual async ValueTask<TContact?> GetByIdAsync(int id)
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.GetBy).ConfigureAwait(false);
 #endif
             return await GetEntityByIdAsync(id).ConfigureAwait(false);
         }
-        internal virtual async Task<E> GetEntityByIdAsync(int id)
+        internal virtual async Task<TEntity> GetEntityByIdAsync(int id)
         {
             var result = await ExecuteGetEntityByIdAsync(id).ConfigureAwait(false);
 
@@ -133,9 +129,9 @@ namespace SnQMusicStore.Logic.Controllers
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal abstract Task<E> ExecuteGetEntityByIdAsync(int id);
+        internal abstract ValueTask<TEntity?> ExecuteGetEntityByIdAsync(int id);
 
-        public virtual async Task<IEnumerable<C>> GetPageListAsync(int pageIndex, int pageSize)
+        public virtual async Task<IEnumerable<TContact>> GetPageListAsync(int pageIndex, int pageSize)
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.GetAll).ConfigureAwait(false);
@@ -143,7 +139,7 @@ namespace SnQMusicStore.Logic.Controllers
 
             return await GetEntityPageListAsync(pageIndex, pageSize).ConfigureAwait(false);
         }
-        public virtual async Task<IEnumerable<C>> GetPageListAsync(string orderBy, int pageIndex, int pageSize)
+        public virtual async Task<IEnumerable<TContact>> GetPageListAsync(string orderBy, int pageIndex, int pageSize)
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.GetAll).ConfigureAwait(false);
@@ -151,7 +147,7 @@ namespace SnQMusicStore.Logic.Controllers
 
             return await GetEntityPageListAsync(orderBy, pageIndex, pageSize).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> GetEntityPageListAsync(int pageIndex, int pageSize)
+        internal virtual async Task<IEnumerable<TEntity>> GetEntityPageListAsync(int pageIndex, int pageSize)
         {
             if (pageSize < 1 && pageSize > MaxPageSize)
                 throw new LogicException(ErrorType.InvalidPageSize);
@@ -161,7 +157,7 @@ namespace SnQMusicStore.Logic.Controllers
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> GetEntityPageListAsync(string orderBy, int pageIndex, int pageSize)
+        internal virtual async Task<IEnumerable<TEntity>> GetEntityPageListAsync(string orderBy, int pageIndex, int pageSize)
         {
             if (pageSize < 1 && pageSize > MaxPageSize)
                 throw new LogicException(ErrorType.InvalidPageSize);
@@ -171,150 +167,149 @@ namespace SnQMusicStore.Logic.Controllers
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal abstract Task<IEnumerable<E>> ExecuteGetEntityPageListAsync(int pageIndex, int pageSize);
-        internal abstract Task<IEnumerable<E>> ExecuteGetEntityPageListAsync(string orderBy, int pageIndex, int pageSize);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteGetEntityPageListAsync(int pageIndex, int pageSize);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteGetEntityPageListAsync(string orderBy, int pageIndex, int pageSize);
 
-        public virtual async Task<IEnumerable<C>> GetAllAsync()
+        public virtual async Task<IEnumerable<TContact>> GetAllAsync()
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.GetAll).ConfigureAwait(false);
 #endif
             return await GetEntityAllAsync().ConfigureAwait(false);
         }
-        public virtual async Task<IEnumerable<C>> GetAllAsync(string orderBy)
+        public virtual async Task<IEnumerable<TContact>> GetAllAsync(string orderBy)
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.GetAll).ConfigureAwait(false);
 #endif
             return await GetEntityAllAsync(orderBy).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> GetEntityAllAsync()
+        internal virtual async Task<IEnumerable<TEntity>> GetEntityAllAsync()
         {
             var result = await ExecuteGetEntityAllAsync().ConfigureAwait(false);
 
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> GetEntityAllAsync(string orderBy)
+        internal virtual async Task<IEnumerable<TEntity>> GetEntityAllAsync(string orderBy)
         {
             var result = await ExecuteGetEntityAllAsync().ConfigureAwait(false);
 
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal abstract Task<IEnumerable<E>> ExecuteGetEntityAllAsync();
-        internal abstract Task<IEnumerable<E>> ExecuteGetEntityAllAsync(string orderBy);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteGetEntityAllAsync();
+        internal abstract Task<IEnumerable<TEntity>> ExecuteGetEntityAllAsync(string orderBy);
 
-        public virtual async Task<IEnumerable<C>> QueryPageListAsync(string predicate, int pageIndex, int pageSize)
+        public virtual async Task<IEnumerable<TContact>> QueryPageListAsync(string predicate, int pageIndex, int pageSize)
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.QueryBy).ConfigureAwait(false);
 #endif
             return await QueryEntityPageListAsync(predicate, pageIndex, pageSize).ConfigureAwait(false);
         }
-        public virtual async Task<IEnumerable<C>> QueryPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize)
+        public virtual async Task<IEnumerable<TContact>> QueryPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize)
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.QueryBy).ConfigureAwait(false);
 #endif
             return await QueryEntityPageListAsync(predicate, orderBy, pageIndex, pageSize).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> QueryEntityPageListAsync(string predicate, int pageIndex, int pageSize)
+        internal virtual async Task<IEnumerable<TEntity>> QueryEntityPageListAsync(string predicate, int pageIndex, int pageSize)
         {
             var result = await ExecuteQueryEntityPageListAsync(predicate, pageIndex, pageSize).ConfigureAwait(false);
 
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> QueryEntityPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize)
+        internal virtual async Task<IEnumerable<TEntity>> QueryEntityPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize)
         {
             var result = await ExecuteQueryEntityPageListAsync(predicate, orderBy, pageIndex, pageSize).ConfigureAwait(false);
 
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal abstract Task<IEnumerable<E>> ExecuteQueryEntityPageListAsync(string predicate, int pageIndex, int pageSize);
-        internal abstract Task<IEnumerable<E>> ExecuteQueryEntityPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteQueryEntityPageListAsync(string predicate, int pageIndex, int pageSize);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteQueryEntityPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize);
 
-        internal virtual async Task<IEnumerable<E>> QueryEntityPageListAsync(Expression<Func<E, bool>> predicate, int pageIndex, int pageSize)
+        internal virtual async Task<IEnumerable<TEntity>> QueryEntityPageListAsync(Expression<Func<TEntity, bool>> predicate, int pageIndex, int pageSize)
         {
             var result = await ExecuteQueryEntityPageListAsync(predicate, pageIndex, pageSize).ConfigureAwait(false);
 
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal abstract Task<IEnumerable<E>> ExecuteQueryEntityPageListAsync(Expression<Func<E, bool>> predicate, int pageIndex, int pageSize);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteQueryEntityPageListAsync(Expression<Func<TEntity, bool>> predicate, int pageIndex, int pageSize);
 
-        public virtual async Task<IEnumerable<C>> QueryAllAsync(string predicate)
+        public virtual async Task<IEnumerable<TContact>> QueryAllAsync(string predicate)
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.QueryAll).ConfigureAwait(false);
 #endif
             return await QueryEntityAllAsync(predicate).ConfigureAwait(false);
         }
-        public virtual async Task<IEnumerable<C>> QueryAllAsync(string predicate, string orderBy)
+        public virtual async Task<IEnumerable<TContact>> QueryAllAsync(string predicate, string orderBy)
         {
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.QueryAll).ConfigureAwait(false);
 #endif
             return await QueryEntityAllAsync(predicate, orderBy).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> QueryEntityAllAsync(string predicate)
+        internal virtual async Task<IEnumerable<TEntity>> QueryEntityAllAsync(string predicate)
         {
             var result = await ExecuteQueryEntityAllAsync(predicate).ConfigureAwait(false);
 
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> QueryEntityAllAsync(string predicate, string orderBy)
+        internal virtual async Task<IEnumerable<TEntity>> QueryEntityAllAsync(string predicate, string orderBy)
         {
             var result = await ExecuteQueryEntityAllAsync(predicate, orderBy).ConfigureAwait(false);
 
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal virtual async Task<IEnumerable<E>> QueryEntityAllAsync(Expression<Func<E, bool>> predicate)
+        internal virtual async Task<IEnumerable<TEntity>> QueryEntityAllAsync(Expression<Func<TEntity, bool>> predicate)
         {
             var result = await ExecuteQueryEntityAllAsync(predicate).ConfigureAwait(false);
 
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal abstract Task<IEnumerable<E>> ExecuteQueryEntityAllAsync(Expression<Func<E, bool>> predicate);
-        internal abstract Task<IEnumerable<E>> ExecuteQueryEntityAllAsync(string predicate);
-        internal abstract Task<IEnumerable<E>> ExecuteQueryEntityAllAsync(string predicate, string orderBy);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteQueryEntityAllAsync(Expression<Func<TEntity, bool>> predicate);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteQueryEntityAllAsync(string predicate);
+        internal abstract Task<IEnumerable<TEntity>> ExecuteQueryEntityAllAsync(string predicate, string orderBy);
         #endregion Query
 
         #region Create
-        public virtual async Task<C> CreateAsync()
+        public virtual async Task<TContact> CreateAsync()
         {
             return await CreateEntityAsync().ConfigureAwait(false);
         }
-        internal virtual async Task<E> CreateEntityAsync()
+        internal virtual async Task<TEntity> CreateEntityAsync()
         {
-            var entity = new E();
+            var entity = new TEntity();
 
             AfterCreate(entity);
             return await BeforeReturnAsync(entity).ConfigureAwait(false);
         }
-        protected virtual void AfterCreate(E entity)
+        protected virtual void AfterCreate(TEntity entity)
         {
         }
         #endregion Create
 
         #region InsertUpdate
-        protected virtual E BeforeInsertUpdate(E entity) { return entity; }
-        protected virtual Task<E> BeforeInsertUpdateAsync(E entity) => Task.FromResult(entity);
-        protected virtual E AfterInsertUpdate(E entity) { return entity; }
-        protected virtual Task<E> AfterInsertUpdateAsync(E entity) => Task.FromResult(entity);
+        protected virtual TEntity BeforeInsertUpdate(TEntity entity) { return entity; }
+        protected virtual Task<TEntity> BeforeInsertUpdateAsync(TEntity entity) => Task.FromResult(entity);
+        protected virtual TEntity AfterInsertUpdate(TEntity entity) { return entity; }
+        protected virtual Task<TEntity> AfterInsertUpdateAsync(TEntity entity) => Task.FromResult(entity);
         #endregion InsertUpdate
 
         #region Insert
-        protected virtual E BeforeInsert(E entity) { return entity; }
-        protected virtual Task<E> BeforeInsertAsync(E entity) => Task.FromResult(entity);
-        public virtual async Task<C> InsertAsync(C entity)
+        protected virtual TEntity BeforeInsert(TEntity entity) { return entity; }
+        protected virtual Task<TEntity> BeforeInsertAsync(TEntity entity) => Task.FromResult(entity);
+        public virtual async Task<TContact> InsertAsync(TContact entity)
         {
-            entity.CheckArgument(nameof(entity));
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.Insert).ConfigureAwait(false);
 #endif
@@ -324,10 +319,8 @@ namespace SnQMusicStore.Logic.Controllers
 
             return await InsertEntityAsync(innerEntity).ConfigureAwait(false);
         }
-        internal virtual async Task<E> InsertEntityAsync(E entity)
+        internal virtual async Task<TEntity> InsertEntityAsync(TEntity entity)
         {
-            entity.CheckArgument(nameof(entity));
-
             entity = BeforeInsertUpdate(entity);
             entity = await BeforeInsertUpdateAsync(entity).ConfigureAwait(false);
             entity = BeforeInsert(entity);
@@ -340,16 +333,15 @@ namespace SnQMusicStore.Logic.Controllers
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal abstract Task<E> ExecuteInsertEntityAsync(E entity);
-        protected virtual E AfterInsert(E entity) { return entity; }
-        protected virtual Task<E> AfterInsertAsync(E entity) => Task.FromResult(entity);
-        public virtual async Task<IEnumerable<C>> InsertAsync(IEnumerable<C> entities)
+        internal abstract Task<TEntity> ExecuteInsertEntityAsync(TEntity entity);
+        protected virtual TEntity AfterInsert(TEntity entity) { return entity; }
+        protected virtual Task<TEntity> AfterInsertAsync(TEntity entity) => Task.FromResult(entity);
+        public virtual async Task<IEnumerable<TContact>> InsertAsync(IEnumerable<TContact> entities)
         {
-            entities.CheckArgument(nameof(entities));
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.InsertArray).ConfigureAwait(false);
 #endif
-            var result = new List<C>();
+            var result = new List<TContact>();
 
             foreach (var entity in entities)
             {
@@ -360,11 +352,10 @@ namespace SnQMusicStore.Logic.Controllers
         #endregion Insert
 
         #region Update
-        protected virtual E BeforeUpdate(E entity) { return entity; }
-        protected virtual Task<E> BeforeUpdateAsync(E entity) => Task.FromResult(entity);
-        public virtual async Task<C> UpdateAsync(C entity)
+        protected virtual TEntity BeforeUpdate(TEntity entity) { return entity; }
+        protected virtual Task<TEntity> BeforeUpdateAsync(TEntity entity) => Task.FromResult(entity);
+        public virtual async Task<TContact> UpdateAsync(TContact entity)
         {
-            entity.CheckArgument(nameof(entity));
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.Update).ConfigureAwait(false);
 #endif
@@ -373,10 +364,8 @@ namespace SnQMusicStore.Logic.Controllers
             innerEntity.CopyProperties(entity);
             return await UpdateEntityAsync(innerEntity).ConfigureAwait(false);
         }
-        internal virtual async Task<E> UpdateEntityAsync(E entity)
+        internal virtual async Task<TEntity> UpdateEntityAsync(TEntity entity)
         {
-            entity.CheckArgument(nameof(entity));
-
             entity = BeforeInsertUpdate(entity);
             entity = await BeforeInsertUpdateAsync(entity).ConfigureAwait(false);
             entity = BeforeUpdate(entity);
@@ -389,16 +378,15 @@ namespace SnQMusicStore.Logic.Controllers
             result = BeforeReturn(result);
             return await BeforeReturnAsync(result).ConfigureAwait(false);
         }
-        internal abstract Task<E> ExecuteUpdateEntityAsync(E entity);
-        protected virtual E AfterUpdate(E entity) { return entity; }
-        protected virtual Task<E> AfterUpdateAsync(E entity) => Task.FromResult(entity);
-        public virtual async Task<IEnumerable<C>> UpdateAsync(IEnumerable<C> entities)
+        internal abstract Task<TEntity> ExecuteUpdateEntityAsync(TEntity entity);
+        protected virtual TEntity AfterUpdate(TEntity entity) { return entity; }
+        protected virtual Task<TEntity> AfterUpdateAsync(TEntity entity) => Task.FromResult(entity);
+        public virtual async Task<IEnumerable<TContact>> UpdateAsync(IEnumerable<TContact> entities)
         {
-            entities.CheckArgument(nameof(entities));
 #if ACCOUNT_ON
             await CheckAuthorizationAsync(GetType(), MethodBase.GetCurrentMethod(), AccessType.UpdateArray).ConfigureAwait(false);
 #endif
-            var result = new List<C>();
+            var result = new List<TContact>();
 
             foreach (var entity in entities)
             {
@@ -409,8 +397,8 @@ namespace SnQMusicStore.Logic.Controllers
         #endregion Update
 
         #region Delete
-        protected virtual void BeforeDelete(E entity) { }
-        protected virtual Task BeforeDeleteAsync(E entity) => Task.FromResult(0);
+        protected virtual void BeforeDelete(TEntity entity) { }
+        protected virtual Task BeforeDeleteAsync(TEntity entity) => Task.FromResult(0);
         public virtual async Task DeleteAsync(int id)
         {
 #if ACCOUNT_ON
@@ -423,19 +411,17 @@ namespace SnQMusicStore.Logic.Controllers
 
             await DeleteEntityAsync(entity).ConfigureAwait(false);
         }
-        internal virtual async Task DeleteEntityAsync(E entity)
+        internal virtual async Task DeleteEntityAsync(TEntity entity)
         {
-            entity.CheckArgument(nameof(entity));
-
             BeforeDelete(entity);
             await BeforeDeleteAsync(entity).ConfigureAwait(false);
             await ExecuteDeleteEntityAsync(entity).ConfigureAwait(false);
             AfterDelete(entity);
             await AfterDeleteAsync(entity).ConfigureAwait(false);
         }
-        internal abstract Task ExecuteDeleteEntityAsync(E entity);
-        protected virtual void AfterDelete(E entity) { }
-        protected virtual Task AfterDeleteAsync(E entity) => Task.FromResult(0);
+        internal abstract Task ExecuteDeleteEntityAsync(TEntity entity);
+        protected virtual void AfterDelete(TEntity entity) { }
+        protected virtual Task AfterDeleteAsync(TEntity entity) => Task.FromResult(0);
         #endregion Delete
     }
 }

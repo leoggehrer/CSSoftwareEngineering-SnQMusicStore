@@ -27,7 +27,7 @@ namespace SnQMusicStore.Logic.DataContext
             where C : IIdentifiable
             where E : IdentityEntity, C;
 
-        Task<E> GetByIdAsync<C, E>(int id)
+        ValueTask<E?> GetByIdAsync<C, E>(int id)
             where C : IIdentifiable
             where E : IdentityEntity, C;
 

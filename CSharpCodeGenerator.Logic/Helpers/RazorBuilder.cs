@@ -21,9 +21,9 @@ namespace CSharpCodeGenerator.Logic.Helpers
         private record SourceItem
         {
             public SourceType Type { get; init; }
-            public string TagName { get; init; }
-            public string CssClass { get; init; }
-            public string CssAttributes { get; init; }
+            public string TagName { get; init; } = string.Empty;
+            public string CssClass { get; init; } = string.Empty;
+            public string CssAttributes { get; init; } = string.Empty;
             public int Indent { get; init; }
 
             public override string ToString() =>
@@ -67,8 +67,6 @@ namespace CSharpCodeGenerator.Logic.Helpers
         }
         public void Add(RazorBuilder razorBuilder)
         {
-            razorBuilder.CheckArgument(nameof(razorBuilder));
-
             if (razorBuilder.openElements.Count > 0)
                 throw new Exception("Added razor builder is not closed.");
 
@@ -90,8 +88,6 @@ namespace CSharpCodeGenerator.Logic.Helpers
         }
         public RazorBuilder AddCode(string line)
         {
-            line.CheckArgument(nameof(line));
-
             sourceItems.Add(new SourceItem
             {
                 Type = SourceType.CodeTag,

@@ -11,7 +11,7 @@ namespace CommonBase.Attributes
     [AttributeUsage(AttributeTargets.Interface, AllowMultiple = true)]
     public partial class ContractMemberInfoAttribute : PropertyInfoAttribute
     {
-        public string PropertyName { get; set; }
+        public string? PropertyName { get; set; }
     }
 }
 //MdEnd

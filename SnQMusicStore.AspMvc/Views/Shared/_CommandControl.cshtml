@@ -1,58 +1,62 @@
 ﻿@*@CodeCopy*@
 @{
     @using SnQMusicStore.AspMvc.Models.Modules.Common
+    @using SnQMusicStore.AspMvc.Modules.View
     @model SnQMusicStore.AspMvc.Models.IdentityModel
 
-    var viewBagInfo = Model.ViewBagInfo;
-
-    if (viewBagInfo.ParentModel == null)
+    if (Model != null)
     {
-        @if ((Model.CommandMode & CommandMode.Edit) > 0)
-        {
-            var action = Url.Action(nameof(ActionMode.Edit), viewBagInfo.Controller, new { @id = Model.Id });
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
 
-            <a type="button" href="@action" class="btn btn-outline-primary" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Edit")"><i class="fa fa-edit" aria-hidden="true"></i></a>
+        if (viewBagInfo.ParentModel == null)
+        {
+            @if ((Model.CommandMode & CommandMode.Edit) > 0)
+            {
+                var action = Url.Action(nameof(ActionMode.Edit), viewBagInfo.Controller, new { @id = Model.Id });
+
+                <a type="button" href="@action" class="btn btn-outline-primary" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Edit")"><i class="fa fa-edit" aria-hidden="true"></i></a>
+            }
+            @if ((Model.CommandMode & CommandMode.Details) > 0)
+            {
+                var action = Url.Action(nameof(ActionMode.Details), viewBagInfo.Controller, new { @id = Model.Id });
+
+                <a type="button" href="@action" class="btn btn-outline-dark" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Details")"><i class="fa fa-list" aria-hidden="true"></i></a>
+            }
+            @if ((Model.CommandMode & CommandMode.Create) > 0)
+            {
+                var action = Url.Action(nameof(ActionMode.CreateById), viewBagInfo.Controller, new { @id = Model.Id });
+
+                <a type="button" href="@action" class="btn btn-outline-info" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Create")"><i class="fa fa-copy" aria-hidden="true"></i></a>
+            }
+            @if ((Model.CommandMode & CommandMode.Delete) > 0)
+            {
+                var action = Url.Action(nameof(ActionMode.Delete), viewBagInfo.Controller, new { @id = Model.Id });
+
+                <a type="button" href="@action" class="btn btn-outline-danger" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Delete")"><i class="fa fa-trash" aria-hidden="true"></i></a>
+            }
         }
-        @if ((Model.CommandMode & CommandMode.Details) > 0)
+        else
         {
-            var action = Url.Action(nameof(ActionMode.Details), viewBagInfo.Controller, new { @id = Model.Id });
+            var master = viewBagInfo.ParentModel as IdentityModel;
 
-            <a type="button" href="@action" class="btn btn-outline-dark" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Details")"><i class="fa fa-list" aria-hidden="true"></i></a>
-        }
-        @if ((Model.CommandMode & CommandMode.Create) > 0)
-        {
-            var action = Url.Action(nameof(ActionMode.CreateById), viewBagInfo.Controller, new { @id = Model.Id });
+            @if (master != null && (master.CommandMode & CommandMode.EditDetail) > 0)
+            {
+                var action = Url.Action(nameof(ActionMode.EditDetail), viewBagInfo.Controller, new { @id = master.Id, @detailId = Model.Id });
 
-            <a type="button" href="@action" class="btn btn-outline-info" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Create")"><i class="fa fa-copy" aria-hidden="true"></i></a>
-        }
-        @if ((Model.CommandMode & CommandMode.Delete) > 0)
-        {
-            var action = Url.Action(nameof(ActionMode.Delete), viewBagInfo.Controller, new { @id = Model.Id });
+                <a type="button" href="@action" class="btn btn-outline-primary" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("EditDetail")"><i class="fa fa-edit" aria-hidden="true"></i></a>
+            }
+            @if (master != null && (master.CommandMode & CommandMode.CreateDetail) > 0)
+            {
+                var action = Url.Action(nameof(ActionMode.CreateDetailById), viewBagInfo.Controller, new { @id = master.Id, @detailId = Model.Id });
 
-            <a type="button" href="@action" class="btn btn-outline-danger" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Delete")"><i class="fa fa-trash" aria-hidden="true"></i></a>
-        }
-    }
-    else
-    {
-        var master = viewBagInfo.ParentModel as IdentityModel;
+                <a type="button" href="@action" class="btn btn-outline-info" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Create")"><i class="fa fa-copy" aria-hidden="true"></i></a>
+            }
+            @if (master != null && (master.CommandMode & CommandMode.DeleteDetail) > 0)
+            {
+                var action = Url.Action(nameof(ActionMode.DeleteDetail), viewBagInfo.Controller, new { @id = master.Id, @detailId = Model.Id });
 
-        @if (master != null && (master.CommandMode & CommandMode.EditDetail) > 0)
-        {
-            var action = Url.Action(nameof(ActionMode.EditDetail), viewBagInfo.Controller, new { @id = master.Id, @detailId = Model.Id });
-
-            <a type="button" href="@action" class="btn btn-outline-primary" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("EditDetail")"><i class="fa fa-edit" aria-hidden="true"></i></a>
-        }
-        @if (master != null && (master.CommandMode & CommandMode.CreateDetail) > 0)
-        {
-            var action = Url.Action(nameof(ActionMode.CreateDetailById), viewBagInfo.Controller, new { @id = master.Id, @detailId = Model.Id });
-
-            <a type="button" href="@action" class="btn btn-outline-info" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("Create")"><i class="fa fa-copy" aria-hidden="true"></i></a>
-        }
-        @if (master != null && (master.CommandMode & CommandMode.DeleteDetail) > 0)
-        {
-            var action = Url.Action(nameof(ActionMode.DeleteDetail), viewBagInfo.Controller, new { @id = master.Id, @detailId = Model.Id });
-
-            <a type="button" href="@action" class="btn btn-outline-danger" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("DeleteDetail")"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                <a type="button" href="@action" class="btn btn-outline-danger" style="margin: 0px 2px 2px 0px;" title="@viewBagInfo.TranslateFor("DeleteDetail")"><i class="fa fa-trash" aria-hidden="true"></i></a>
+            }
         }
     }
 }

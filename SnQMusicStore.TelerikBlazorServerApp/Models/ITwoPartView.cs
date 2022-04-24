@@ -1,9 +1,9 @@
 ﻿//@CodeCopy
 //MdStart
 
-namespace SnQMusicStore.AspMvc.Models
+namespace SnQMusicStore.TelerikBlazorServerApp.Models
 {
-    public interface IFirstToSecond
+    public interface ITwoPartView
     {
         IdentityModel FirstModel { get; }
         IdentityModel SecondModel { get; }

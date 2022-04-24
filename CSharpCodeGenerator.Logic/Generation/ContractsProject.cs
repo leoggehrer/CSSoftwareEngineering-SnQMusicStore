@@ -14,22 +14,16 @@ namespace CSharpCodeGenerator.Logic.Generation
         public string ProjectName => $"{SolutionProperties.SolutionName}{SolutionProperties.ContractsPostfix}";
         public string ProjectPath => Path.Combine(SolutionProperties.SolutionPath, ProjectName);
 
-        private ContractsProject()
+        private ContractsProject(SolutionProperties solutionProperties)
         {
-
+            SolutionProperties = solutionProperties;
         }
         public static ContractsProject Create(SolutionProperties solutionProperties)
         {
-            solutionProperties.CheckArgument(nameof(solutionProperties));
-
-            ContractsProject result = new()
-            {
-                SolutionProperties = solutionProperties
-            };
-            return result;
+            return new(solutionProperties);
         }
 
-        private IEnumerable<Type> assemblyTypes = null;
+        private IEnumerable<Type>? assemblyTypes;
         public IEnumerable<Type> AssemblyTypes
         {
             get
@@ -55,7 +49,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             get
             {
                 return InterfaceTypes.Where(t => t.IsInterface
-                                              && t.FullName.EndsWith($"{StaticLiterals.RootSubName}{t.Name}"));
+                                              && t.FullName != null && t.FullName.EndsWith($"{StaticLiterals.RootSubName}{t.Name}"));
             }
         }
         public IEnumerable<Type> ClientTypes
@@ -63,7 +57,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             get
             {
                 return InterfaceTypes.Where(t => t.IsInterface
-                                              && t.FullName.Contains(StaticLiterals.ClientSubName));
+                                              && t.FullName != null && t.FullName.Contains(StaticLiterals.ClientSubName));
             }
         }
         public IEnumerable<Type> BusinessTypes
@@ -71,7 +65,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             get
             {
                 return InterfaceTypes.Where(t => t.IsInterface
-                                              && t.FullName.Contains(StaticLiterals.BusinessSubName));
+                                              && t.FullName != null && t.FullName.Contains(StaticLiterals.BusinessSubName));
             }
         }
         public IEnumerable<Type> ModuleTypes
@@ -79,7 +73,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             get
             {
                 return InterfaceTypes.Where(t => t.IsInterface
-                                              && t.FullName.Contains(StaticLiterals.ModulesSubName));
+                                              && t.FullName != null && t.FullName.Contains(StaticLiterals.ModulesSubName));
             }
         }
 
@@ -88,7 +82,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             get
             {
                 return InterfaceTypes.Where(t => t.IsInterface
-                                              && t.FullName.Contains(StaticLiterals.PersistenceSubName));
+                                              && t.FullName != null && t.FullName.Contains(StaticLiterals.PersistenceSubName));
             }
         }
         public IEnumerable<Type> ShadowTypes
@@ -96,7 +90,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             get
             {
                 return InterfaceTypes.Where(t => t.IsInterface
-                                              && t.FullName.Contains(StaticLiterals.ShadowSubName));
+                                              && t.FullName != null && t.FullName.Contains(StaticLiterals.ShadowSubName));
             }
         }
         public IEnumerable<Type> ThirdPartyTypes
@@ -104,7 +98,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             get
             {
                 return InterfaceTypes.Where(t => t.IsInterface
-                                              && t.FullName.Contains(StaticLiterals.ThirdPartySubName));
+                                              && t.FullName != null && t.FullName.Contains(StaticLiterals.ThirdPartySubName));
             }
         }
     }

@@ -12,7 +12,7 @@ namespace CSharpCodeGenerator.Logic.Git
 {
     public partial class GitIgnoreManager
     {
-        private static string[] Paths { get; set; }
+        private static string[] Paths { get; set; } = Array.Empty<string>();
         private static string[] SearchPatterns => StaticLiterals.SourceFileExtensions.Split('|');
         private static string GitIgnoreFile => ".gitignore";
 
@@ -45,7 +45,7 @@ namespace CSharpCodeGenerator.Logic.Git
 
         private static void BuildPaths(string exlusionDirectory)
         {
-            var cp = Environment.CurrentDirectory.Split("\\");
+            var cp = Environment.CurrentDirectory.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
             var sp = cp.TakeTo(x => x.Equals(exlusionDirectory));
 
             // Set the solution Path

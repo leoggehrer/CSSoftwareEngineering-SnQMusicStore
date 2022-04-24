@@ -8,16 +8,12 @@
     @using SnQMusicStore.AspMvc.Models.Modules.View
     @model EditViewModel
 
-    var viewBagInfo = Model?.ViewBagInfo;
+    var viewBagInfo = Model?.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
     var sessionInfo = new SessionWrapper(Context.Session);
 
-    if (viewBagInfo == null)
-    {
-        viewBagInfo = new ViewBagWrapper(ViewBag);
-    }
     viewBagInfo.Translate = Translator.TranslateIt;
-    viewBagInfo.Controller = ViewContext.RouteData.Values["controller"].ToString();
-    viewBagInfo.Action = ViewContext.RouteData.Values["action"].ToString();
+    viewBagInfo.Controller = ViewContext.RouteData?.Values["controller"]?.ToString() ?? string.Empty;
+    viewBagInfo.Action = ViewContext.RouteData?.Values["action"]?.ToString() ?? string.Empty;
 
     ViewData["Title"] = viewBagInfo.Title;
     <h2>@ViewData["Title"]</h2>
@@ -41,10 +37,10 @@
         @await Html.PartialAsync("_SubmitApplyBack", new SubmitApplyBackCmd() 
         {
             SubmitText = viewBagInfo.TranslateFor("Save"),
-            SubmitAction = Url.Action(nameof(ActionMode.Insert), viewBagInfo.Controller),
+            SubmitAction = Url.Action(nameof(ActionMode.Insert), viewBagInfo.Controller) ?? string.Empty,
             BackText = viewBagInfo.TranslateFor("Back to List"),
             ApplyText = viewBagInfo.TranslateFor("Apply"),
-            ApplyAction = Url.Action(nameof(ActionMode.Apply), viewBagInfo.Controller),
+            ApplyAction = Url.Action(nameof(ActionMode.Apply), viewBagInfo.Controller) ?? string.Empty,
         })
     </form>
 }

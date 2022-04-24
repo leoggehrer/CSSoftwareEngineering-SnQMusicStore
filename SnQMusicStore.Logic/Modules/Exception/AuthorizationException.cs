@@ -26,16 +26,16 @@ namespace SnQMusicStore.Logic.Modules.Exception
         {
         }
 
-        /// <summary>
-        /// Initialisiert eine neue Instanz der LogicException-Klasse 
-        /// mit einer angegebenen Fehlermeldung.
-        /// </summary>
-        /// <param name="errorType">Identification der Fehlermeldung.</param>
-        /// <param name="ex">Exception die aufgetreten ist.</param>
-        public AuthorizationException(ErrorType errorType, System.Exception ex)
-            : base(errorType, ex.InnerException)
-        {
-        }
+        ///// <summary>
+        ///// Initialisiert eine neue Instanz der LogicException-Klasse 
+        ///// mit einer angegebenen Fehlermeldung.
+        ///// </summary>
+        ///// <param name="errorType">Identification der Fehlermeldung.</param>
+        ///// <param name="ex">Exception die aufgetreten ist.</param>
+        //public AuthorizationException(ErrorType errorType, System.Exception ex)
+        //    : base(errorType, ex.InnerException)
+        //{
+        //}
     }
 }
 //MdEnd

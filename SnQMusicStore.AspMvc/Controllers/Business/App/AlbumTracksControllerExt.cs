@@ -15,7 +15,13 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.App
                 using var artistCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IArtist>(sessionToken);
 
                 model.OneModel.Artists = await artistCtrl.GetAllAsync().ConfigureAwait(false);
-                model.OneModel.Artist = model.OneModel.Artists.FirstOrDefault(e => e.Id == model.ArtistId);
+
+                var artist = model.OneModel.Artists.FirstOrDefault(e => e.Id == model.ArtistId);
+
+                if (artist != null)
+                {
+                    model.OneModel.Artist = artist;
+                }
             }
             return model;
         }
@@ -27,20 +33,25 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.App
 
             foreach (var model in models)
             {
-                model.OneModel.Artist = artists.FirstOrDefault(e => e.Id == model.ArtistId);
+                var artist = artists.FirstOrDefault(e => e.Id == model.ArtistId);
+
+                if (artist != null)
+                {
+                    model.OneModel.Artist = artist;
+                }
                 result.Add(model);
             }
             return result;
         }
         protected override async Task<AlbumTracks> BeforeViewAsync(AlbumTracks model, ActionMode action)
         {
-            model = await LoadModelReferencesAsync(SessionInfo.LoginSession.SessionToken, model, action);
+            model = await LoadModelReferencesAsync(SessionInfo.LoginSession?.SessionToken ?? string.Empty, model, action);
 
             return await base.BeforeViewAsync(model, action).ConfigureAwait(false);
         }
         protected override async Task<IEnumerable<AlbumTracks>> BeforeViewAsync(IEnumerable<AlbumTracks> models, ActionMode action)
         {
-            models = await LoadModelsReferencesAsync(SessionInfo.LoginSession.SessionToken, models);
+            models = await LoadModelsReferencesAsync(SessionInfo.LoginSession?.SessionToken ?? string.Empty, models);
 
             return await base.BeforeViewAsync(models, action).ConfigureAwait(false);
         }
@@ -63,7 +74,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.App
 
                     foreach (var model in models)
                     {
-                        if (model.ToString().ToLower().Contains(searchValue))
+                        if (searchValue != null && model.ToString().ToLower().Contains(searchValue))
                         {
                             if (result.Any(e => e.Id == model.Id) == false)
                             {

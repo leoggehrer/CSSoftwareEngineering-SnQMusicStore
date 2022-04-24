@@ -11,22 +11,6 @@ namespace CSharpCodeGenerator.Logic.Generation
 {
     internal abstract partial class GeneratorObject
     {
-        static GeneratorObject()
-        {
-            ClassConstructing();
-            ClassConstructed();
-        }
-        static partial void ClassConstructing();
-        static partial void ClassConstructed();
-        public GeneratorObject()
-        {
-            Constructing();
-
-            Constructed();
-        }
-        partial void Constructing();
-        partial void Constructed();
-
         public enum InterfaceType
         {
             Unknown,
@@ -37,14 +21,23 @@ namespace CSharpCodeGenerator.Logic.Generation
             Persistence,
             Shadow,
         }
+        static GeneratorObject()
+        {
+            ClassConstructing();
+            ClassConstructed();
+        }
+        static partial void ClassConstructing();
+        static partial void ClassConstructed();
         public ISolutionProperties Properties => SolutionProperties;
-        public SolutionProperties SolutionProperties { get; }
+        public SolutionProperties SolutionProperties { get; init; }
         public GeneratorObject(SolutionProperties solutionProperties)
         {
-            solutionProperties.CheckArgument(nameof(solutionProperties));
-
+            Constructing();
             SolutionProperties = solutionProperties;
+            Constructed();
         }
+        partial void Constructing();
+        partial void Constructed();
 
         #region Helpers
         #region Namespace-Helpers
@@ -70,38 +63,34 @@ namespace CSharpCodeGenerator.Logic.Generation
         #region Assemply-Helpers
         public static IEnumerable<Type> GetInterfaceTypes(Assembly assembly)
         {
-            assembly.CheckArgument(nameof(assembly));
-
             return assembly.GetTypes().Where(t => t.IsInterface && t.IsPublic);
         }
         public static IEnumerable<Type> GetModulesTypes(Assembly assembly)
         {
             return GetInterfaceTypes(assembly)
                         .Where(t => t.IsInterface
-                                 && t.FullName.Contains(StaticLiterals.ModulesSubName));
+                                 && t.FullName != null && t.FullName.Contains(StaticLiterals.ModulesSubName));
         }
         public static IEnumerable<Type> GetPersistenceTypes(Assembly assembly)
         {
             return GetInterfaceTypes(assembly)
                         .Where(t => t.IsInterface
-                                 && t.FullName.Contains(StaticLiterals.PersistenceSubName));
+                                 && t.FullName != null && t.FullName.Contains(StaticLiterals.PersistenceSubName));
         }
         public static IEnumerable<Type> GetBusinessTypes(Assembly assembly)
         {
             return GetInterfaceTypes(assembly)
                         .Where(t => t.IsInterface
-                                 && t.FullName.Contains(StaticLiterals.BusinessSubName));
+                                 && t.FullName != null && t.FullName.Contains(StaticLiterals.BusinessSubName));
         }
         #endregion Assembly-Helpers
 
         #region Interface helpers
         public static InterfaceType GetInterfaceType(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = InterfaceType.Unknown;
 
-            if (type.IsInterface)
+            if (type.IsInterface && type.FullName != null)
             {
                 if (type.FullName.EndsWith($"{StaticLiterals.RootSubName}{type.Name}"))
                     result = InterfaceType.Client;
@@ -120,8 +109,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         public static IEnumerable<Type> GetInterfaces(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new List<Type>();
 
             static void GetInterfacesRec(Type type, List<Type> interfaces)
@@ -138,9 +125,8 @@ namespace CSharpCodeGenerator.Logic.Generation
             GetInterfacesRec(type, result);
             return result;
         }
-        public static Type GetTypeInterface(Type type)
+        public static Type? GetTypeInterface(Type type)
         {
-            type.CheckArgument(nameof(type));
             type.CheckInterface(nameof(type));
 
             var result = default(Type);
@@ -148,19 +134,19 @@ namespace CSharpCodeGenerator.Logic.Generation
 
             if (interfaceType == InterfaceType.Business)
             {
-                result = type.GetInterfaces().FirstOrDefault(i => i.Namespace.Contains(StaticLiterals.BusinessSubName));
+                result = type.GetInterfaces().FirstOrDefault(i => i.Namespace != null && i.Namespace.Contains(StaticLiterals.BusinessSubName));
             }
             else if (interfaceType == InterfaceType.Module)
             {
-                result = type.GetInterfaces().FirstOrDefault(i => i.Namespace.Contains(StaticLiterals.ModulesSubName));
+                result = type.GetInterfaces().FirstOrDefault(i => i.Namespace != null && i.Namespace.Contains(StaticLiterals.ModulesSubName));
             }
             else if (interfaceType == InterfaceType.Persistence)
             {
-                result = type.GetInterfaces().FirstOrDefault(i => i.Namespace.Contains(StaticLiterals.PersistenceSubName));
+                result = type.GetInterfaces().FirstOrDefault(i => i.Namespace != null && i.Namespace.Contains(StaticLiterals.PersistenceSubName));
             }
             else if (interfaceType == InterfaceType.Shadow)
             {
-                result = type.GetInterfaces().FirstOrDefault(i => i.Namespace.Contains(StaticLiterals.ShadowSubName));
+                result = type.GetInterfaces().FirstOrDefault(i => i.Namespace != null && i.Namespace.Contains(StaticLiterals.ShadowSubName));
             }
             return result;
         }
@@ -173,8 +159,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         /// <param name="type">Der zu ueberpruefende Typ.</param>
         public static void CheckInterfaceType(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             if (type.IsInterface == false)
                 throw new ArgumentException($"The parameter '{nameof(type)}' must be an interface.");
         }
@@ -188,9 +172,9 @@ namespace CSharpCodeGenerator.Logic.Generation
             CheckInterfaceType(type);
 
             var result = string.Empty;
-            var data = type.Namespace.Split('.');
+            var data = type.Namespace?.Split('.');
 
-            if (data.Length > 0)
+            if (data?.Length > 0)
             {
                 result = data[0];
             }
@@ -204,9 +188,9 @@ namespace CSharpCodeGenerator.Logic.Generation
         public static string CreateSubNamespaceFromType(Type type)
         {
             var result = string.Empty;
-            var data = type.Namespace.Split('.');
+            var data = type.Namespace?.Split('.');
 
-            for (var i = 2; i < data.Length; i++)
+            for (var i = 2; i < data?.Length; i++)
             {
                 if (string.IsNullOrEmpty(result))
                 {
@@ -236,8 +220,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         /// <returns>Transfer-Model-Namensraum</returns>
         public static string CreateTransferModelNameSpace(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             return $"Transfer.{StaticLiterals.ModelsFolder}.{CreateSubNamespaceFromType(type)}";
         }
 
@@ -314,7 +296,7 @@ namespace CSharpCodeGenerator.Logic.Generation
 
             var result = string.Empty;
 
-            if (type.IsInterface)
+            if (type.FullName != null)
             {
                 var entityName = CreateEntityNameFromInterface(type);
 
@@ -394,7 +376,7 @@ namespace CSharpCodeGenerator.Logic.Generation
 
             var result = string.Empty;
 
-            if (type.IsInterface)
+            if (type.FullName != null)
             {
                 var entityName = type.Name[1..];
 
@@ -415,7 +397,7 @@ namespace CSharpCodeGenerator.Logic.Generation
 
             var result = string.Empty;
 
-            if (type.IsInterface)
+            if (type.FullName != null)
             {
                 var entityName = $"{type.Name[1..]}s";
 
@@ -436,7 +418,7 @@ namespace CSharpCodeGenerator.Logic.Generation
 
             var result = string.Empty;
 
-            if (type.IsInterface)
+            if (type.FullName != null)
             {
                 var entityName = $"{type.Name[1..]}s";
 
@@ -448,6 +430,11 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
 
         #region Property-Helpers
+        public static bool IsNullable(Type type)
+        {
+            return Nullable.GetUnderlyingType(type) != null;
+        }
+
         /// <summary>
         /// Diese Methode konvertiert den Eigenschaftstyp in eine Zeichenfolge.
         /// </summary>
@@ -455,7 +442,9 @@ namespace CSharpCodeGenerator.Logic.Generation
         /// <returns>Der Eigenschaftstyp als Zeichenfolge.</returns>
         public static string GetPropertyType(PropertyInfo propertyInfo)
         {
-            return propertyInfo.PropertyType.GetCodeDefinition();
+            var result = propertyInfo.PropertyType.GetCodeDefinition();
+
+            return result;
         }
         /// <summary>
         /// Diese Methode ermittelt den Feldnamen der Eigenschaft.
@@ -465,8 +454,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         /// <returns>Der Feldname als Zeichenfolge.</returns>
         public static string CreateFieldName(PropertyInfo propertyInfo, string prefix)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             return $"{prefix}{char.ToLower(propertyInfo.Name.First())}{propertyInfo.Name[1..]}";
         }
         #endregion Property-Helpers

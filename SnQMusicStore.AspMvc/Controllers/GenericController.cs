@@ -8,7 +8,6 @@ using SnQMusicStore.AspMvc.Models.Modules.View;
 using SnQMusicStore.AspMvc.Modules.View;
 using System;
 using System.Linq;
-using System.Linq.Dynamic.Core.Parser;
 using System.Threading.Tasks;
 
 namespace SnQMusicStore.AspMvc.Controllers
@@ -44,17 +43,17 @@ namespace SnQMusicStore.AspMvc.Controllers
             var result = default(Contracts.Client.IAdapterAccess<T>);
 
             BeforeCreateController(ref result, ref handled);
-            if (handled == false)
+            if (handled == false || result == null)
             {
                 result = Adapters.Factory.Create<T>();
 #if ACCOUNT_ON
-                result.SessionToken = SessionInfo?.SessionToken;
+                result.SessionToken = SessionInfo.SessionToken;
 #endif
             }
             AfterCreateController(result);
             return result;
         }
-        partial void BeforeCreateController<T>(ref Contracts.Client.IAdapterAccess<T> controller, ref bool handled);
+        partial void BeforeCreateController<T>(ref Contracts.Client.IAdapterAccess<T>? controller, ref bool handled);
         partial void AfterCreateController<T>(Contracts.Client.IAdapterAccess<T> controller);
 
         protected bool FromCreateToEdit { get; set; } = false;
@@ -63,41 +62,37 @@ namespace SnQMusicStore.AspMvc.Controllers
 
         protected static Type GetViewModel(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = type;
 
             if (type.IsGenericTypeOf(typeof(OneToAnotherModel<,,,>)))
             {
-                result = type.BaseType.GetGenericArguments()[1];
+                result = type.BaseType?.GetGenericArguments()[1];
             }
             else if (type.IsGenericTypeOf(typeof(OneToManyModel<,,,>)))
             {
-                result = type.BaseType.GetGenericArguments()[1];
+                result = type.BaseType?.GetGenericArguments()[1];
             }
             else if (type.IsGenericTypeOf(typeof(CompositeModel<,,,,,>)))
             {
-                result = type.BaseType.GetGenericArguments()[1];
+                result = type.BaseType?.GetGenericArguments()[1];
             }
-            return result;
+            return result ?? type;
         }
-        protected static Type GetViewInterface(Type type)
+        protected static Type? GetViewInterface(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = type;
 
             if (type.IsGenericTypeOf(typeof(OneToAnotherModel<,,,>)))
             {
-                result = type.BaseType.GetGenericArguments()[0];
+                result = type.BaseType?.GetGenericArguments()[0];
             }
             else if (type.IsGenericTypeOf(typeof(OneToManyModel<,,,>)))
             {
-                result = type.BaseType.GetGenericArguments()[0];
+                result = type.BaseType?.GetGenericArguments()[0];
             }
             else if (type.IsGenericTypeOf(typeof(CompositeModel<,,,,,>)))
             {
-                result = type.BaseType.GetGenericArguments()[0];
+                result = type.BaseType?.GetGenericArguments()[0];
             }
             return result;
         }
@@ -143,8 +138,6 @@ namespace SnQMusicStore.AspMvc.Controllers
 
         protected virtual TModel ToModel(TContract entity)
         {
-            entity.CheckArgument(nameof(entity));
-
             var result = new TModel();
 
             result.CopyProperties(entity);
@@ -156,17 +149,17 @@ namespace SnQMusicStore.AspMvc.Controllers
             var model = default(TModel);
 
             BeforeGetModel(ref model, ref handled);
-            if (handled == false)
+            if (handled == false || model == null)
             {
                 using var ctrl = CreateController();
                 var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
 
-                model = ToModel(entity);
+                model = entity != null ? ToModel(entity) : new();
             }
             AfterGetModel(model);
             return model;
         }
-        partial void BeforeGetModel(ref TModel model, ref bool handled);
+        partial void BeforeGetModel(ref TModel? model, ref bool handled);
         partial void AfterGetModel(TModel model);
 
         protected virtual SearchModel CreateSearchModel()
@@ -251,15 +244,15 @@ namespace SnQMusicStore.AspMvc.Controllers
 
             if (predicate.HasContent() && orderBy.HasContent())
             {
-                result = await ctrl.QueryAllAsync(predicate, orderBy).ConfigureAwait(false);
+                result = await ctrl.QueryAllAsync(predicate!, orderBy!).ConfigureAwait(false);
             }
             else if (predicate.HasContent())
             {
-                result = await ctrl.QueryAllAsync(predicate).ConfigureAwait(false);
+                result = await ctrl.QueryAllAsync(predicate!).ConfigureAwait(false);
             }
             else if (orderBy.HasContent())
             {
-                result = await ctrl.GetAllAsync(orderBy).ConfigureAwait(false);
+                result = await ctrl.GetAllAsync(orderBy!).ConfigureAwait(false);
             }
             else
             {
@@ -279,7 +272,7 @@ namespace SnQMusicStore.AspMvc.Controllers
             if (applyFilter)
             {
                 var viewType = GetViewInterface(typeof(TModel));
-                var searchValue = SessionInfo.GetSearchValue(ControllerName);
+                var searchValue = SessionInfo.GetSearchValue(ControllerName) ?? string.Empty;
                 var searchInterfacePredicate = SearchModel.CreateInterfacePredicate(viewType, searchValue);
                 var filterValues = SessionInfo.GetFilterValues(ControllerName);
                 var filterPredicate = filterValues?.CreatePredicate();
@@ -307,11 +300,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                 pageCount = await ctrl.CountByAsync(predicate).ConfigureAwait(false);
 
                 SetSessionPageData(pageCount, pageIndex, pageSize);
-                result = await ctrl.QueryPageListAsync(predicate, orderBy, pageIndex, pageSize).ConfigureAwait(false);
+                result = await ctrl.QueryPageListAsync(predicate, orderBy!, pageIndex, pageSize).ConfigureAwait(false);
             }
             else if (predicate.HasContent())
             {
-                pageCount = await ctrl.CountByAsync(predicate).ConfigureAwait(false);
+                pageCount = await ctrl.CountByAsync(predicate!).ConfigureAwait(false);
 
                 SetSessionPageData(pageCount, pageIndex, pageSize);
                 result = await ctrl.QueryPageListAsync(predicate, pageIndex, pageSize).ConfigureAwait(false);
@@ -321,7 +314,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                 pageCount = await ctrl.CountAsync().ConfigureAwait(false);
 
                 SetSessionPageData(pageCount, pageIndex, pageSize);
-                result = await ctrl.GetPageListAsync(orderBy, pageIndex, pageSize).ConfigureAwait(false);
+                result = await ctrl.GetPageListAsync(orderBy!, pageIndex, pageSize).ConfigureAwait(false);
             }
             else
             {
@@ -360,7 +353,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                     var pageIndex = 0;
                     var searchModel = CreateSearchModel();
                     var pageSize = SessionInfo.GetPageSize(ControllerName);
-                    GetObjectValue(searchModel.ViewBagInfo.ItemPrefix, searchModel.GetSearchValueName(), formCollection, out string searchValue);
+                    GetObjectValue(searchModel.ViewBagInfo?.ItemPrefix ?? string.Empty, searchModel.GetSearchValueName(), formCollection, out string searchValue);
 
                     SetSessionSearchValue(searchValue);
 
@@ -371,6 +364,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                     LastViewError = ex.GetError();
                 }
             }
+            models ??= Array.Empty<TModel>();
             AfterIndex(models);
             return ReturnIndexView(models);
         }
@@ -401,6 +395,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                     LastViewError = ex.GetError();
                 }
             }
+            models ??= Array.Empty<TModel>();
             AfterIndex(models);
             return ReturnIndexView(models);
         }
@@ -431,6 +426,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                     LastViewError = ex.GetError();
                 }
             }
+            models ??= Array.Empty<TModel>();
             AfterIndex(models);
             return ReturnIndexView(models);
         }
@@ -457,10 +453,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                     LastViewError = ex.GetError();
                 }
             }
+            models ??= Array.Empty<TModel>();
             AfterIndex(models);
             return ReturnIndexView(models);
         }
-        partial void BeforeIndex(ref IEnumerable<TModel> models, ref bool handled);
+        partial void BeforeIndex(ref IEnumerable<TModel>? models, ref bool handled);
         partial void AfterIndex(IEnumerable<TModel> models);
         protected virtual IActionResult ReturnIndexView(IEnumerable<TModel> models) => View("Index", CreateIndexViewModel(models));
 
@@ -483,10 +480,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                     LastViewError = ex.GetError();
                 }
             }
+            models ??= Array.Empty<TModel>();
             AfterIndexByPageIndex(models);
             return ReturnIndexView(models);
         }
-        partial void BeforeIndexByPageIndex(int pageIndex, int pageSize, ref IEnumerable<TModel> models, ref bool handled);
+        partial void BeforeIndexByPageIndex(int pageIndex, int pageSize, ref IEnumerable<TModel>? models, ref bool handled);
         partial void AfterIndexByPageIndex(IEnumerable<TModel> models);
 
         [HttpGet]
@@ -510,10 +508,11 @@ namespace SnQMusicStore.AspMvc.Controllers
                     LastViewError = ex.GetError();
                 }
             }
+            models ??= Array.Empty<TModel>();
             AfterIndexByPageSize(models);
             return ReturnIndexView(models);
         }
-        partial void BeforeIndexByPageSize(int pageSize, ref IEnumerable<TModel> models, ref bool handled);
+        partial void BeforeIndexByPageSize(int pageSize, ref IEnumerable<TModel>? models, ref bool handled);
         partial void AfterIndexByPageSize(IEnumerable<TModel> models);
         #endregion Index actions
 
@@ -552,12 +551,12 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterCreate(model);
-            if (HasError == false)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.Create);
                 model = await BeforeViewAsync(model, ActionMode.Create).ConfigureAwait(false);
             }
-            return HasError ? RedirectToAction("Index") : ReturnCreateView(model);
+            return HasError || model == null ? RedirectToAction("Index") : ReturnCreateView(model);
         }
         [HttpGet]
         [ActionName(nameof(ActionMode.CreateById))]
@@ -573,7 +572,8 @@ namespace SnQMusicStore.AspMvc.Controllers
                 {
                     LastViewError = string.Empty;
                     model = await EditModelAsync(id).ConfigureAwait(false);
-                    model.Id = 0;
+                    if (model != null)
+                        model.Id = 0;
                 }
                 catch (Exception ex)
                 {
@@ -581,15 +581,15 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterCreate(model);
-            if (HasError == false)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.Create);
                 model = await BeforeViewAsync(model, ActionMode.Create).ConfigureAwait(false);
             }
-            return HasError ? RedirectToAction("Index") : ReturnCreateView(model);
+            return HasError || model == null ? RedirectToAction("Index") : ReturnCreateView(model);
         }
-        partial void BeforeCreate(ref TModel model, ref bool handled);
-        partial void AfterCreate(TModel model);
+        partial void BeforeCreate(ref TModel? model, ref bool handled);
+        partial void AfterCreate(TModel? model);
         protected virtual IActionResult ReturnCreateView(TModel model) => View("Create", CreateEditViewModel(model));
 
         protected virtual async Task<TModel> CreateModelAsync()
@@ -605,10 +605,11 @@ namespace SnQMusicStore.AspMvc.Controllers
 
                 model = ToModel(entity);
             }
+            model ??= new TModel();
             AfterCreateModel(model);
             return model;
         }
-        partial void BeforeCreateModel(ref TModel model, ref bool handled);
+        partial void BeforeCreateModel(ref TModel? model, ref bool handled);
         partial void AfterCreateModel(TModel model);
 
         [HttpPost]
@@ -678,21 +679,21 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterEdit(model);
-            if (HasError == false)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.Edit);
                 model = await BeforeViewAsync(model, ActionMode.Edit).ConfigureAwait(false);
             }
-            return HasError ? RedirectToAction("Index") : ReturnEditView(model);
+            return HasError || model == null ? RedirectToAction("Index") : ReturnEditView(model);
         }
-        partial void BeforeEdit(ref TModel model, ref bool handled);
-        partial void AfterEdit(TModel model);
+        partial void BeforeEdit(ref TModel? model, ref bool handled);
+        partial void AfterEdit(TModel? model);
         protected virtual IActionResult ReturnEditView(TModel model)
         {
             return View("Edit", CreateEditViewModel(model));
         }
 
-        protected virtual async Task<TModel> EditModelAsync(int id)
+        protected virtual async Task<TModel?> EditModelAsync(int id)
         {
             var handled = false;
             var model = default(TModel);
@@ -703,13 +704,13 @@ namespace SnQMusicStore.AspMvc.Controllers
                 using var ctrl = CreateController();
                 var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
 
-                model = ToModel(entity);
+                model = entity != null ? ToModel(entity) : new();
             }
             AfterEditModel(model);
             return model;
         }
-        partial void BeforeEditModel(ref TModel model, ref bool handled);
-        partial void AfterEditModel(TModel model);
+        partial void BeforeEditModel(ref TModel? model, ref bool handled);
+        partial void AfterEditModel(TModel? model);
 
         [HttpPost]
         [ActionName(nameof(ActionMode.Update))]
@@ -743,14 +744,17 @@ namespace SnQMusicStore.AspMvc.Controllers
                 if (model is IMasterDetails modelMasterDetail)
                 {
                     var entity = await ctrl.GetByIdAsync(model.Id).ConfigureAwait(false);
-                    var entityModel = ToModel(entity);
+                    var entityModel = entity != null ? ToModel(entity) : new();
 
                     if (entityModel is IMasterDetails entityMasterDetail)
                     {
                         entityMasterDetail.Master.CopyFrom(modelMasterDetail.Master);
                         entity = await ctrl.UpdateAsync(entityModel).ConfigureAwait(false);
                     }
-                    model.CopyProperties(entity);
+                    if (entity != null)
+                    {
+                        model.CopyProperties(entity);
+                    }
                 }
                 else
                 {
@@ -781,7 +785,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                     using var ctrl = CreateController();
                     var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
 
-                    model = ToModel(entity);
+                    model = entity != null ? ToModel(entity) : new();
                     LastViewError = string.Empty;
                 }
                 catch (Exception ex)
@@ -790,15 +794,15 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterDelete(model);
-            if (HasError == false)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.Delete);
                 model = await BeforeViewAsync(model, ActionMode.Delete).ConfigureAwait(false);
             }
-            return HasError ? RedirectToAction("Index") : ReturnDeleteView(model);
+            return HasError || model == null ? RedirectToAction("Index") : ReturnDeleteView(model);
         }
-        partial void BeforeDelete(ref TModel model, ref bool handled);
-        partial void AfterDelete(TModel model);
+        partial void BeforeDelete(ref TModel? model, ref bool handled);
+        partial void AfterDelete(TModel? model);
         protected virtual IActionResult ReturnDeleteView(TModel model) => View("Delete", CreateDisplayViewModel(model));
 
         [ActionName(nameof(ActionMode.Delete))]
@@ -815,6 +819,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                     using var ctrl = CreateController();
 
                     await ctrl.DeleteAsync(id).ConfigureAwait(false);
+                    SessionInfo.SetPageIndex(ControllerName, 0);
                     LastViewError = string.Empty;
                 }
                 catch (Exception ex)
@@ -828,13 +833,13 @@ namespace SnQMusicStore.AspMvc.Controllers
                 using var ctrl = CreateController();
                 var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
 
-                model = ToModel(entity);
+                model = entity != null ? ToModel(entity) : new();
             }
             return ReturnAfterDelete(HasError, model);
         }
         partial void BeforeDeleteModel(int id, ref bool handled);
         partial void AfterDeleteModel(int id);
-        protected virtual IActionResult ReturnAfterDelete(bool hasError, TModel model) => hasError ? View("Delete", CreateDisplayViewModel(model)) : RedirectToAction("Index");
+        protected virtual IActionResult ReturnAfterDelete(bool hasError, TModel? model) => hasError && model != null ? View("Delete", CreateDisplayViewModel(model)) : RedirectToAction("Index");
         #endregion Model actions
 
         #region Details
@@ -858,16 +863,16 @@ namespace SnQMusicStore.AspMvc.Controllers
                     LastViewError = ex.GetError();
                 }
             }
-            AfterEdit(model);
-            if (HasError == false)
+            AfterDetails(model);
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.Details);
                 model = await BeforeViewAsync(model, ActionMode.Details).ConfigureAwait(false);
             }
-            return HasError ? RedirectToAction("Index") : ReturnDetailsView(model);
+            return HasError || model == null ? RedirectToAction("Index") : ReturnDetailsView(model);
         }
-        partial void BeforeDetails(ref TModel model, ref bool handled);
-        partial void AfterDetails(TModel model);
+        partial void BeforeDetails(ref TModel? model, ref bool handled);
+        partial void AfterDetails(TModel? model);
         protected virtual IActionResult ReturnDetailsView(TModel model) => View("Details", CreateDisplayViewModel(model));
         #endregion Details
 
@@ -898,7 +903,7 @@ namespace SnQMusicStore.AspMvc.Controllers
 
                         masterDetailModel.Master = oneModel;
                         masterDetailModel.Detail = manyModel;
-                        addManyMethod?.Invoke(model, new object[] { masterDetailModel.Detail });
+                        addManyMethod?.Invoke(model, new object?[] { masterDetailModel.Detail });
                     }
                 }
                 catch (Exception ex)
@@ -907,7 +912,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterCreateDetail(model);
-            if (HasError == false)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.CreateDetail);
                 model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
@@ -925,7 +930,7 @@ namespace SnQMusicStore.AspMvc.Controllers
             var masterDetailModel = new MasterDetailModel();
 
             BeforeCreateDetail(ref model, ref handled);
-            if (handled == false)
+            if (handled == false || model != null)
             {
                 try
                 {
@@ -942,8 +947,10 @@ namespace SnQMusicStore.AspMvc.Controllers
 
                         masterDetailModel.Master = oneModel;
                         masterDetailModel.Detail = manyModel;
-                        manyModel.Id = 0;
-                        addManyMethod?.Invoke(model, new object[] { masterDetailModel.Detail });
+                        if (manyModel != null)
+                            manyModel.Id = 0;
+
+                        addManyMethod?.Invoke(model, new object?[] { masterDetailModel.Detail });
                     }
                 }
                 catch (Exception ex)
@@ -952,7 +959,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterCreateDetail(model);
-            if (HasError == false)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.CreateDetail);
                 model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
@@ -961,8 +968,8 @@ namespace SnQMusicStore.AspMvc.Controllers
             }
             return HasError ? RedirectToAction("Index") : ReturnCreateDetailView(masterDetailModel);
         }
-        partial void BeforeCreateDetail(ref TModel model, ref bool handled);
-        partial void AfterCreateDetail(TModel model);
+        partial void BeforeCreateDetail(ref TModel? model, ref bool handled);
+        partial void AfterCreateDetail(TModel? model);
         protected virtual IActionResult ReturnCreateDetailView(MasterDetailModel model) => View("CreateDetail", model);
 
         [HttpPost]
@@ -974,7 +981,7 @@ namespace SnQMusicStore.AspMvc.Controllers
             var masterDetailModel = new MasterDetailModel();
 
             BeforeAddDetail(ref model, ref handled);
-            if (handled == false)
+            if (handled == false || model == null)
             {
                 try
                 {
@@ -990,7 +997,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                         masterDetailModel.Master = oneModel;
                         masterDetailModel.Detail = manyModel;
                         SetModelValues(masterDetailModel.Detail, nameof(MasterDetailModel.Detail), formCollection);
-                        addManyMethod?.Invoke(model, new object[] { masterDetailModel.Detail });
+                        addManyMethod?.Invoke(model, new object?[] { masterDetailModel.Detail });
 
                         using var ctrl = CreateController();
                         var entity = await ctrl.UpdateAsync(model).ConfigureAwait(false);
@@ -1005,17 +1012,17 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterAddDetail(model);
-            if (HasError)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.CreateDetail);
                 model = await BeforeViewAsync(model, ActionMode.CreateDetail).ConfigureAwait(false);
                 masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.CreateDetail);
                 masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.CreateDetail).ConfigureAwait(false);
             }
-            return HasError ? ReturnCreateDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model.Id });
+            return HasError ? ReturnCreateDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model?.Id });
         }
-        partial void BeforeAddDetail(ref TModel model, ref bool handled);
-        partial void AfterAddDetail(TModel model);
+        partial void BeforeAddDetail(ref TModel? model, ref bool handled);
+        partial void AfterAddDetail(TModel? model);
 
         [HttpGet]
         [ActionName(nameof(ActionMode.EditDetail))]
@@ -1050,7 +1057,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterEditDetail(model);
-            if (HasError == false)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.EditDetail);
                 model = await BeforeViewAsync(model, ActionMode.EditDetail).ConfigureAwait(false);
@@ -1059,8 +1066,8 @@ namespace SnQMusicStore.AspMvc.Controllers
             }
             return HasError ? RedirectToAction("Index") : ReturnEditDetailView(masterDetailModel);
         }
-        partial void BeforeEditDetail(ref TModel model, ref bool handled);
-        partial void AfterEditDetail(TModel model);
+        partial void BeforeEditDetail(ref TModel? model, ref bool handled);
+        partial void AfterEditDetail(TModel? model);
         protected virtual IActionResult ReturnEditDetailView(MasterDetailModel model) => View("EditDetail", model);
 
         [HttpPost]
@@ -1105,17 +1112,17 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterUpdateDetail(model);
-            if (HasError)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.EditDetail);
                 model = await BeforeViewAsync(model, ActionMode.EditDetail).ConfigureAwait(false);
                 masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.EditDetail);
                 masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.EditDetail).ConfigureAwait(false);
             }
-            return HasError ? ReturnEditDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model.Id });
+            return HasError ? ReturnEditDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model?.Id });
         }
-        partial void BeforeUpdateDetail(ref TModel model, ref bool handled);
-        partial void AfterUpdateDetail(TModel model);
+        partial void BeforeUpdateDetail(ref TModel? model, ref bool handled);
+        partial void AfterUpdateDetail(TModel? model);
 
         [HttpGet]
         [ActionName(nameof(ActionMode.DeleteDetail))]
@@ -1150,7 +1157,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterViewDeleteDetail(model);
-            if (HasError == false)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.DeleteDetail);
                 model = await BeforeViewAsync(model, ActionMode.DeleteDetail).ConfigureAwait(false);
@@ -1159,8 +1166,8 @@ namespace SnQMusicStore.AspMvc.Controllers
             }
             return HasError ? RedirectToAction("Index") : ReturnDeleteDetailView(masterDetailModel);
         }
-        partial void BeforeViewDeleteDetail(ref TModel model, ref bool handled);
-        partial void AfterViewDeleteDetail(TModel model);
+        partial void BeforeViewDeleteDetail(ref TModel? model, ref bool handled);
+        partial void AfterViewDeleteDetail(TModel? model);
         protected virtual IActionResult ReturnDeleteDetailView(MasterDetailModel model) => View("DeleteDetail", model);
 
         [HttpPost]
@@ -1207,24 +1214,22 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterDeleteDetail(model);
-            if (HasError)
+            if (HasError == false && model != null)
             {
                 model = BeforeView(model, ActionMode.DeleteDetail);
                 model = await BeforeViewAsync(model, ActionMode.DeleteDetail).ConfigureAwait(false);
                 masterDetailModel = BeforeViewMasterDetail(masterDetailModel, ActionMode.DeleteDetail);
                 masterDetailModel = await BeforeViewMasterDetailAsync(masterDetailModel, ActionMode.DeleteDetail).ConfigureAwait(false);
             }
-            return HasError ? ReturnDeleteDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model.Id });
+            return HasError ? ReturnDeleteDetailView(masterDetailModel) : RedirectToAction("Details", new { id = model?.Id });
         }
-        partial void BeforeDeleteDetail(ref TModel model, ref bool handled);
-        partial void AfterDeleteDetail(TModel model);
+        partial void BeforeDeleteDetail(ref TModel? model, ref bool handled);
+        partial void AfterDeleteDetail(TModel? model);
         #endregion Detail model actions
 
         #region Helpers
         public static bool GetObjectId(string prefix, IFormCollection formCollection, out int id)
         {
-            formCollection.CheckArgument(nameof(formCollection));
-
             var result = false;
             var formKey = "Id";
 
@@ -1247,7 +1252,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         public static bool GetObjectValue(string prefix, string name, IFormCollection formCollection, out string value)
         {
-            formCollection.CheckArgument(nameof(formCollection));
+            _ = formCollection ?? throw new ArgumentNullException(nameof(formCollection));
 
             var result = false;
             var formKey = name;
@@ -1259,7 +1264,9 @@ namespace SnQMusicStore.AspMvc.Controllers
 
             if (formCollection.Keys.Contains(formKey))
             {
-                value = formCollection[formKey].FirstOrDefault();
+                var values = formCollection[formKey];
+
+                value = values.FirstOrDefault() ?? string.Empty;
             }
             else
             {
@@ -1267,10 +1274,10 @@ namespace SnQMusicStore.AspMvc.Controllers
             }
             return result;
         }
-        public static void SetModelValues(object model, string prefix, IFormCollection formCollection)
+        public static void SetModelValues(object? model, string prefix, IFormCollection formCollection)
         {
-            model.CheckArgument(nameof(model));
-            formCollection.CheckArgument(nameof(formCollection));
+            _ = model ?? throw new ArgumentNullException(nameof(model));
+            _ = formCollection ?? throw new ArgumentNullException(nameof(formCollection));
 
             foreach (var pi in model.GetType().GetProperties().Where(pi => pi.CanWrite))
             {
@@ -1338,7 +1345,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                     }
                     else
                     {
-                        object value = Convert.ChangeType(formValue, pi.PropertyType);
+                        object? value = Convert.ChangeType(formValue, pi.PropertyType);
 
                         pi.SetValue(model, value);
                     }

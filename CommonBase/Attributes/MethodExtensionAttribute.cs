@@ -11,6 +11,10 @@ namespace CommonBase.Attributes
     public partial class MethodExtensionAttribute : Attribute
     {
         public string MappingName { get; set; }
+        public MethodExtensionAttribute(string name)
+        {
+            MappingName = name;
+        }
     }
 }
 //MdEnd

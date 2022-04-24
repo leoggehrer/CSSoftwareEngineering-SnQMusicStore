@@ -21,8 +21,8 @@
 
     if (sessionInfo.IsAuthenticated)
     {
-        mnuUser = sessionInfo.LoginSession.Name;
-        if (sessionInfo.LoginSession.IsRemoteAuth)
+        mnuUser = sessionInfo.LoginSession?.Name;
+        if (sessionInfo.LoginSession != null && sessionInfo.LoginSession.IsRemoteAuth)
         {
             mnuUser = $"{mnuUser} [rm]";
         }

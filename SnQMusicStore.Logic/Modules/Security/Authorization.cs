@@ -16,7 +16,7 @@ namespace SnQMusicStore.Logic.Modules.Security
         static Authorization()
         {
             ClassConstructing();
-            if (SystemAuthorizationToken.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(SystemAuthorizationToken))
             {
                 SystemAuthorizationToken = Guid.NewGuid().ToString();
             }
@@ -29,13 +29,13 @@ namespace SnQMusicStore.Logic.Modules.Security
         internal static int DefaultTimeOutInSeconds => DefaultTimeOutInMinutes * 60;
         internal static string SystemAuthorizationToken { get; set; }
 
-        internal static Task CheckAuthorizationAsync(string sessionToken, MethodBase methodBase, AccessType accessType)
+        internal static Task CheckAuthorizationAsync(string sessionToken, MethodBase? methodBase, AccessType accessType)
         {
-            return CheckAuthorizationAsync(sessionToken, methodBase, accessType, null);
+            return CheckAuthorizationAsync(sessionToken, methodBase, accessType, string.Empty);
         }
-        internal static async Task CheckAuthorizationAsync(string sessionToken, MethodBase methodBase, AccessType accessType, string infoData)
+        internal static async Task CheckAuthorizationAsync(string sessionToken, MethodBase? methodBase, AccessType accessType, string infoData)
         {
-            methodBase.CheckArgument(nameof(methodBase));
+            _ = methodBase ?? throw new ArgumentNullException(nameof(methodBase));
 
             bool handled = false;
 
@@ -47,8 +47,10 @@ namespace SnQMusicStore.Logic.Modules.Security
             AfterCheckAuthorization(sessionToken, methodBase, accessType);
         }
 
-        private static async Task CheckAuthorizationInternalAsync(string sessionToken, MethodBase methodBase, AccessType accessType, string infoData)
+        private static async Task CheckAuthorizationInternalAsync(string sessionToken, MethodBase? methodBase, AccessType accessType, string infoData)
         {
+            _ = methodBase ?? throw new ArgumentNullException(nameof(methodBase));
+
             var originalMethodBase = methodBase.GetAsyncOriginal();
 
             if (sessionToken.IsNullOrEmpty())
@@ -62,9 +64,8 @@ namespace SnQMusicStore.Logic.Modules.Security
             else if (sessionToken.Equals(SystemAuthorizationToken) == false)
             {
                 var authorization = originalMethodBase.GetCustomAttribute<AuthorizeAttribute>();
-                bool isRequired = authorization?.Required ?? false;
 
-                if (isRequired)
+                if (authorization != null && authorization.Required)
                 {
                     var curSession = await AccountManager.QueryAliveSessionAsync(sessionToken).ConfigureAwait(false);
 
@@ -86,10 +87,10 @@ namespace SnQMusicStore.Logic.Modules.Security
             }
         }
 
-        static partial void BeforeCheckAuthorization(string sessionToken, MethodBase methodBase, AccessType accessType, ref bool handled);
-        static partial void AfterCheckAuthorization(string sessionToken, MethodBase methodBase, AccessType accessType);
+        static partial void BeforeCheckAuthorization(string? sessionToken, MethodBase? methodBase, AccessType accessType, ref bool handled);
+        static partial void AfterCheckAuthorization(string? sessionToken, MethodBase? methodBase, AccessType accessType);
 
-        internal static async Task CheckAuthorizationAsync(string sessionToken, Type subjectType, MethodBase methodBase, AccessType accessType, string infoData)
+        internal static async Task CheckAuthorizationAsync(string? sessionToken, Type subjectType, MethodBase methodBase, AccessType accessType, string infoData)
         {
             bool handled = false;
 
@@ -101,12 +102,9 @@ namespace SnQMusicStore.Logic.Modules.Security
             AfterCheckAuthorization(sessionToken, subjectType, methodBase, accessType);
         }
 
-        private static async Task CheckAuthorizationInternalAsync(string sessionToken, Type subjectType, MethodBase methodBase, AccessType accessType, string infoData)
+        private static async Task CheckAuthorizationInternalAsync(string? sessionToken, Type subjectType, MethodBase methodBase, AccessType accessType, string infoData)
         {
-            subjectType.CheckArgument(nameof(subjectType));
-            methodBase.CheckArgument(nameof(methodBase));
-
-            static AuthorizeAttribute GetClassAuthorization(Type classType)
+            static AuthorizeAttribute? GetClassAuthorization(Type classType)
             {
                 var runType = classType;
                 var result = default(AuthorizeAttribute);
@@ -121,10 +119,9 @@ namespace SnQMusicStore.Logic.Modules.Security
 
             var originalMethodBase = methodBase.GetAsyncOriginal();
 
-            if (sessionToken.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(sessionToken))
             {
-                var authorization = originalMethodBase.GetCustomAttribute<AuthorizeAttribute>()
-                                 ?? GetClassAuthorization(subjectType);
+                var authorization = originalMethodBase.GetCustomAttribute<AuthorizeAttribute>() ?? GetClassAuthorization(subjectType);
                 var isRequired = authorization?.Required ?? false;
 
                 if (isRequired)
@@ -134,11 +131,9 @@ namespace SnQMusicStore.Logic.Modules.Security
             }
             else if (sessionToken.Equals(SystemAuthorizationToken) == false)
             {
-                var authorization = originalMethodBase.GetCustomAttribute<AuthorizeAttribute>()
-                                 ?? GetClassAuthorization(subjectType);
-                var isRequired = authorization?.Required ?? false;
+                var authorization = originalMethodBase.GetCustomAttribute<AuthorizeAttribute>() ?? GetClassAuthorization(subjectType);
 
-                if (isRequired)
+                if (authorization != null && authorization.Required)
                 {
                     var curSession = await AccountManager.QueryAliveSessionAsync(sessionToken).ConfigureAwait(false);
 
@@ -160,10 +155,10 @@ namespace SnQMusicStore.Logic.Modules.Security
             }
         }
 
-        static partial void BeforeCheckAuthorization(string sessionToken, Type subjectType, MethodBase methodBase, AccessType accessType, ref bool handled);
-        static partial void AfterCheckAuthorization(string sessionToken, Type subjectType, MethodBase methodBase, AccessType accessType);
+        static partial void BeforeCheckAuthorization(string? sessionToken, Type subjectType, MethodBase methodBase, AccessType accessType, ref bool handled);
+        static partial void AfterCheckAuthorization(string? sessionToken, Type subjectType, MethodBase methodBase, AccessType accessType);
 
-        private static void Logging(int identityId, Type subjectType, MethodBase methodBase, AccessType accessType, string info)
+        private static void Logging(int identityId, Type? subjectType, MethodBase methodBase, AccessType accessType, string info)
         {
 #if LOGGING_ON
             Task.Run(async () =>
@@ -181,7 +176,7 @@ namespace SnQMusicStore.Logic.Modules.Security
                     {
                         IdentityId = identityId,
                         Time = DateTime.Now,
-                        Subject = subjectType.Name,
+                        Subject = subjectType?.Name ?? "unknown",
                         Action = $"{methodBase.Name} ({accessType})",
                         Info = info
                     };
@@ -193,8 +188,8 @@ namespace SnQMusicStore.Logic.Modules.Security
 #endif
         }
 #if LOGGING_ON
-        static partial void BeforeLogging(Type subjectType, MethodBase methodBase, AccessType accessType, ref bool handled);
-        static partial void AfterLogging(Type subjectType, MethodBase methodBase, AccessType accessType);
+        static partial void BeforeLogging(Type? subjectType, MethodBase methodBase, AccessType accessType, ref bool handled);
+        static partial void AfterLogging(Type? subjectType, MethodBase methodBase, AccessType accessType);
 #endif
     }
 }

@@ -2,30 +2,39 @@
 @{
     @using SnQMusicStore.AspMvc.Models.Modules.View
     @using SnQMusicStore.AspMvc.Modules.Session
+    @using SnQMusicStore.AspMvc.Modules.View
     @model SorterModel
 
-    var viewBagInfo = Model.ViewBagInfo;
-    var sessionInfo = Model.SessionInfo;
-    var indexViewModel = Model.IndexViewModel;
-    var index = viewBagInfo.Index;
-    var property = viewBagInfo.DisplayProperty;
-    var sortOperations = Model.GetSortOperations(property);
-    var sorterValues = sessionInfo.GetSorterValues(viewBagInfo.Controller);
-    var propertyOperation = default(string);
-    var sorterItem = default(SorterItem);
-    var listOperation = new List<SelectListItem>(sortOperations);
-
-    if (sorterValues != null && sorterValues.TryGetValue(property.Name, out sorterItem))
+    if (Model != null)
     {
-        propertyOperation = sorterItem.Operation;
-    }
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var sessionInfo = Model.SessionInfo;
+        var indexViewModel = Model.IndexViewModel;
+        var index = viewBagInfo.Index;
+        var property = viewBagInfo.DisplayProperty;
+        var sortOperations = Model.GetSortOperations(property);
+        var sorterValues = sessionInfo.GetSorterValues(viewBagInfo.Controller);
+        var propertyOperation = default(string);
+        var sorterItem = default(SorterItem);
+        var listOperation = new List<SelectListItem>(sortOperations);
 
-    listOperation.ForEach(e => e.Selected = propertyOperation != null && e.Value == propertyOperation);
-    <div class="form-group row">
-        <label for="@property.Name" class="col-sm-2 col-form-label">@viewBagInfo.TranslateFor(indexViewModel.GetLabel(property))</label>
-        <div class="col-sm-2">
-            @Html.DropDownList(Model.GetSortOperationName(property), listOperation, null, new { @class = "form-control" })
-        </div>
-    </div>
-    viewBagInfo.Handled = true;
+        if (property != null
+            && sorterValues != null
+            && sorterValues.TryGetValue(property.Name, out sorterItem))
+        {
+            propertyOperation = sorterItem.Operation;
+        }
+
+        if (property != null)
+        {
+            listOperation.ForEach(e => e.Selected = propertyOperation != null && e.Value == propertyOperation);
+            <div class="form-group row">
+                <label for="@property.Name" class="col-sm-2 col-form-label">@viewBagInfo.TranslateFor(indexViewModel.GetLabel(property))</label>
+                <div class="col-sm-2">
+                    @Html.DropDownList(Model.GetSortOperationName(property), listOperation, null, new { @class = "form-control" })
+                </div>
+            </div>
+            viewBagInfo.Handled = true;
+        }
+    }
 }

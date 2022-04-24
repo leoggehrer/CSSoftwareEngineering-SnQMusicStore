@@ -30,7 +30,7 @@ namespace SnQMusicStore.Logic.Modules.Exception
 				if (Messages.ContainsKey((ErrorType)item) == false)
 				{
 					var sb = new StringBuilder();
-					var error = Enum.GetName(typeof(ErrorType), item);
+					var error = Enum.GetName(typeof(ErrorType), item) ?? string.Empty;
 
 					foreach (var chr in error)
 					{

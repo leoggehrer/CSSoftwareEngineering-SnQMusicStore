@@ -11,8 +11,8 @@
     var sessionInfo = new SessionWrapper(Context.Session);
 
     viewBagInfo.Translate = Translator.TranslateIt;
-    viewBagInfo.Controller = ViewContext.RouteData.Values["controller"].ToString();
-    viewBagInfo.Action = ViewContext.RouteData.Values["action"].ToString();
+    viewBagInfo.Controller = ViewContext.RouteData?.Values["controller"]?.ToString() ?? string.Empty;
+    viewBagInfo.Action = ViewContext.RouteData?.Values["action"]?.ToString() ?? string.Empty;
 
     if (Model != null)
     {

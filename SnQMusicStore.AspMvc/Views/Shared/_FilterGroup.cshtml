@@ -2,54 +2,62 @@
 @{
     @using SnQMusicStore.AspMvc.Models.Modules.View
     @using SnQMusicStore.AspMvc.Modules.Session
+    @using SnQMusicStore.AspMvc.Modules.View
     @model FilterModel
 
-    var viewBagInfo = Model.ViewBagInfo;
-    var sessionInfo = Model.SessionInfo;
-    var indexViewModel = Model.IndexViewModel;
-    var index = viewBagInfo.Index;
-    var property = viewBagInfo.DisplayProperty;
-    var typeOperations = Model.GetTypeOperations(property);
-    var filterValues = sessionInfo.GetFilterValues(viewBagInfo.Controller);
-    var propertyValue = default(string);
-    var propertyOperation = default(string);
-    var filterItem = default(FilterItem);
-    var listOperation = new List<SelectListItem>(typeOperations);
-
-    if (filterValues != null && filterValues.TryGetValue(property.Name, out filterItem))
+    if (Model != null)
     {
-        propertyValue = filterItem.Value;
-        propertyOperation = filterItem.Operation;
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var sessionInfo = Model.SessionInfo;
+        var indexViewModel = Model.IndexViewModel;
+        var index = viewBagInfo.Index;
+        var property = viewBagInfo.DisplayProperty;
+
+        if (property != null)
+        {
+            var typeOperations = Model.GetTypeOperations(property);
+            var filterValues = sessionInfo.GetFilterValues(viewBagInfo.Controller);
+            var propertyValue = default(string);
+            var propertyOperation = default(string);
+            var filterItem = default(FilterItem);
+            var listOperation = new List<SelectListItem>(typeOperations);
+
+            if (filterValues != null && filterValues.TryGetValue(property.Name, out filterItem))
+            {
+                propertyValue = filterItem.Value;
+                propertyOperation = filterItem.Operation;
+            }
+
+            listOperation.ForEach(e => e.Selected = propertyOperation != null && e.Value == propertyOperation);
+            <div class="form-group row">
+                <label for="@property.Name" class="col-sm-2 col-form-label">@viewBagInfo.TranslateFor(indexViewModel.GetLabel(property))</label>
+                <div class="col-sm-2">
+                    @Html.DropDownList(Model.GetTypeOperationName(property), listOperation, null, new { @class = "form-control" })
+                </div>
+                <div class="col-sm-8">
+                    @if (property.PropertyType.IsEnum)
+                    {
+                        var list = new List<SelectListItem>();
+
+                        list.Add(new SelectListItem { Text = string.Empty, Value = string.Empty });
+                        list.AddRange(Html.GetEnumSelectList(property.PropertyType));
+                        list.ForEach(e => e.Selected = propertyValue != null && e.Value == propertyValue);
+
+                        @Html.DropDownList(Model.GetName(property), list, null, new { @class = "form-control" })
+                    }
+                    else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                    {
+                        var boolVal = propertyValue != null ? Convert.ToBoolean(propertyValue) : false;
+
+                        @Html.CheckBox(Model.GetName(property), boolVal, new { @class="form-check-input", style="margin: 0.7em;" })
+                    }
+                    else
+                    {
+                        <input type="text" class="form-control" id="@Model.GetId(property)" name="@Model.GetName(property)" , value="@propertyValue" />
+                    }
+                </div>
+            </div>
+            viewBagInfo.Handled = true;
+        }
     }
-
-    listOperation.ForEach(e => e.Selected = propertyOperation != null && e.Value == propertyOperation);
-    <div class="form-group row">
-        <label for="@property.Name" class="col-sm-2 col-form-label">@viewBagInfo.TranslateFor(indexViewModel.GetLabel(property))</label>
-        <div class="col-sm-2">
-            @Html.DropDownList(Model.GetTypeOperationName(property), listOperation, null, new { @class = "form-control" })
-        </div>
-        <div class="col-sm-8">
-            @if (property.PropertyType.IsEnum)
-            {
-                var list = new List<SelectListItem>();
-
-                list.Add(new SelectListItem { Text = string.Empty, Value = string.Empty });
-                list.AddRange(Html.GetEnumSelectList(property.PropertyType));
-                list.ForEach(e => e.Selected = propertyValue != null && e.Value == propertyValue);
-
-                @Html.DropDownList(Model.GetName(property), list, null, new { @class = "form-control" })
-            }
-            else if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
-            {
-                var boolVal = propertyValue != null ? Convert.ToBoolean(propertyValue) : false;
-
-                @Html.CheckBox(Model.GetName(property), boolVal, new { @class="form-check-input", style="margin: 0.7em;" })
-            }
-            else
-            {
-                <input type="text" class="form-control" id="@Model.GetId(property)" name="@Model.GetName(property)" , value="@propertyValue" />
-            }
-        </div>
-    </div>
-    viewBagInfo.Handled = true;
 }

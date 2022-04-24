@@ -54,17 +54,16 @@ namespace CSharpCodeGenerator.Logic.Models.Configuration
 	}
     internal record DisplaySetting
     {
-#pragma warning disable CA1822 // Mark members as static
         public string Type => nameof(DisplaySetting);
-#pragma warning restore CA1822 // Mark members as static
+
         public bool ScaffoldItem { get; set; }
         public bool IsModelItem { get; set; }
         public ReadonlyMode ReadonlyMode { get; set; } = ReadonlyMode.None;
         public VisibilityMode VisibilityMode { get; set; } = VisibilityMode.Visible;
         public bool ListSortable { get; set; }
         public bool ListFilterable { get; set; }
-        public string ListWidth { get; set; }
-        public string FormatValue { get; set; }
+        public string ListWidth { get; set; } = string.Empty;
+        public string FormatValue { get; set; } = string.Empty;
         public int Order { get; set; }
     }
 }

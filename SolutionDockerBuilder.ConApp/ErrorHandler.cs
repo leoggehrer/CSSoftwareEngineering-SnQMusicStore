@@ -7,10 +7,10 @@ namespace SolutionDockerBuilder.ConApp
 {
     public static class ErrorHandler
     {
-        private static string lastError;
+        private static string? lastError;
         private static readonly List<string> errorList = new ();
 
-        public static string LastError 
+        public static string? LastError 
         { 
             get => lastError; 
             set
@@ -28,7 +28,7 @@ namespace SolutionDockerBuilder.ConApp
             lastError = null;
             errorList.Clear();
         }
-        public static string GetLastErrorAndClear()
+        public static string? GetLastErrorAndClear()
         {
             var result = LastError;
 
@@ -47,7 +47,7 @@ namespace SolutionDockerBuilder.ConApp
 
             var tab = string.Empty;
             var errMsg = source.Message;
-            Exception innerException = source.InnerException;
+            Exception? innerException = source.InnerException;
 
             while (innerException != null)
             {

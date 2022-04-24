@@ -9,12 +9,12 @@ namespace CommonBase.Extensions
 {
     public static partial class ObjectExtensions
     {
-        public static void CheckArgument(this object source, string argName)
+        public static void CheckArgument(this object? source, string argName)
         {
             if (source == null)
                 throw new ArgumentNullException(argName);
         }
-        public static void CheckNotNull(this object source, string itemName)
+        public static void CheckNotNull(this object? source, string itemName)
         {
             if (source == null)
                 throw new ArgumentNullException(itemName);
@@ -52,10 +52,8 @@ namespace CommonBase.Extensions
             return result;
         }
 
-        public static bool TryParse(this object value, Type type, out object typeValue)
+        public static bool TryParse(this object value, Type? type, out object? typeValue)
         {
-            type.CheckArgument(nameof(type));
-
             bool result;
 
             if (value == null)
@@ -63,7 +61,7 @@ namespace CommonBase.Extensions
                 result = true;
                 typeValue = null;
             }
-            else if (type.IsNullableType())
+            else if (type != null && type.IsNullableType())
             {
                 if (type.IsGenericType)
                 {
@@ -77,29 +75,32 @@ namespace CommonBase.Extensions
             }
             else if (type == typeof(TimeSpan))
             {
-                typeValue = TimeSpan.Parse(value.ToString());
+                typeValue = TimeSpan.Parse(value.ToString() ?? string.Empty);
                 result = true;
             }
             else if (type == typeof(DateTime))
             {
-                typeValue = DateTime.Parse(value.ToString());
+                typeValue = DateTime.Parse(value.ToString() ?? string.Empty);
                 result = true;
             }
-            else if (type.IsEnum)
+            else if (type != null && type.IsEnum)
             {
                 result = Enum.TryParse(type, value.ToString(), out typeValue);
             }
-            else
+            else if (type != null)
             {
                 typeValue = Convert.ChangeType(value, type);
                 result = true;
             }
+            else
+            {
+                result = false;
+                typeValue = null;
+            }
             return result;
         }
-        public static bool ConvertByTypeCode(this object value, Type type, out object typeValue)
+        public static bool ConvertByTypeCode(this object value, Type type, out object? typeValue)
         {
-            type.CheckArgument(nameof(type));
-
             var result = false;
             var code = Type.GetTypeCode(type);
 
@@ -224,7 +225,7 @@ namespace CommonBase.Extensions
                 case TypeCode.String:
                     {
                         result = value != null;
-                        typeValue = result ? value.ToString() : null;
+                        typeValue = value != null ? value.ToString() ?? string.Empty : null;
                         break;
                     }
             }
@@ -309,18 +310,15 @@ namespace CommonBase.Extensions
         {
             CopyProperties(target, source, null, null);
         }
-        public static void CopyProperties(object target, object source, Func<string, bool> filter, Func<string, string> mapping)
+        public static void CopyProperties(object target, object source, Func<string, bool>? filter, Func<string, string>? mapping)
         {
-            target.CheckArgument(nameof(target));
-            source.CheckArgument(nameof(source));
-
             Dictionary<string, PropertyItem> targetPropertyInfos = target.GetType().GetAllTypeProperties();
             Dictionary<string, PropertyItem> sourcePropertyInfos = source.GetType().GetAllTypeProperties();
 
             SetPropertyValues(target, source, filter, mapping, targetPropertyInfos, sourcePropertyInfos);
         }
 
-        private static void SetPropertyValues(object target, object source, Func<string, bool> filter, Func<string, string> mapping, Dictionary<string, PropertyItem> targetPropertyInfos, Dictionary<string, PropertyItem> sourcePropertyInfos)
+        private static void SetPropertyValues(object target, object source, Func<string, bool>? filter, Func<string, string>? mapping, Dictionary<string, PropertyItem> targetPropertyInfos, Dictionary<string, PropertyItem> sourcePropertyInfos)
         {
             filter ??= (n => true);
             mapping ??= (n => n);
@@ -335,32 +333,35 @@ namespace CommonBase.Extensions
                     {
                         if (propertyItemSource.IsStringType)
                         {
-                            object value = propertyItemSource.PropertyInfo.GetValue(source, null);
+                            var value = propertyItemSource.PropertyInfo.GetValue(source);
 
-                            propertyItemTarget.Value.PropertyInfo.SetValue(target, value, null);
+                            propertyItemTarget.Value.PropertyInfo.SetValue(target, value);
                         }
                         else if (propertyItemSource.IsArrayType)
                         {
-                            object value = propertyItemSource.PropertyInfo.GetValue(source, null);
+                            var value = propertyItemSource.PropertyInfo.GetValue(source);
 
-                            propertyItemTarget.Value.PropertyInfo.SetValue(target, value, null);
+                            propertyItemTarget.Value.PropertyInfo.SetValue(target, value);
                         }
                         else if (propertyItemSource.PropertyInfo.PropertyType.IsValueType
                             && propertyItemTarget.Value.PropertyInfo.PropertyType.IsValueType)
                         {
-                            object value = propertyItemSource.PropertyInfo.GetValue(source, null);
+                            var value = propertyItemSource.PropertyInfo.GetValue(source);
 
-                            propertyItemTarget.Value.PropertyInfo.SetValue(target, value, null);
+                            propertyItemTarget.Value.PropertyInfo.SetValue(target, value);
                         }
                         else if (propertyItemSource.IsComplexType)
                         {
-                            object srcValue = propertyItemSource.PropertyInfo.GetValue(source);
-                            object tarValue = propertyItemTarget.Value.PropertyInfo.GetValue(target);
+                            var value = propertyItemSource.PropertyInfo.GetValue(source);
 
-                            if (srcValue != null && tarValue != null)
-                            {
-                                SetPropertyValues(tarValue, srcValue, filter, mapping, propertyItemTarget.Value.PropertyItems, propertyItemSource.PropertyItems);
-                            }
+                            propertyItemTarget.Value.PropertyInfo.SetValue(target, value);
+                            //object srcValue = propertyItemSource.PropertyInfo.GetValue(source);
+                            //object tarValue = propertyItemTarget.Value.PropertyInfo.GetValue(target);
+
+                            //if (srcValue != null && tarValue != null)
+                            //{
+                            //    SetPropertyValues(tarValue, srcValue, filter, mapping, propertyItemTarget.Value.PropertyItems, propertyItemSource.PropertyItems);
+                            //}
                         }
                     }
                 }

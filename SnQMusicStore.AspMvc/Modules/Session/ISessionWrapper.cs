@@ -14,7 +14,7 @@ namespace SnQMusicStore.AspMvc.Modules.Session
 
         #region Object-Access
         void SetValue(string key, object value);
-        object GetValue(string key);
+        object? GetValue(string key);
         #endregion Object-Access
 
         #region Int-Access
@@ -23,17 +23,17 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         #endregion Int-Access
 
         #region String-Access
-        void SetStringValue(string key, string value);
-        string GetStringValue(string key);
-        string GetStringValue(string key, string defaultValue);
+        void SetStringValue(string key, string? value);
+        string? GetStringValue(string key);
+        string? GetStringValue(string key, string defaultValue);
         #endregion String-Access
 
         #region Properties
-        string ReturnUrl { get; set; }
-        string ReturnController { get; set; }
-        string ReturnAction { get; set; }
-        string Hint { get; set; }
-        string Error { get; set; }
+        string? ReturnUrl { get; set; }
+        string? ReturnController { get; set; }
+        string? ReturnAction { get; set; }
+        string? Hint { get; set; }
+        string? Error { get; set; }
         #endregion Properties
 
         #region Filter properties
@@ -42,14 +42,14 @@ namespace SnQMusicStore.AspMvc.Modules.Session
         void SetFilterPredicate(string controllerName, string value);
         string GetFilterPredicate(string controllerName);
         void SetFilterModel(string controllerName, FilterModel filterModel);
-        FilterModel GetFilterModel(string controllerName);
+        FilterModel? GetFilterModel(string controllerName);
         void SetFilterValues(string controllerName, FilterValues filterValues);
-        FilterValues GetFilterValues(string controllerName);
+        FilterValues? GetFilterValues(string controllerName);
         #endregion Filter properties
 
         #region Sorter properties
         void SetSorterValues(string controllerName, SorterValues sorterValues);
-        SorterValues GetSorterValues(string controllerName);
+        SorterValues? GetSorterValues(string controllerName);
         #endregion Sorter properties
 
         #region Page properties
@@ -67,8 +67,8 @@ namespace SnQMusicStore.AspMvc.Modules.Session
 
 #if ACCOUNT_ON
         #region Authentication
-        Models.Persistence.Account.LoginSession LoginSession { get; set; }
-        string SessionToken => LoginSession?.SessionToken;
+        Models.Persistence.Account.LoginSession? LoginSession { get; set; }
+        string SessionToken => LoginSession?.SessionToken ?? string.Empty;
         bool IsAuthenticated { get; }
         bool IsSessionAlive { get; }
         #endregion Authentication

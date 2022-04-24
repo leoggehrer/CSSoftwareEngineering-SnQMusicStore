@@ -56,21 +56,20 @@ namespace CSharpCodeGenerator.Logic.Generation
         public string LogicControllerNameSpace => $"{SolutionProperties.LogicProjectName}.{StaticLiterals.ControllersFolder}";
         public string CreateLogicControllerNameSpace(Type type)
         {
-            type.CheckArgument(nameof(type));
-
-            return $"{LogicControllerNameSpace}.{GeneratorObject.CreateSubNamespaceFromType(type)}";
+            return $"{LogicControllerNameSpace}.{CreateSubNamespaceFromType(type)}";
         }
         private static List<string> InitLogicControllerAttributes(Type type)
         {
             var result = new List<string>();
 
-            if (type.FullName.EndsWith(".Business.Account.IAppAccess")
+            if (type.FullName != null 
+                && (type.FullName.EndsWith(".Business.Account.IAppAccess")
                 || type.FullName.EndsWith(".Persistence.Account.IAccess")
                 || type.FullName.EndsWith(".Persistence.Account.IIdentity")
                 || type.FullName.EndsWith(".Persistence.Account.IRole")
                 || type.FullName.EndsWith(".Persistence.Account.IIdentityXRole")
                 || type.FullName.EndsWith(".Persistence.Account.ILoginSession")
-                )
+                ))
             {
                 result.Add("[Logic.Modules.Security.Authorize(\"SysAdmin\", \"AppAdmin\")]");
             }
@@ -95,20 +94,23 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreateBusinessController(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             Contracts.IGeneratedItem result;
-            var itfcs = type.GetInterfaces();
+            var contractHelper = new ContractHelper(type);
+            var interfaces = type.GetInterfaces();
 
-            if (itfcs.Length > 0 && itfcs[0].Name.Equals(StaticLiterals.ICompositeName) && itfcs[0].GetGenericArguments().Length == 3)
+            if (contractHelper.DelegateType != null)
+            {
+                result = CreateDelegateBusinessController(type); ;
+            }
+            else if (interfaces.Length > 0 && interfaces[0].Name.Equals(StaticLiterals.ICompositeName) && interfaces[0].GetGenericArguments().Length == 3)
             {
                 result = CreateCompositeBusinessController(type);
             }
-            else if (itfcs.Length > 0 && itfcs[0].Name.Equals(StaticLiterals.IOneToAnotherName) && itfcs[0].GetGenericArguments().Length == 2)
+            else if (interfaces.Length > 0 && interfaces[0].Name.Equals(StaticLiterals.IOneToAnotherName) && interfaces[0].GetGenericArguments().Length == 2)
             {
                 result = CreateOneToAnotherBusinessController(type);
             }
-            else if (itfcs.Length > 0 && itfcs[0].Name.Equals(StaticLiterals.IOneToManyName) && itfcs[0].GetGenericArguments().Length == 2)
+            else if (interfaces.Length > 0 && interfaces[0].Name.Equals(StaticLiterals.IOneToManyName) && interfaces[0].GetGenericArguments().Length == 2)
             {
                 result = CreateOneToManyBusinessController(type);
             }
@@ -120,15 +122,13 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreateDefaultBusinessController(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var entityName = CreateEntityNameFromInterface(type);
             var subNameSpace = CreateSubNamespaceFromType(type);
             var entityType = $"{StaticLiterals.EntitiesFolder}.{subNameSpace}.{entityName}";
             var controllerName = $"{entityName}Controller";
             var baseControllerName = "BusinessControllerAdapter";
             var controllerAttributes = InitLogicControllerAttributes(type);
-            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicController)
+            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicBusinessController)
             {
                 FullName = CreateLogicControllerFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,
@@ -147,10 +147,68 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.FormatCSharpCode();
             return result;
         }
+        private Contracts.IGeneratedItem CreateDelegateBusinessController(Type type)
+        {
+            var contractHelper = new ContractHelper(type);
+            var entityName = CreateEntityNameFromInterface(type);
+            var subNameSpace = CreateSubNamespaceFromType(type);
+            var entityType = $"{StaticLiterals.EntitiesFolder}.{subNameSpace}.{entityName}";
+            var controllerName = $"{entityName}Controller";
+            var baseControllerName = "GenericDelegateController";
+            var delegateGenericType = contractHelper.DelegateType;
+            var delegateEntityType = $"{(delegateGenericType != null ? CreateEntityFullNameFromInterface(delegateGenericType) : string.Empty)}";
+            var delegateCtrlType = $"{(delegateGenericType != null ? CreateLogicControllerFullNameFromInterface(delegateGenericType) : string.Empty)}";
+            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicBusinessController)
+            {
+                FullName = CreateLogicControllerFullNameFromInterface(type),
+                FileExtension = StaticLiterals.CSharpFileExtension,
+                SubFilePath = CreateSubFilePathFromInterface(type, "Controllers", "Controller", StaticLiterals.CSharpFileExtension),
+            };
+            ConvertGenericPersistenceControllerName(type, ref baseControllerName);
+            CreateLogicControllerAttributes(type, result.Source);
+            result.Add($"sealed partial class {controllerName} : {baseControllerName}<{type.FullName}, {entityType}, {delegateGenericType?.FullName}, {delegateEntityType}>");
+            result.Add("{");
+
+            var initStatements = new List<string>()
+            {
+                $"sourceEntityController = new {delegateCtrlType}(this);",
+            };
+
+            result.AddRange(CreatePartialStaticConstrutor(controllerName));
+            result.AddRange(CreatePartialConstrutor("public", controllerName, $"{SolutionProperties.DataContextFolder}.IContext context", "base(context)", initStatements));
+            result.AddRange(CreatePartialConstrutor("public", controllerName, "ControllerObject controller", "base(controller)", initStatements, false));
+
+            result.Add("[Attributes.ControllerManagedField]");
+            result.Add($"private {delegateCtrlType} sourceEntityController = null;");
+            result.Add($"protected override GenericController<{delegateGenericType?.FullName}, {delegateEntityType}> SourceEntityController");
+            result.Add("{");
+            result.Add($"get => sourceEntityController; // ?? (sourceEntityController =  new {delegateCtrlType}(this));");
+            result.Add($"set => sourceEntityController = value as {delegateCtrlType};");
+            result.Add("}");
+
+            result.Add($"protected override {entityType} ConvertTo({delegateEntityType} delegateEntity)");
+            result.Add("{");
+            result.Add("var handled = false;");
+            result.Add($"var result = new {entityType}();");
+
+            result.Add("BeforeConvertTo(delegateEntity, result, ref handled);");
+            result.Add("if (handled == false)");
+            result.Add("{");
+            result.Add("result.SetSource(delegateEntity);");
+            result.Add("}");
+            result.Add("AfterConvertTo(delegateEntity, result);");
+            result.Add("return result;");
+            result.Add("}");
+            result.Add($"partial void BeforeConvertTo({delegateEntityType} delegateEntity, {entityType} entity, ref bool handled);");
+            result.Add($"partial void AfterConvertTo({delegateEntityType} delegateEntity, {entityType} entity);");
+    
+            result.Add("}");
+            result.EnvelopeWithANamespace(CreateLogicControllerNameSpace(type));
+            result.FormatCSharpCode();
+            return result;
+        }
         private Contracts.IGeneratedItem CreateCompositeBusinessController(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var entityName = CreateEntityNameFromInterface(type);
             var subNameSpace = CreateSubNamespaceFromType(type);
             var entityType = $"{StaticLiterals.EntitiesFolder}.{subNameSpace}.{entityName}";
@@ -167,7 +225,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             var connectorCtrlType = $"{CreateLogicControllerFullNameFromInterface(connectorGenericType)}";
             var oneCtrlType = $"{CreateLogicControllerFullNameFromInterface(oneGenericType)}";
             var anotherCtrlType = $"{CreateLogicControllerFullNameFromInterface(anotherGenericType)}";
-            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicController)
+            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicBusinessController)
             {
                 FullName = CreateLogicControllerFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,
@@ -221,8 +279,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreateOneToAnotherBusinessController(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var entityName = CreateEntityNameFromInterface(type);
             var subNameSpace = CreateSubNamespaceFromType(type);
             var entityType = $"{StaticLiterals.EntitiesFolder}.{subNameSpace}.{entityName}";
@@ -236,7 +292,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             var anotherEntityType = $"{CreateEntityFullNameFromInterface(anotherGenericType)}";
             var oneCtrlType = $"{CreateLogicControllerFullNameFromInterface(oneGenericType)}";
             var anotherCtrlType = $"{CreateLogicControllerFullNameFromInterface(anotherGenericType)}";
-            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicController)
+            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicBusinessController)
             {
                 FullName = CreateLogicControllerFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,
@@ -281,8 +337,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreateOneToManyBusinessController(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var entityName = CreateEntityNameFromInterface(type);
             var subNameSpace = CreateSubNamespaceFromType(type);
             var entityType = $"{StaticLiterals.EntitiesFolder}.{subNameSpace}.{entityName}";
@@ -296,7 +350,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             var manyEntityType = $"{CreateEntityFullNameFromInterface(manyGenericType)}";
             var oneCtrlType = $"{CreateLogicControllerFullNameFromInterface(oneGenericType)}";
             var manyCtrlType = $"{CreateLogicControllerFullNameFromInterface(manyGenericType)}";
-            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicController)
+            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicBusinessController)
             {
                 FullName = CreateLogicControllerFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,
@@ -356,15 +410,13 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreatePersistenceController(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var entityName = CreateEntityNameFromInterface(type);
             var subNameSpace = CreateSubNamespaceFromType(type);
             var entityType = $"{StaticLiterals.EntitiesFolder}.{subNameSpace}.{entityName}";
             var controllerName = $"{entityName}Controller";
             var baseControllerName = "GenericPersistenceController";
             var controllerAttributes = InitLogicControllerAttributes(type);
-            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicController)
+            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicPersistenceController)
             {
                 FullName = CreateLogicControllerFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,
@@ -401,8 +453,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreateShadowController(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var entityName = CreateEntityNameFromInterface(type);
             var subNameSpace = CreateSubNamespaceFromType(type);
             var entityType = $"{StaticLiterals.EntitiesFolder}.{subNameSpace}.{entityName}";
@@ -412,7 +462,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             var sourceGenericType = interfaceTypes.Single(e => e.IsGenericType && e.Name.Equals(StaticLiterals.IShadowName)).GetGenericArguments()[0];
             var sourceEntityType = $"{CreateEntityFullNameFromInterface(sourceGenericType)}";
             var sourceCtrlType = $"{CreateLogicControllerFullNameFromInterface(sourceGenericType)}";
-            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicController)
+            var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.LogicShadowController)
             {
                 FullName = CreateLogicControllerFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,
@@ -451,8 +501,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         public string WebApiNameSpace => $"{SolutionProperties.WebApiProjectName}.{StaticLiterals.ControllersFolder}";
         public string CreateWebApiControllerNameSpace(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             return $"{WebApiNameSpace}.{CreateSubNamespaceFromType(type)}";
         }
         static partial void CreateWebApiControllerAttributes(Type type, List<string> codeLines);
@@ -462,29 +510,42 @@ namespace CSharpCodeGenerator.Logic.Generation
         {
             var result = new List<Contracts.IGeneratedItem>();
             var contractsProject = ContractsProject.Create(SolutionProperties);
-            var types = contractsProject.PersistenceTypes
-                                        .Union(contractsProject.ShadowTypes)
-                                        .Union(contractsProject.BusinessTypes);
+            var contractHelpers = contractsProject.PersistenceTypes
+                                                  .Union(contractsProject.ShadowTypes)
+                                                  .Union(contractsProject.BusinessTypes)
+                                                  .Select(t => new ContractHelper(t));
 
-            foreach (var type in types)
+            foreach (var item in contractHelpers.Where(ch => ch.HasLogicAccess))
             {
-                if (CanCreate(nameof(CreateWebApiControllers), type))
+                if (CanCreate(nameof(CreateWebApiControllers), item.Type))
                 {
-                    result.Add(CreateWebApiController(type));
+                    if (ContractHelper.IsBusinessType(item.Type))
+                    {
+                        result.Add(CreateWebApiController(item.Type, Common.ItemType.WebApiBusinessController));
+                    }
+                    else if (ContractHelper.IsPersistenceType(item.Type))
+                    {
+                        result.Add(CreateWebApiController(item.Type, Common.ItemType.WebApiPersistenceController));
+                    }
+                    else if (ContractHelper.IsShadowType(item.Type))
+                    {
+                        result.Add(CreateWebApiController(item.Type, Common.ItemType.WebApiShadowController));
+                    }
                 }
             }
             return result;
         }
-        private Contracts.IGeneratedItem CreateWebApiController(Type type)
+        private Contracts.IGeneratedItem CreateWebApiController(Type type, Common.ItemType itemType)
         {
             //var routeBase = $"/api/[controller]";
+            var contractHelper = new ContractHelper(type);
             var entityName = CreateEntityNameFromInterface(type);
             var subNameSpace = CreateSubNamespaceFromType(type);
             var contractType = $"Contracts.{subNameSpace}.{type.Name}";
             var modelType = $"{CreateTransferModelNameSpace(type)}.{entityName}";
             var editModelType = $"{CreateTransferModelNameSpace(type)}.{entityName}";
             var controllerName = entityName.CreatePluralWord();
-            var result = new Models.GeneratedItem(Common.UnitType.WebApi, Common.ItemType.WebApiController)
+            var result = new Models.GeneratedItem(Common.UnitType.WebApi, itemType)
             {
                 FullName = CreateWebApiControllerFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,
@@ -493,7 +554,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             ConvertWebApiControllerName(type, ref controllerName);
             result.Add("using Microsoft.AspNetCore.Mvc;");
 
-            if (ContractHelper.IsBusinessType(type) == false)
+            if (ContractHelper.IsBusinessType(type) == false || (ContractHelper.IsBusinessType(type) && contractHelper.DelegateType != null))
             {
                 editModelType = $"{CreateTransferModelNameSpace(type)}.Edit{entityName}";
             }
@@ -516,11 +577,9 @@ namespace CSharpCodeGenerator.Logic.Generation
         #endregion WebApiController
 
         #region AspMvc-Controller
-        public string AspMvcNameSpace => $"{SolutionProperties.AspMvcProjectName}.{StaticLiterals.ControllersFolder}";
+        public string AspMvcNameSpace => $"{SolutionProperties.AspMvcAppProjectName}.{StaticLiterals.ControllersFolder}";
         public string CreateAspMvcControllerNameSpace(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             return $"{AspMvcNameSpace}.{CreateSubNamespaceFromType(type)}";
         }
         static partial void CreateAspMvcControllerAttributes(Type type, List<string> codeLines);
@@ -530,22 +589,34 @@ namespace CSharpCodeGenerator.Logic.Generation
         {
             var result = new List<Contracts.IGeneratedItem>();
             var contractsProject = ContractsProject.Create(SolutionProperties);
-            var types = contractsProject.PersistenceTypes
-                                        .Union(contractsProject.ShadowTypes)
-                                        .Union(contractsProject.BusinessTypes);
+            var contractHelpers = contractsProject.PersistenceTypes
+                                                  .Union(contractsProject.ShadowTypes)
+                                                  .Union(contractsProject.BusinessTypes)
+                                                  .Select(t => new ContractHelper(t));
 
-            foreach (var type in types)
+            foreach (var item in contractHelpers.Where(ch => ch.HasLogicAccess))
             {
-                if (CanCreate(nameof(CreateAspMvcControllers), type))
+                if (CanCreate(nameof(CreateAspMvcControllers), item.Type))
                 {
-                    var isPublic = true;// contractsProject.BusinessTypes.Any(t => t == type) == false;
+                    var isPublic = true;
 
-                    result.Add(CreateAspMvcController(type, isPublic));
+                    if (ContractHelper.IsBusinessType(item.Type))
+                    {
+                        result.Add(CreateAspMvcController(item.Type, Common.ItemType.AspMvcBusinessController, isPublic));
+                    }
+                    else if (ContractHelper.IsPersistenceType(item.Type))
+                    {
+                        result.Add(CreateAspMvcController(item.Type, Common.ItemType.AspMvcPersistenceController, isPublic));
+                    }
+                    else if (ContractHelper.IsShadowType(item.Type))
+                    {
+                        result.Add(CreateAspMvcController(item.Type, Common.ItemType.AspMvcShadowController, isPublic));
+                    }
                 }
             }
             return result;
         }
-        private Contracts.IGeneratedItem CreateAspMvcController(Type type, bool isPublic)
+        private Contracts.IGeneratedItem CreateAspMvcController(Type type, Common.ItemType itemType, bool isPublic)
         {
             var entityName = CreateEntityNameFromInterface(type);
             var subNameSpace = CreateSubNamespaceFromType(type);
@@ -553,7 +624,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             var modelType = $"AspMvc.{StaticLiterals.ModelsFolder}.{subNameSpace}.{entityName}";
             var controllerName = entityName.CreatePluralWord();
             var className = $"{controllerName}Controller";
-            var result = new Models.GeneratedItem(Common.UnitType.AspMvc, Common.ItemType.AspMvcController)
+            var result = new Models.GeneratedItem(Common.UnitType.AspMvcApp, itemType)
             {
                 FullName = CreateAspMvcControllerFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,

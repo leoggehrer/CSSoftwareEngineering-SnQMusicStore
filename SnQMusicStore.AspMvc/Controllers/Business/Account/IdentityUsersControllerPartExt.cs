@@ -61,7 +61,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.Account
         }
 
         [ActionName("Import")]
-        public ActionResult ImportAsync(string error = null)
+        public ActionResult ImportAsync(string? error = null)
         {
             var model = new Models.Modules.Csv.ImportProtocol() { BackController = ControllerName };
 
@@ -90,15 +90,21 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.Account
                     {
                         var entity = await ctrl.CreateAsync();
 
-                        CopyModels(CsvHeader, item.Model, entity);
-                        await ctrl.InsertAsync(entity);
+                        if (item.Model != null)
+                        {
+                            CopyModels(CsvHeader, item.Model, entity);
+                            await ctrl.InsertAsync(entity);
+                        }
                     }
                     else if (item.Action == Models.Modules.Csv.ImportAction.Update)
                     {
                         var entity = await ctrl.GetByIdAsync(item.Id);
 
-                        CopyModels(CsvHeader, item.Model, entity);
-                        await ctrl.UpdateAsync(entity);
+                        if (entity != null && item.Model != null)
+                        {
+                            CopyModels(CsvHeader, item.Model, entity);
+                            await ctrl.UpdateAsync(entity);
+                        }
                     }
                     else if (item.Action == Models.Modules.Csv.ImportAction.Delete)
                     {

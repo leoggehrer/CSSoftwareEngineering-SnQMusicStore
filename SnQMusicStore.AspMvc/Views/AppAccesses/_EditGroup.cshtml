@@ -6,32 +6,34 @@
     @using SnQMusicStore.AspMvc.Modules.View
     @model EditViewModel
 
-    var viewBagInfo = Model.ViewBagInfo;
-    var property = viewBagInfo.DisplayProperty;
-
-    @if (Model.DisplayModel is Role role)
+    if (Model != null)
     {
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var property = viewBagInfo.DisplayProperty;
 
-        if (property.Name.Equals(nameof(Role.Designation)))
+        @if (Model.DisplayModel is Role role)
         {
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-check" style="margin-bottom: 0.5em;">
-                        <label class="form-label" for="@property.Name" style="color: blue;">@viewBagInfo.TranslateFor("Grant access to:")</label>
-                        @Html.DropDownList(Model.GetName(property), new SelectList(role.AssignedRoles, "Designation", "Designation"), null, new { @class = "form-control", style = "min-width: 400px; border-color: blue; font-weight: bold;" })
+            if (property != null && property.Name.Equals(nameof(Role.Designation)))
+            {
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check" style="margin-bottom: 0.5em;">
+                            <label class="form-label" for="@property.Name" style="color: blue;">@viewBagInfo.TranslateFor("Grant access to:")</label>
+                            @Html.DropDownList(Model.GetName(property), new SelectList(role.AssignedRoles, "Designation", "Designation"), null, new { @class = "form-control", style = "min-width: 400px; border-color: blue; font-weight: bold;" })
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
+            viewBagInfo.Handled = true;
         }
-        viewBagInfo.Handled = true;
-    }
-    else if (property.Name.Equals("Password"))
-    {
-        viewBagInfo.Handled = true;
-    }
-    else
-    {
-        @await Html.PartialAsync("../Shared/_EditGroup", Model)
+        else if (property != null && property.Name.Equals("Password"))
+        {
+            viewBagInfo.Handled = true;
+        }
+        else
+        {
+            @await Html.PartialAsync("../Shared/_EditGroup", Model)
+        }
     }
 }
 @*#endif*@

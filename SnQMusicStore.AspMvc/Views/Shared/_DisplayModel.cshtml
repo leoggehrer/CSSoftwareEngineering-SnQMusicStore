@@ -3,20 +3,23 @@
     @using SnQMusicStore.AspMvc.Modules.View
     @model SnQMusicStore.AspMvc.Models.ModelObject
 
-    var index = 0;
-    var viewBagInfo = Model.ViewBagInfo;
-    var displayViewModel = ViewModelCreator.CreateDisplayViewModel(viewBagInfo, Model);
-
-    @foreach (var property in displayViewModel.GetHiddenProperties())
+    if (Model != null)
     {
-        <input type="hidden" id="@displayViewModel.GetId(property)" name="@displayViewModel.GetName(property)" value="@displayViewModel.GetDisplayValue(property)" />
-    }
+        var index = 0;
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var displayViewModel = ViewModelCreator.CreateDisplayViewModel(viewBagInfo, Model);
 
-    @foreach (var item in displayViewModel.GetDisplayProperties())
-    {
-        viewBagInfo.Index = index++;
-        viewBagInfo.Handled = false;
-        viewBagInfo.DisplayProperty = item;
-        @await Html.PartialAsync("_DisplayGroup", displayViewModel)
+        @foreach (var property in displayViewModel.GetHiddenProperties())
+        {
+            <input type="hidden" id="@displayViewModel.GetId(property)" name="@displayViewModel.GetName(property)" value="@displayViewModel.GetDisplayValue(property)" />
+        }
+
+        @foreach (var item in displayViewModel.GetDisplayProperties())
+        {
+            viewBagInfo.Index = index++;
+            viewBagInfo.Handled = false;
+            viewBagInfo.DisplayProperty = item;
+            @await Html.PartialAsync("_DisplayGroup", displayViewModel)
+        }
     }
 }

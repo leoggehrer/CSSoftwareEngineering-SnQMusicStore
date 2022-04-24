@@ -69,7 +69,7 @@ namespace SnQMusicStore.AspMvc.Modules.View
             }
             set => ViewBag.CommandMode = value;
         }
-        public object ParentModel
+        public object? ParentModel
         {
             get => ViewBag.ParentModel as object;
             set => ViewBag.ParentModel = value;
@@ -78,15 +78,15 @@ namespace SnQMusicStore.AspMvc.Modules.View
         public string Title => Translate(Controller);
         public string Controller
         {
-            get => ViewBag.Controller as string;
+            get => (ViewBag.Controller as string) ?? string.Empty;
             set => ViewBag.Controller = value;
         }
         public string Action
         {
-            get => ViewBag.Action as string;
+            get => (ViewBag.Action as string) ?? string.Empty;
             set => ViewBag.Action = value;
         }
-        public string ItemPrefix
+        public string? ItemPrefix
         {
             get => ViewBag.ItemPrefix as string;
             set => ViewBag.ItemPrefix = value;
@@ -167,7 +167,7 @@ namespace SnQMusicStore.AspMvc.Modules.View
                 return result;
             }
         }
-        public PropertyInfo DisplayProperty
+        public PropertyInfo? DisplayProperty
         {
             get => ViewBag.DisplayProperty as PropertyInfo;
             set => ViewBag.DisplayProperty = value;
@@ -227,7 +227,7 @@ namespace SnQMusicStore.AspMvc.Modules.View
                MappingNames.Add(key, value);
             }
         }
-        public bool GetMappingProperty(string key, out PropertyInfo propertyInfo)
+        public bool GetMappingProperty(string key, out PropertyInfo? propertyInfo)
         {
             return MappingProperties.TryGetValue(key, out propertyInfo);
         }
@@ -251,24 +251,31 @@ namespace SnQMusicStore.AspMvc.Modules.View
 
         public static Type GetDisplayType(Type modelType)
         {
-            modelType.CheckArgument(nameof(modelType));
-
             var result = modelType;
 
             if (modelType.IsGenericTypeOf(typeof(OneToManyModel<,,,>)))
             {
-                var genericTypes = modelType.BaseType.GetGenericArguments();
+                var genericTypes = modelType.BaseType?.GetGenericArguments();
 
-                if (genericTypes.Length > 1)
+                if (genericTypes?.Length > 1)
                 {
                     result = genericTypes[1];
                 }
             }
             else if (modelType.IsGenericTypeOf(typeof(OneToAnotherModel<,,,>)))
             {
-                var genericTypes = modelType.BaseType.GetGenericArguments();
+                var genericTypes = modelType.BaseType?.GetGenericArguments();
 
-                if (genericTypes.Length > 1)
+                if (genericTypes?.Length > 1)
+                {
+                    result = genericTypes[1];
+                }
+            }
+            else if (modelType.IsGenericTypeOf(typeof(CompositeModel<,,,,,>)))
+            {
+                var genericTypes = modelType.BaseType?.GetGenericArguments();
+
+                if (genericTypes?.Length > 1)
                 {
                     result = genericTypes[1];
                 }

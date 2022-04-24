@@ -1,6 +1,7 @@
 ﻿//@CodeCopy
 //MdStart
 
+using System;
 using System.Text.Json.Serialization;
 
 namespace SnQMusicStore.Transfer.Models
@@ -37,7 +38,7 @@ namespace SnQMusicStore.Transfer.Models
                 if (ConnectorModel is VersionModel ve)
                     result = ve.RowVersion;
 
-                return result;
+                return result ?? Array.Empty<byte>();
             }
             set
             {

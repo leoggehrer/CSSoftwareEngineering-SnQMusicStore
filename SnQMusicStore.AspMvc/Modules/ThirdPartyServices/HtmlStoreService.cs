@@ -55,11 +55,11 @@ namespace SnQMusicStore.AspMvc.Modules.ThirdPartyServices
             }
             return canServiceAcessed;
         }
-        public static StaticPage GetPageContent(string pageName)
+        public static StaticPage? GetPageContent(string pageName)
         {
             return GetPageContent(nameof(SnQMusicStore), pageName);
         }
-        public static StaticPage GetPageContent(string appName, string pageName)
+        public static StaticPage? GetPageContent(string appName, string pageName)
         {
             var result = default(StaticPage);
             var htmlStoreServer = AppSettings.Configuration[StaticLiterals.EnvironmentHtmlStoreServerKey];
@@ -84,7 +84,7 @@ namespace SnQMusicStore.AspMvc.Modules.ThirdPartyServices
                 catch (Exception ex)
                 {
                     LastErrorTime = DateTime.UtcNow;
-                    ErrorHandler.LastLogicError = $"{System.Reflection.MethodBase.GetCurrentMethod().Name}: {ex.GetError()}";
+                    ErrorHandler.LastLogicError = $"{System.Reflection.MethodBase.GetCurrentMethod()?.Name}: {ex.GetError()}";
                     System.Diagnostics.Debug.WriteLine(ErrorHandler.LastLogicError);
                 }
             }
@@ -120,7 +120,7 @@ namespace SnQMusicStore.AspMvc.Modules.ThirdPartyServices
                 catch (Exception ex)
                 {
                     LastErrorTime = DateTime.UtcNow;
-                    ErrorHandler.LastLogicError = $"{System.Reflection.MethodBase.GetCurrentMethod().Name}: {ex.GetError()}";
+                    ErrorHandler.LastLogicError = $"{System.Reflection.MethodBase.GetCurrentMethod()?.Name}: {ex.GetError()}";
                     System.Diagnostics.Debug.WriteLine(ErrorHandler.LastLogicError);
                 }
             }
@@ -156,7 +156,7 @@ namespace SnQMusicStore.AspMvc.Modules.ThirdPartyServices
                 catch (Exception ex)
                 {
                     LastErrorTime = DateTime.UtcNow;
-                    ErrorHandler.LastLogicError = $"{System.Reflection.MethodBase.GetCurrentMethod().Name}: {ex.GetError()}";
+                    ErrorHandler.LastLogicError = $"{System.Reflection.MethodBase.GetCurrentMethod()?.Name}: {ex.GetError()}";
                     System.Diagnostics.Debug.WriteLine(ErrorHandler.LastLogicError);
                 }
             }

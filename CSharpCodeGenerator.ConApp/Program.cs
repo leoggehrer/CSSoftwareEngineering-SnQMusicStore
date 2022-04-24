@@ -30,7 +30,7 @@ namespace CSharpCodeGenerator.ConApp
             int endPos = AppContext.BaseDirectory
                                    .IndexOf($"{nameof(CSharpCodeGenerator)}", StringComparison.CurrentCultureIgnoreCase);
 
-            return AppContext.BaseDirectory.Substring(0, endPos);
+            return AppContext.BaseDirectory[..endPos];
         }
 
         private static string GetCurrentSolutionName()
@@ -39,13 +39,13 @@ namespace CSharpCodeGenerator.ConApp
 
             return GetSolutionNameByFile(solutionPath);
         }
-        private static string GetCurrentContractsFilePath()
+        private static string? GetCurrentContractsFilePath()
         {
             return GetContractsFilePath(GetCurrentSolutionPath());
         }
         private static string GetSolutionNameByPath(string solutionPath)
         {
-            return solutionPath.Split(new char[] { '\\', '/' })
+            return solutionPath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries)
                                .Where(e => string.IsNullOrEmpty(e) == false)
                                .Last();
         }
@@ -78,7 +78,7 @@ namespace CSharpCodeGenerator.ConApp
                     result = fileInfo.FullName;
                 }
             }
-            return result;
+            return result ?? string.Empty;
         }
     }
 }

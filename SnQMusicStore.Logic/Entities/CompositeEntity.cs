@@ -1,5 +1,7 @@
 ﻿//@CodeCopy
 //MdStart
+using System;
+
 namespace SnQMusicStore.Logic.Entities
 {
     internal abstract partial class CompositeEntity<TConnector, TConnectorEntity, TOne, TOneEntity, TAnother, TAnotherEntity> : IdentityEntity
@@ -31,7 +33,7 @@ namespace SnQMusicStore.Logic.Entities
                 if (ConnectorEntity is VersionEntity ve)
                     result = ve.RowVersion;
 
-                return result;
+                return result ?? Array.Empty<byte>();
             }
             set
             {

@@ -12,23 +12,26 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             : base(viewBagWrapper, modelType, displayType, model, displayProperties)
         {
         }
-        public override string GetDisplayValue(PropertyInfo propertyInfo)
+        public override string GetDisplayValue(PropertyInfo? propertyInfo)
         {
-            string result;
+            string? result = null;
 
-            if (propertyInfo.Name.Equals(nameof(Track.GenreId)))
+            if (propertyInfo != null)
             {
-                result = ((Track)Model).Genre?.Name;
+                if (propertyInfo.Name.Equals(nameof(Track.GenreId)))
+                {
+                    result = ((Track)Model).Genre?.Name;
+                }
+                else if (propertyInfo.Name.Equals(nameof(Track.AlbumId)))
+                {
+                    result = ((Track)Model).Album?.Title;
+                }
+                else
+                {
+                    result = base.GetDisplayValue(propertyInfo);
+                }
             }
-            else if (propertyInfo.Name.Equals(nameof(Track.AlbumId)))
-            {
-                result = ((Track)Model).Album?.Title;
-            }
-            else
-            {
-                result = base.GetDisplayValue(propertyInfo);
-            }
-            return result;
+            return result ?? string.Empty;
         }
     }
 }

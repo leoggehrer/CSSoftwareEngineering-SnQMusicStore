@@ -37,10 +37,6 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
 
         internal override async Task<AppAccess> InsertEntityAsync(AppAccess entity)
         {
-            entity.CheckArgument(nameof(entity));
-            entity.OneItem.CheckArgument(nameof(entity.OneItem));
-            entity.ManyItems.CheckArgument(nameof(entity.ManyItems));
-
             var result = new AppAccess();
 
             result.OneEntity.CopyProperties(entity.OneItem);
@@ -91,10 +87,6 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
         }
         internal override async Task<AppAccess> UpdateEntityAsync(AppAccess entity)
         {
-            entity.CheckArgument(nameof(entity));
-            entity.OneItem.CheckArgument(nameof(entity.OneItem));
-            entity.ManyItems.CheckArgument(nameof(entity.ManyItems));
-
             var accessRoles = new List<Role>();
 
             foreach (var item in entity.ManyEntities)

@@ -17,7 +17,13 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
                 using var artistCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IArtist>(sessionToken);
 
                 model.Artists = await artistCtrl.GetAllAsync().ConfigureAwait(false);
-                model.Artist = model.Artists.FirstOrDefault(e => e.Id == model.ArtistId);
+
+                var artist = model.Artists.FirstOrDefault(e => e.Id == model.ArtistId);
+
+                if (artist != null)
+                {
+                    model.Artist = artist;
+                }
             }
             return model;
         }
@@ -29,7 +35,12 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
             foreach (var model in models)
             {
-                model.Artist = artists.FirstOrDefault(e => e.Id == model.ArtistId);
+                var artist = artists.FirstOrDefault(e => e.Id == model.ArtistId);
+
+                if (artist != null)
+                {
+                    model.Artist = artist;
+                }
                 result.Add(model);
             }
             return result;
@@ -44,7 +55,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
         protected override async Task<IEnumerable<Album>> BeforeViewAsync(IEnumerable<Album> models, ActionMode action)
         {
             var viewBagWrapper = new ViewBagWrapper(ViewBag);
-            var sessionToken = SessionInfo.LoginSession.SessionToken;
+            var sessionToken = SessionInfo.LoginSession?.SessionToken ?? string.Empty;
             var result = await LoadModelsReferencesAsync(sessionToken, models).ConfigureAwait(false);
 
             viewBagWrapper.CommandMode |= CommandMode.Details;
@@ -54,14 +65,15 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
         public override async Task<IActionResult> DetailsAsync(int id)
         {
             var viewBagInfo = new ViewBagWrapper(ViewBag);
+            var sessionToken = SessionInfo.LoginSession?.SessionToken ?? string.Empty;
             using var ctrl = CreateController<Contracts.Business.App.IAlbumTracks>();
             var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
             var model = Models.Business.App.AlbumTracks.Create(entity);
             var modelType = model.GetType();
             var displayType = modelType;
 
-            await LoadModelReferencesAsync(SessionInfo.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
-            await TracksController.LoadModelsReferencesAsync(SessionInfo.LoginSession.SessionToken, model.ManyModels).ConfigureAwait(false);
+            await LoadModelReferencesAsync(sessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
+            await TracksController.LoadModelsReferencesAsync(sessionToken, model.ManyModels).ConfigureAwait(false);
 
             viewBagInfo.CommandMode = CommandMode.None;
             return View("Details", ViewModelCreator.CreateDisplayViewModel(viewBagInfo, model, modelType, displayType));

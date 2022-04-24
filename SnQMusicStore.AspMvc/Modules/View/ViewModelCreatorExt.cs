@@ -7,7 +7,7 @@ namespace SnQMusicStore.AspMvc.Modules.View
 {
     partial class ViewModelCreator
     {
-        static partial void BeforeCreateIndexViewModel(ViewBagWrapper viewBagInfo, IEnumerable<IdentityModel> models, Type modelType, Type displayType, ref IndexViewModel result, ref bool handled)
+        static partial void BeforeCreateIndexViewModel(ViewBagWrapper viewBagInfo, IEnumerable<IdentityModel> models, Type modelType, Type displayType, ref IndexViewModel? result, ref bool handled)
         {
             if (modelType.Equals(typeof(Models.Business.App.AlbumTracks)))
             {
@@ -25,7 +25,7 @@ namespace SnQMusicStore.AspMvc.Modules.View
                 result = new AlbumIndexViewModel(viewBagInfo, models, modelType, displayType);
             }
         }
-        static partial void BeforeCreateDisplayViewModel(ViewBagWrapper viewBagInfo, ModelObject model, Type modelType, Type displayType, ref DisplayViewModel result, ref bool handled)
+        static partial void BeforeCreateDisplayViewModel(ViewBagWrapper viewBagInfo, ModelObject model, Type modelType, Type displayType, ref DisplayViewModel? result, ref bool handled)
         {
             if (modelType.Equals(typeof(Models.Business.App.TrackAlbumGenre)))
             {
@@ -48,7 +48,7 @@ namespace SnQMusicStore.AspMvc.Modules.View
                 result = new AlbumDisplayViewModel(viewBagInfo, model, modelType, displayType);
             }
         }
-        static partial void BeforeCreateEditViewModel(ViewBagWrapper viewBagInfo, IdentityModel model, Type modelType, Type displayType, ref EditViewModel result, ref bool handled)
+        static partial void BeforeCreateEditViewModel(ViewBagWrapper viewBagInfo, IdentityModel model, Type modelType, Type displayType, ref EditViewModel? result, ref bool handled)
         {
             if (modelType.Equals(typeof(Models.Persistence.App.Album)))
             {

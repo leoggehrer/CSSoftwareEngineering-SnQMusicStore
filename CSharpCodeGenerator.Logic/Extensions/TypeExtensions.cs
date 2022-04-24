@@ -13,8 +13,6 @@ namespace CSharpCodeGenerator.Logic.Extensions
 
         public static string GetCleanName(this Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var name = type.Name;
 
             if (type.IsGenericType)
@@ -25,8 +23,6 @@ namespace CSharpCodeGenerator.Logic.Extensions
         }
         public static string GetCodeDefinition(this Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var sb = new StringBuilder();
 
             sb.AppendFormat("{0}.{1}", type.Namespace, type.GetCleanName());

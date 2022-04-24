@@ -5,13 +5,16 @@
     @using SnQMusicStore.AspMvc.Modules.View
     @model IndexViewModel
 
-    var viewBagInfo = Model?.ViewBagInfo;
-    var sessionInfo = new SessionWrapper(Context.Session);
-    var filterModel = new FilterModel(sessionInfo, Model);
-        
-    <form asp-action="Filter" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        @await Html.PartialAsync("_FilterModel", filterModel)
-        @await Html.PartialAsync("_Submit", new SubmitCmd() { SubmitText = viewBagInfo.TranslateFor("Apply") })
-    </form>
+    if (Model != null)
+    {
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var sessionInfo = new SessionWrapper(Context.Session);
+        var filterModel = new FilterModel(sessionInfo, Model);
+
+        <form asp-action="Filter" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @await Html.PartialAsync("_FilterModel", filterModel)
+            @await Html.PartialAsync("_Submit", new SubmitCmd() { SubmitText = viewBagInfo.TranslateFor("Apply") })
+        </form>
+    }
 }

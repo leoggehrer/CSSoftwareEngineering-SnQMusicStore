@@ -15,7 +15,7 @@ using System.Text;
 namespace SnQMusicStore.AspMvc.Controllers
 {
     public partial class MvcController : Controller
-	{
+    {
         static MvcController()
         {
             ClassConstructing();
@@ -33,7 +33,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void Constructed();
 
         #region Error
-        protected virtual string LastViewError
+        protected virtual string? LastViewError
         {
             get => Modules.Handler.ErrorHandler.LastViewError;
             set
@@ -46,7 +46,7 @@ namespace SnQMusicStore.AspMvc.Controllers
 
         #region SessionInfo
         public bool IsSessionAvailable => HttpContext?.Session != null;
-        private ISessionWrapper sessionInfo = null;
+        private ISessionWrapper? sessionInfo = null;
         internal ISessionWrapper SessionInfo => sessionInfo ??= new SessionWrapper(HttpContext.Session);
         #endregion SessionInfo
 
@@ -78,10 +78,6 @@ namespace SnQMusicStore.AspMvc.Controllers
 
         protected virtual FileResult ExportDefault(IEnumerable<string> csvHeader, IEnumerable<Object> exportObjects, string fileName)
         {
-            csvHeader.CheckArgument(nameof(csvHeader));
-            exportObjects.CheckArgument(nameof(exportObjects));
-            fileName.CheckArgument(nameof(fileName));
-
             var contentData = new List<byte>();
             var encodingPreamble = Encoding.UTF8.GetPreamble();
 
@@ -100,7 +96,7 @@ namespace SnQMusicStore.AspMvc.Controllers
 
                     if (value != null)
                     {
-                        exportLine.Append(value.ToString().Remove("\r", string.Empty));
+                        exportLine.Append(value?.ToString()?.Remove("\r", string.Empty));
                     }
                     else
                     {
@@ -193,14 +189,10 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         protected virtual void CopyModels(string[] propertyNames, object source, object target)
         {
-            propertyNames.CheckArgument(nameof(propertyNames));
-            source.CheckArgument(nameof(source));
-            target.CheckArgument(nameof(target));
-
-            static (object Obj, PropertyInfo PropInfo) GetPropertyInfo(string pn, object obj)
+            static (object? Obj, PropertyInfo? PropInfo) GetPropertyInfo(string pn, object? obj)
             {
                 var pnElems = pn.Split(".");
-                var pi = obj.GetType().GetProperty(pnElems[0]);
+                var pi = obj?.GetType().GetProperty(pnElems[0]);
 
                 for (int i = 1; pi != null && pi.CanRead && i < pnElems.Length; i++)
                 {
@@ -222,19 +214,17 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
         }
-        protected virtual object GetFieldValue(object item, string propertyName)
+        protected virtual object? GetFieldValue(object item, string propertyName)
         {
-            item.CheckArgument(nameof(item));
-            propertyName.CheckArgument(nameof(propertyName));
-
             var result = default(object);
             var propertyElems = propertyName.Split(".");
             var pi = item.GetType().GetProperty(propertyElems[0]);
 
             for (int i = 1; pi != null && pi.CanRead && i < propertyElems.Length; i++)
             {
-                item = pi.GetValue(item);
-                pi = item?.GetType().GetProperty(propertyElems[i]);
+                var value = pi.GetValue(item);
+
+                pi = value?.GetType().GetProperty(propertyElems[i]);
             }
             if (item != null && pi != null && pi.CanRead)
             {
@@ -242,18 +232,16 @@ namespace SnQMusicStore.AspMvc.Controllers
             }
             return result;
         }
-        protected virtual void SetFieldValue(object item, string propertyName, string strVal)
+        protected virtual void SetFieldValue(object item, string propertyName, string? strVal)
         {
-            item.CheckArgument(nameof(item));
-            propertyName.CheckArgument(nameof(propertyName));
-
             var propertyElems = propertyName.Split(".");
             var pi = item.GetType().GetProperty(propertyElems[0]);
 
             for (int i = 1; pi != null && pi.CanRead && i < propertyElems.Length; i++)
             {
-                item = pi.GetValue(item);
-                pi = item?.GetType().GetProperty(propertyElems[i]);
+                var value = pi.GetValue(item);
+
+                pi = value?.GetType().GetProperty(propertyElems[i]);
             }
             if (item != null && pi != null && pi.CanWrite)
             {
@@ -278,9 +266,9 @@ namespace SnQMusicStore.AspMvc.Controllers
         {
             return Request.Form.Files.Count;
         }
-        protected IFormFile GetRequestFormFile(int index)
+        protected IFormFile? GetRequestFormFile(int index)
         {
-            IFormFile result = null;
+            IFormFile? result = null;
 
             if (Request.Form.Files.Count > index)
             {
@@ -290,33 +278,32 @@ namespace SnQMusicStore.AspMvc.Controllers
         }
         protected string GetRequestFileName(int index)
         {
-            IFormFile formFile = GetRequestFormFile(index);
+            IFormFile? formFile = GetRequestFormFile(index);
 
             return formFile?.FileName ?? string.Empty;
         }
         protected byte[] GetRequestFileData(int index)
         {
-            return GetRequestFileData(GetRequestFormFile(index));
+            var file = GetRequestFormFile(index);
+
+            return file != null ? GetRequestFileData(file) : Array.Empty<byte>();
         }
         protected byte[] GetRequestFileData(IFormFile formFile)
         {
-            byte[] result = null;
+            byte[] result;
+            using var inputStream = formFile.OpenReadStream();
 
-            if (formFile != null)
+            if (inputStream is not MemoryStream memoryStream)
             {
-                using var inputStream = formFile.OpenReadStream();
-                if (inputStream is not MemoryStream memoryStream)
+                using (memoryStream = new MemoryStream())
                 {
-                    using (memoryStream = new MemoryStream())
-                    {
-                        inputStream.CopyTo(memoryStream);
-                        result = memoryStream.ToArray();
-                    }
-                }
-                else
-                {
+                    inputStream.CopyTo(memoryStream);
                     result = memoryStream.ToArray();
                 }
+            }
+            else
+            {
+                result = memoryStream.ToArray();
             }
             return result;
         }
@@ -332,14 +319,17 @@ namespace SnQMusicStore.AspMvc.Controllers
         protected string[] GetModelStateErrors()
         {
             var list = new List<string>();
-            var errorLists = ModelState.Where(x => x.Value.Errors.Count > 0)
-                                       .Select(x => new { x.Key, x.Value.Errors });
+            var errorLists = ModelState.Where(x => x.Value?.Errors.Count > 0)
+                                       .Select(x => new { x.Key, x.Value?.Errors });
 
             foreach (var errorList in errorLists)
             {
-                foreach (var error in errorList.Errors)
+                if (errorList.Errors != null)
                 {
-                    list.Add($"{errorList.Key}: {error.ErrorMessage}");
+                    foreach (var error in errorList.Errors)
+                    {
+                        list.Add($"{errorList.Key}: {error.ErrorMessage}");
+                    }
                 }
             }
             return list.ToArray();

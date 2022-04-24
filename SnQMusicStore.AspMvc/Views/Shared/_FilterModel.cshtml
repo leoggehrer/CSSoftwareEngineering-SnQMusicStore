@@ -2,23 +2,27 @@
 @{
     @using SnQMusicStore.AspMvc.Models.Modules.View
     @using System.Reflection
+    @using SnQMusicStore.AspMvc.Modules.View
     @model FilterModel
 
-    var index = 0;
-    var viewBagInfo = Model.ViewBagInfo;
-    var sessionInfo = Model.SessionInfo;
-    var indexViewModel = Model.IndexViewModel;
-    var filterValues = sessionInfo.GetFilterValues(viewBagInfo.Controller);
-    var properties = indexViewModel.GetFilterProperties();
-
-    @foreach (var property in properties)
+    if (Model != null)
     {
-        if (property.CanRead)
+        var index = 0;
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var sessionInfo = Model.SessionInfo;
+        var indexViewModel = Model.IndexViewModel;
+        var filterValues = sessionInfo.GetFilterValues(viewBagInfo.Controller);
+        var properties = indexViewModel.GetFilterProperties();
+
+        @foreach (var property in properties)
         {
-            Model.ViewBagInfo.Index = index++;
-            Model.ViewBagInfo.Handled = false;
-            Model.ViewBagInfo.DisplayProperty = property;
-            @await Html.PartialAsync("_FilterGroup", Model)
+            if (property.CanRead)
+            {
+                viewBagInfo.Index = index++;
+                viewBagInfo.Handled = false;
+                viewBagInfo.DisplayProperty = property;
+                @await Html.PartialAsync("_FilterGroup", Model)
+            }
         }
     }
 }

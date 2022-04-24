@@ -62,7 +62,7 @@ namespace CommonBase.Extensions
                     action(item);
                 }
             }
-            return source;
+            return source ?? Array.Empty<T>();
         }
         public static int NextValue<T>(this IEnumerable<T> source, Func<T, int> getValue)
         {
@@ -85,8 +85,6 @@ namespace CommonBase.Extensions
 
         public static IEnumerable<T> Add<T>(this IEnumerable<T> source, T item)
         {
-            source.CheckArgument(nameof(source));
-
             var result = new List<T>(source)
             {
                 item
@@ -95,8 +93,6 @@ namespace CommonBase.Extensions
         }
         public static IEnumerable<T> AddRange<T>(this IEnumerable<T> source, IEnumerable<T> items)
         {
-            source.CheckArgument(nameof(source));
-
             var result = new List<T>(source);
 
             result.AddRange(items);
@@ -104,8 +100,6 @@ namespace CommonBase.Extensions
         }
         public static IEnumerable<T> SkipLast<T>(this IEnumerable<T> source)
         {
-            source.CheckArgument(nameof(source));
-
             using var e = source.GetEnumerator();
             if (e.MoveNext())
             {
@@ -122,9 +116,6 @@ namespace CommonBase.Extensions
         ///<returns>The index of the first matching item, or -1 if no items match.</returns>
         public static int FindIndex<T>(this IEnumerable<T> items, Func<T, bool> predicate)
         {
-            items.CheckArgument(nameof(items));
-            predicate.CheckArgument(nameof(predicate));
-
             int retVal = 0;
 
             foreach (var item in items)
@@ -168,7 +159,7 @@ namespace CommonBase.Extensions
                     return end == false;
                 });
             }
-            return result;
+            return result ?? Array.Empty<T>();
         }
     }
 }

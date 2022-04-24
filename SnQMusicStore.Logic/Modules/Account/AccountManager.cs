@@ -74,13 +74,11 @@ namespace SnQMusicStore.Logic.Modules.Account
         }
         public async static Task<ILoginSession> LogonAsync(string jsonWebToken)
         {
-            jsonWebToken.CheckArgument(nameof(jsonWebToken));
-
             var result = default(LoginSession);
 
-            if (JsonWebToken.CheckToken(jsonWebToken, out SecurityToken validatedToken))
+            if (JsonWebToken.CheckToken(jsonWebToken, out SecurityToken? validatedToken))
             {
-                if (validatedToken.ValidTo < DateTime.UtcNow)
+                if (validatedToken != null && validatedToken.ValidTo < DateTime.UtcNow)
                     throw new AuthorizationException(ErrorType.AuthorizationTimeOut);
 
                 if (validatedToken is JwtSecurityToken jwtValidatedToken)
@@ -171,7 +169,7 @@ namespace SnQMusicStore.Logic.Modules.Account
             }
             catch (AuthorizationException ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Error in {MethodBase.GetCurrentMethod()?.Name}: {ex.Message}");
             }
         }
         [Authorize]
@@ -188,14 +186,12 @@ namespace SnQMusicStore.Logic.Modules.Account
         {
             await Authorization.CheckAuthorizationAsync(sessionToken, MethodBase.GetCurrentMethod(), AccessType.QueryBy).ConfigureAwait(false);
 
-            role.CheckArgument(nameof(role));
-
             var loginSession = await QueryAliveSessionAsync(sessionToken).ConfigureAwait(false);
 
             return loginSession != null && loginSession.Roles.Any(r => r.Designation.Equals(role, StringComparison.CurrentCultureIgnoreCase));
         }
         [Authorize]
-        public static async Task<ILoginSession> QueryLoginAsync(string sessionToken)
+        public static async Task<ILoginSession?> QueryLoginAsync(string sessionToken)
         {
             await Authorization.CheckAuthorizationAsync(sessionToken, MethodBase.GetCurrentMethod(), AccessType.QueryBy).ConfigureAwait(false);
 
@@ -294,9 +290,9 @@ namespace SnQMusicStore.Logic.Modules.Account
         #endregion Public logon
 
         #region Internal logon
-        internal static async Task<LoginSession> QueryAliveSessionAsync(string sessionToken)
+        internal static async Task<LoginSession?> QueryAliveSessionAsync(string sessionToken)
         {
-            LoginSession result = LoginSessions.FirstOrDefault(ls => ls.IsActive
+            LoginSession? result = LoginSessions.FirstOrDefault(ls => ls.IsActive
                                                                   && ls.SessionToken.Equals(sessionToken));
 
             if (result == null)
@@ -335,11 +331,8 @@ namespace SnQMusicStore.Logic.Modules.Account
             }
             return result;
         }
-        internal static async Task<LoginSession> QueryAliveSessionAsync(string email, string password)
+        internal static async Task<LoginSession?> QueryAliveSessionAsync(string email, string password)
         {
-            email.CheckArgument(nameof(email));
-            password.CheckArgument(nameof(password));
-
             var result = LoginSessions.FirstOrDefault(e => e.IsActive
                                                         && e.Email.Equals(email, StringComparison.CurrentCultureIgnoreCase));
 
@@ -381,11 +374,8 @@ namespace SnQMusicStore.Logic.Modules.Account
             }
             return result;
         }
-        internal static async Task<LoginSession> QueryLoginByEmailAsync(string email, string password, string optionalInfo)
+        internal static async Task<LoginSession?> QueryLoginByEmailAsync(string email, string password, string optionalInfo)
         {
-            email.CheckArgument(nameof(email));
-            password.CheckArgument(nameof(password));
-
             var result = default(LoginSession);
             var querySession = await QueryAliveSessionAsync(email, password).ConfigureAwait(false);
 
@@ -435,8 +425,6 @@ namespace SnQMusicStore.Logic.Modules.Account
         }
         internal static async Task<IEnumerable<Role>> QueryIdentityRolesAsync(ControllerObject controllerObject, int identityId)
         {
-            controllerObject.CheckArgument(nameof(controllerObject));
-
             var result = new List<Role>();
             using var identityXRoleCtrl = new Controllers.Persistence.Account.IdentityXRoleController(controllerObject);
             var roles = await identityXRoleCtrl.QueryIdentityRolesAsync(identityId).ConfigureAwait(false);
@@ -493,7 +481,7 @@ namespace SnQMusicStore.Logic.Modules.Account
                                 saveChanges = true;
                                 await sessionCtrl.UpdateAsync(dbItem).ConfigureAwait(false);
                             }
-                            if (memItemRemove)
+                            if (memItemRemove && memItem != null)
                             {
                                 LoginSessions.Remove(memItem);
                             }
@@ -517,7 +505,7 @@ namespace SnQMusicStore.Logic.Modules.Account
                     }
                     catch (System.Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine($"Error in {MethodBase.GetCurrentMethod()?.Name}: {ex.Message}");
                     }
                     LastLoginUpdate = DateTime.Now;
                     await Task.Delay(UpdateDelay).ConfigureAwait(false);
@@ -554,8 +542,6 @@ namespace SnQMusicStore.Logic.Modules.Account
         /// <returns>true wenn das Passwort mit PasswordRules entspricht, false sonst</returns>
         public static bool CheckPasswordSyntax(string password)
         {
-            password.CheckArgument(nameof(password));
-
             int digitCount = 0;
             int letterCount = 0;
             int lowerLetterCount = 0;
@@ -606,8 +592,6 @@ namespace SnQMusicStore.Logic.Modules.Account
         /// <returns>Mailadresse ist gültig</returns>
         public static bool CheckMailAddressSyntax(string mailAddress)
         {
-            mailAddress.CheckArgument(nameof(mailAddress));
-
             //return Regex.IsMatch(mailAddress, @"^([\w-\.]+){2,}@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$");
             ////@"^(?("")("".+?""@)|(([0-9a-zA-Z]((\.(?!\.))|[-!#\$%&'\*\+/=\?\^`\{\}\|~\w])*)(?<=[0-9a-zA-Z])@))" +
             ////@"(?(\[)(\[(\d{1,3}\.){3}\d{1,3}\])|(([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,6}))$"); 

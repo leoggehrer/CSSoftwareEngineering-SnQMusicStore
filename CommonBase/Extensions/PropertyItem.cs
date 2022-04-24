@@ -9,8 +9,6 @@ namespace CommonBase.Extensions
     {
         public PropertyItem(PropertyInfo propertyInfo)
         {
-            propertyInfo.CheckArgument(nameof(propertyInfo));
-
             PropertyInfo = propertyInfo;
             PropertyItems = new Dictionary<string, PropertyItem>();
         }

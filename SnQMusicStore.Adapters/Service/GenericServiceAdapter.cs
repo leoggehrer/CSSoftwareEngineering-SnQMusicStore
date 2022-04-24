@@ -59,14 +59,14 @@ namespace SnQMusicStore.Adapters.Service
 
                     if (response.IsSuccessStatusCode)
                     {
-                        string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                         return Convert.ToInt32(stringData);
                     }
                     else
                     {
-                        string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                        string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                        var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                        var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                         System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                         throw new AdapterException((int)response.StatusCode, errorMessage);
@@ -100,14 +100,14 @@ namespace SnQMusicStore.Adapters.Service
 
             if (response.IsSuccessStatusCode)
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 return Convert.ToInt32(stringData);
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
@@ -120,22 +120,23 @@ namespace SnQMusicStore.Adapters.Service
 
             if (response.IsSuccessStatusCode)
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
                 return Convert.ToInt32(stringData);
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
         }
 
-        public async Task<TContract> GetByIdAsync(int id)
+        public async ValueTask<TContract?> GetByIdAsync(int id)
         {
+            TContract? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{ExtUri}/{id}").ConfigureAwait(false);
 
@@ -143,19 +144,21 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel>(contentData, DeserializerOptions).ConfigureAwait(false);
+                result = await JsonSerializer.DeserializeAsync<TModel>(contentData, DeserializerOptions).ConfigureAwait(false);
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? new TModel();
         }
         public async Task<IEnumerable<TContract>> GetAllAsync()
         {
+            IEnumerable<TContract>? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{ExtUri}").ConfigureAwait(false);
 
@@ -163,19 +166,21 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
+                result = await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>();
         }
         public async Task<IEnumerable<TContract>> GetAllAsync(string orderBy)
         {
+            IEnumerable<TContract>? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{SortedExtUri}/{orderBy}").ConfigureAwait(false);
 
@@ -183,20 +188,22 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
+                result = await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>();
         }
 
         public async Task<IEnumerable<TContract>> GetPageListAsync(int pageIndex, int pageSize)
         {
+            IEnumerable<TContract>? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{ExtUri}/{pageIndex}/{pageSize}").ConfigureAwait(false);
 
@@ -204,19 +211,21 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
+                result = await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>();
         }
         public async Task<IEnumerable<TContract>> GetPageListAsync(string orderBy, int pageIndex, int pageSize)
         {
+            IEnumerable<TContract>? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{SortedExtUri}/{orderBy}/{pageIndex}/{pageSize}").ConfigureAwait(false);
 
@@ -224,20 +233,22 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
+                result = await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>();
         }
 
         public async Task<IEnumerable<TContract>> QueryAllAsync(string predicate)
         {
+            IEnumerable<TContract>? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{ExtUri}/Query/{predicate}").ConfigureAwait(false);
 
@@ -245,19 +256,21 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
+                result = await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>();
         }
         public async Task<IEnumerable<TContract>> QueryAllAsync(string predicate, string orderBy)
         {
+            IEnumerable<TContract>? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{SortedExtUri}/Query/{predicate}/{orderBy}").ConfigureAwait(false);
 
@@ -265,20 +278,22 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
+                result = await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>();
         }
 
         public async Task<IEnumerable<TContract>> QueryPageListAsync(string predicate, int pageIndex, int pageSize)
         {
+            IEnumerable<TContract>? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{ExtUri}/Query/{predicate}/{pageIndex}/{pageSize}").ConfigureAwait(false);
 
@@ -286,19 +301,21 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
+                result = await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>();
         }
         public async Task<IEnumerable<TContract>> QueryPageListAsync(string predicate, string orderBy, int pageIndex, int pageSize)
         {
+            IEnumerable<TContract>? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{SortedExtUri}/Query/{predicate}/{orderBy}/{pageIndex}/{pageSize}").ConfigureAwait(false);
 
@@ -306,20 +323,22 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
+                result = await JsonSerializer.DeserializeAsync<TModel[]>(contentData, DeserializerOptions).ConfigureAwait(false) as IEnumerable<TContract>;
             }
             else
             {
-                string stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                string errorMessage = $"{response.ReasonPhrase}: {stringData}";
+                var stringData = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var errorMessage = $"{response.ReasonPhrase}: {stringData}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>();
         }
 
         public async Task<TContract> CreateAsync()
         {
+            TContract? result;
             using var client = GetClient(BaseUri);
             var response = await client.GetAsync($"{ExtUri}/Create").ConfigureAwait(false);
 
@@ -327,21 +346,21 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var contentData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel>(contentData, DeserializerOptions).ConfigureAwait(false);
+                result = await JsonSerializer.DeserializeAsync<TModel>(contentData, DeserializerOptions).ConfigureAwait(false);
             }
             else
             {
-                string errorMessage = $"{response.ReasonPhrase}: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}";
+                var errorMessage = $"{response.ReasonPhrase}: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? new TModel();
         }
 
         public async Task<TContract> InsertAsync(TContract entity)
         {
-            entity.CheckArgument(nameof(entity));
-
+            TContract? result;
             using var client = GetClient(BaseUri);
             var jsonData = JsonSerializer.Serialize(ToModel(entity));
             var contentData = new StringContent(jsonData, Encoding.UTF8, MediaType);
@@ -351,20 +370,20 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var resultData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel>(resultData, DeserializerOptions).ConfigureAwait(false);
+                result = await JsonSerializer.DeserializeAsync<TModel>(resultData, DeserializerOptions).ConfigureAwait(false);
             }
             else
             {
-                string errorMessage = $"{response.ReasonPhrase}: { await response.Content.ReadAsStringAsync().ConfigureAwait(false) }";
+                var errorMessage = $"{response.ReasonPhrase}: { await response.Content.ReadAsStringAsync().ConfigureAwait(false) }";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? entity;
         }
         public async Task<IQueryable<TContract>> InsertAsync(IEnumerable<TContract> entities)
         {
-            entities.CheckArgument(nameof(entities));
-
+            IQueryable<TContract>? result;
             using var client = GetClient(BaseUri);
             var jsonData = JsonSerializer.Serialize(ToModel(entities));
             var contentData = new StringContent(jsonData, Encoding.UTF8, MediaType);
@@ -373,22 +392,22 @@ namespace SnQMusicStore.Adapters.Service
             if (response.IsSuccessStatusCode)
             {
                 var resultData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                var result = await JsonSerializer.DeserializeAsync<List<TModel>>(resultData, DeserializerOptions).ConfigureAwait(false);
+                var deserializeResult = await JsonSerializer.DeserializeAsync<List<TModel>>(resultData, DeserializerOptions).ConfigureAwait(false);
 
-                return result.AsQueryable() as IQueryable<TContract>;
+                result = deserializeResult?.AsQueryable() as IQueryable<TContract>;
             }
             else
             {
-                string errorMessage = $"{response.ReasonPhrase}: { await response.Content.ReadAsStringAsync().ConfigureAwait(false) }";
+                var errorMessage = $"{response.ReasonPhrase}: { await response.Content.ReadAsStringAsync().ConfigureAwait(false) }";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>().AsQueryable();
         }
         public async Task<TContract> UpdateAsync(TContract entity)
         {
-            entity.CheckArgument(nameof(entity));
-
+            TContract? result;
             using var client = GetClient(BaseUri);
             var jsonData = JsonSerializer.Serialize(ToModel(entity));
             var contentData = new StringContent(jsonData, Encoding.UTF8, MediaType);
@@ -398,20 +417,20 @@ namespace SnQMusicStore.Adapters.Service
             {
                 var resultData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                return await JsonSerializer.DeserializeAsync<TModel>(resultData, DeserializerOptions).ConfigureAwait(false);
+                result = await JsonSerializer.DeserializeAsync<TModel>(resultData, DeserializerOptions).ConfigureAwait(false);
             }
             else
             {
-                string errorMessage = $"{response.ReasonPhrase}: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}";
+                var errorMessage = $"{response.ReasonPhrase}: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? entity;
         }
         public async Task<IQueryable<TContract>> UpdateAsync(IEnumerable<TContract> entities)
         {
-            entities.CheckArgument(nameof(entities));
-
+            IQueryable<TContract>? result;
             using var client = GetClient(BaseUri);
             var jsonData = JsonSerializer.Serialize(ToModel(entities));
             var contentData = new StringContent(jsonData, Encoding.UTF8, MediaType);
@@ -420,17 +439,18 @@ namespace SnQMusicStore.Adapters.Service
             if (response.IsSuccessStatusCode)
             {
                 var resultData = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                var result = await JsonSerializer.DeserializeAsync<List<TModel>>(resultData, DeserializerOptions).ConfigureAwait(false);
+                var deserializeResult = await JsonSerializer.DeserializeAsync<List<TModel>>(resultData, DeserializerOptions).ConfigureAwait(false);
 
-                return result.AsQueryable() as IQueryable<TContract>;
+                result = deserializeResult?.AsQueryable() as IQueryable<TContract>;
             }
             else
             {
-                string errorMessage = $"{response.ReasonPhrase}: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}";
+                var errorMessage = $"{response.ReasonPhrase}: {await response.Content.ReadAsStringAsync().ConfigureAwait(false)}";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);
             }
+            return result ?? Array.Empty<TContract>().AsQueryable();
         }
 
         public async Task DeleteAsync(int id)
@@ -440,7 +460,7 @@ namespace SnQMusicStore.Adapters.Service
 
             if (response.IsSuccessStatusCode == false)
             {
-                string errorMessage = $"{response.ReasonPhrase}: { await response.Content.ReadAsStringAsync().ConfigureAwait(false) }";
+                var errorMessage = $"{response.ReasonPhrase}: { await response.Content.ReadAsStringAsync().ConfigureAwait(false) }";
 
                 System.Diagnostics.Debug.WriteLine("{0} ({1})", (int)response.StatusCode, errorMessage);
                 throw new AdapterException((int)response.StatusCode, errorMessage);

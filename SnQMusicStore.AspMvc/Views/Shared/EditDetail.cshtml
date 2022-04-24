@@ -12,13 +12,17 @@
     var sessionInfo = new SessionWrapper(Context.Session);
 
     viewBagInfo.Translate = Translator.TranslateIt;
-    viewBagInfo.Controller = ViewContext.RouteData.Values["controller"].ToString();
-    viewBagInfo.Action = ViewContext.RouteData.Values["action"].ToString();
+    viewBagInfo.Controller = ViewContext.RouteData?.Values["controller"]?.ToString() ?? string.Empty;
+    viewBagInfo.Action = ViewContext.RouteData?.Values["action"]?.ToString() ?? string.Empty;
 
-    Model.Master.ViewBagInfo = viewBagInfo;
-    Model.Detail.ViewBagInfo = viewBagInfo;
-    viewBagInfo.HiddenNames.Add($"{Model.Master.GetType().Name}Id");
-    viewBagInfo.IgnoreNames.Add($"{Model.Master.GetType().Name}Id");
+    if (Model.Master != null)
+        Model.Master.ViewBagInfo = viewBagInfo;
+
+    if (Model.Detail != null)
+        Model.Detail.ViewBagInfo = viewBagInfo;
+
+    viewBagInfo.HiddenNames.Add($"{Model?.Master?.GetType().Name}Id");
+    viewBagInfo.IgnoreNames.Add($"{Model?.Master?.GetType().Name}Id");
 
     ViewData["Title"] = viewBagInfo.Title;
     <h2>@ViewData["Title"]</h2>
@@ -29,7 +33,7 @@
     </div>
     <hr />
 
-    @await Html.PartialAsync("_DisplayModel", Model.Master)
+    @await Html.PartialAsync("_DisplayModel", Model?.Master)
     <hr />
 
     @if (string.IsNullOrEmpty(ErrorHandler.LastViewError) == false)
@@ -40,16 +44,16 @@
     }
 
     viewBagInfo.ItemPrefix = nameof(Model.Detail);
-    <form id="form" asp-action="@nameof(ActionMode.UpdateDetail)" asp-route-id="@Model.Master.Id" method="post">
+    <form id="form" asp-action="@nameof(ActionMode.UpdateDetail)" asp-route-id="@Model?.Master?.Id" method="post">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        @await Html.PartialAsync("_EditModel", Model.Detail)
+        @await Html.PartialAsync("_EditModel", Model?.Detail)
         <hr />
         @await Html.PartialAsync("_SubmitBack", new SubmitBackCmd() 
         { 
             SubmitText = viewBagInfo.TranslateFor("Save"), 
             BackText = viewBagInfo.TranslateFor("Back to Details"),
             BackAction = "Details",
-            BackRouteValues = new { id = Model.Master.Id }
+            BackRouteValues = new { id = Model?.Master?.Id }
         })
     </form>
 }

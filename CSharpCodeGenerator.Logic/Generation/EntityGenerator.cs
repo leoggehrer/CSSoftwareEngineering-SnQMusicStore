@@ -35,8 +35,6 @@ namespace CSharpCodeGenerator.Logic.Generation
 
         public string CreateNameSpace(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             return $"{EntityNameSpace}.{GeneratorObject.CreateSubNamespaceFromType(type)}";
         }
         private bool CanCreateEntity(Type type)
@@ -85,8 +83,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreateBusinessEntity(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.BusinessEntity)
             {
                 FullName = CreateEntityFullNameFromInterface(type),
@@ -117,8 +113,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreateModuleEntity(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.ModuleEntity)
             {
                 FullName = CreateEntityFullNameFromInterface(type),
@@ -151,8 +145,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreatePersistenceEntity(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.PersistenceEntity)
             {
                 FullName = CreateEntityFullNameFromInterface(type),
@@ -183,8 +175,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         private Contracts.IGeneratedItem CreateShadowEntity(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.ShadowEntity)
             {
                 FullName = CreateEntityFullNameFromInterface(type),
@@ -208,9 +198,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         /// <returns>Die Entitaet als Text.</returns>
         private Contracts.IGeneratedItem CreateEntityToEntityFromContracts(Type type, IEnumerable<Type> types)
         {
-            type.CheckArgument(nameof(type));
-            types.CheckArgument(nameof(types));
-
             var typeName = CreateEntityNameFromInterface(type);
             var result = new Models.GeneratedItem(Common.UnitType.Logic, Common.ItemType.PersistenceEntity)
             {
@@ -296,11 +283,8 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.FormatCSharpCode();
             return result;
         }
-
         private Contracts.IGeneratedItem CreateEntityFromContract(Type type, Common.ItemType itemType)
         {
-            type.CheckArgument(nameof(type));
-
             var contractHelper = new ContractHelper(type);
             var baseInterfaces = GetPersistenceBaseContract(type);
             var typeProperties = ContractHelper.GetAllProperties(type);
@@ -313,7 +297,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             {
                 FullName = CreateEntityFullNameFromInterface(type),
                 FileExtension = StaticLiterals.CSharpFileExtension,
-                SubFilePath = CreateSubFilePathFromInterface(type, "Entities", null, StaticLiterals.CSharpFileExtension),
+                SubFilePath = CreateSubFilePathFromInterface(type, "Entities", string.Empty, StaticLiterals.CSharpFileExtension),
             };
             CreateEntityAttributes(type, result.Source);
             result.Add($"partial class {contractHelper.EntityName} : {type.FullName}");
@@ -321,7 +305,20 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.AddRange(CreatePartialStaticConstrutor(contractHelper.EntityName));
             result.AddRange(CreatePartialConstrutor("public", contractHelper.EntityName));
 
-            if (itemType == Common.ItemType.ShadowEntity)
+            if (itemType == Common.ItemType.BusinessEntity && contractHelper.DelegateType != null)
+            {
+                delegateType = contractHelper.DelegateType;
+                delegateEntityType = $"{CreateEntityFullNameFromInterface(delegateType)}";
+
+                result.Add($"public {delegateEntityType} {delegateSourceName}" + " { get; set; }" + $" = new {delegateEntityType}();");
+                result.Add($"public virtual void SetSource({delegateEntityType} source) => {delegateSourceName} = source;");
+
+                delegateProperties = ContractHelper.GetAllProperties(delegateType)
+                                                   .Where(p => CanCreateProperty(delegateType, p.Name));
+                generateProperties = ContractHelper.GetAllProperties(type)
+                                                   .Where(p => CanCreateProperty(type, p.Name));
+            }
+            else if (itemType == Common.ItemType.ShadowEntity)
             {
                 var interfaceTypes = type.GetInterfaces();
 
@@ -354,7 +351,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                 var delegateItem = delegateProperties.FirstOrDefault(p => p.Name.Equals(generateItem.Name) && p.PropertyType.Equals(generateItem.PropertyType));
                 var codeLines = new List<string>();
 
-                if (delegateItem != null)
+                if (delegateType != null && delegateItem != null)
                 {
                     var delegateHelper = new ContractPropertyHelper(delegateType, delegateItem);
 
@@ -381,12 +378,10 @@ namespace CSharpCodeGenerator.Logic.Generation
 
         private static string GetBaseClassByContract(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = string.Empty;
             var typeHelper = new ContractHelper(type);
 
-            if (type.FullName.Contains(StaticLiterals.BusinessSubName))
+            if (type.FullName != null && type.FullName.Contains(StaticLiterals.BusinessSubName))
             {
                 result = IdentityEntity;
                 var itfcs = type.GetInterfaces();
@@ -428,8 +423,23 @@ namespace CSharpCodeGenerator.Logic.Generation
                         result = $"{OneToManyEntity}<{genericArgs[0].FullName}, {firstEntity}, {genericArgs[1].FullName}, {secondEntity}>";
                     }
                 }
+                else
+                {
+                    if (typeHelper.IsVersionable)
+                    {
+                        result = VersionEntity;
+                    }
+                    else if (typeHelper.IsIdentifiable)
+                    {
+                        result = IdentityEntity;
+                    }
+                    else
+                    {
+                        result = EntityObject;
+                    }
+                }
             }
-            else if (type.FullName.Contains(StaticLiterals.PersistenceSubName))
+            else if (type.FullName != null && type.FullName.Contains(StaticLiterals.PersistenceSubName))
             {
                 var baseItf = GetPersistenceBaseContract(type);
 
@@ -450,7 +460,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                     result = EntityObject;
                 }
             }
-            else if (type.FullName.Contains(StaticLiterals.ShadowSubName))
+            else if (type.FullName != null && type.FullName.Contains(StaticLiterals.ShadowSubName))
             {
                 result = ShadowEntity;
             }
@@ -462,20 +472,17 @@ namespace CSharpCodeGenerator.Logic.Generation
             {
                 result = IdentityEntity;
             }
-            else if (type.FullName.Contains(StaticLiterals.ModulesSubName))
+            else if (type.FullName != null && type.FullName.Contains(StaticLiterals.ModulesSubName))
             {
                 result = ModuleObject;
             }
 
             return result;
         }
-        private static Type GetPersistenceBaseContract(Type type)
+        private static Type? GetPersistenceBaseContract(Type type)
         {
-            type.CheckArgument(nameof(type));
-
-
             return type.GetInterfaces().FirstOrDefault(e => e.IsGenericType == false
-                                                         && e.FullName.Contains(StaticLiterals.PersistenceSubName));
+                                                         && e.FullName != null && e.FullName.Contains(StaticLiterals.PersistenceSubName));
         }
     }
 }

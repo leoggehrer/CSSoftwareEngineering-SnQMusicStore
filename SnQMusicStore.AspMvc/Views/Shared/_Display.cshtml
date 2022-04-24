@@ -9,90 +9,96 @@
     @using SnQMusicStore.AspMvc.Models.Modules.View
     @model DisplayViewModel
 
-    var viewBagInfo = Model.ViewBagInfo;
-    var sessionInfo = new SessionWrapper(Context.Session);
-
-    @if (Model.DisplayType.IsGenericTypeOf(typeof(OneToAnotherModel<,,,>)))
+    if (Model != null)
     {
-        var oneProperty = Model.DisplayType.GetProperty("OneModel");
-        var oneModel = oneProperty?.GetValue(Model.DisplayModel) as IdentityModel;
-        var anotherProperty = Model.DisplayType.GetProperty("AnotherModel");
-        var anotherModel = anotherProperty?.GetValue(Model.DisplayModel) as IdentityModel;
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var sessionInfo = new SessionWrapper(Context.Session);
 
-        if (oneModel != null)
+        @if (Model.DisplayType.IsGenericTypeOf(typeof(OneToAnotherModel<,,,>)))
         {
-            oneModel.ViewBagInfo = viewBagInfo;
-            @await Html.PartialAsync("_DisplayModel", oneModel)
+            var oneProperty = Model.DisplayType.GetProperty("OneModel");
+            var oneModel = oneProperty?.GetValue(Model.DisplayModel) as IdentityModel;
+            var anotherProperty = Model.DisplayType.GetProperty("AnotherModel");
+            var anotherModel = anotherProperty?.GetValue(Model.DisplayModel) as IdentityModel;
+
+            if (oneModel != null)
+            {
+                oneModel.ViewBagInfo = viewBagInfo;
+                @await Html.PartialAsync("_DisplayModel", oneModel)
+            }
+            if (anotherModel != null)
+            {
+                anotherModel.ViewBagInfo = viewBagInfo;
+                @await Html.PartialAsync("_DisplayModel", anotherModel)
+            }
         }
-        if (anotherModel != null)
+        else if (Model.DisplayType.IsGenericTypeOf(typeof(OneToManyModel<,,,>)))
         {
-            anotherModel.ViewBagInfo = viewBagInfo;
-            @await Html.PartialAsync("_DisplayModel", anotherModel)
-        }
-    }
-    else if (Model.DisplayType.IsGenericTypeOf(typeof(OneToManyModel<,,,>)))
-    {
-        var oneProperty = Model.DisplayType.GetProperty("OneModel");
-        var oneModel = oneProperty?.GetValue(Model.DisplayModel) as IdentityModel;
-        var manyProperty = Model.DisplayType.GetProperty("ManyModels");
-        var manyModels = manyProperty?.GetValue(Model.DisplayModel);
+            var oneProperty = Model.DisplayType.GetProperty("OneModel");
+            var oneModel = oneProperty?.GetValue(Model.DisplayModel) as IdentityModel;
+            var manyProperty = Model.DisplayType.GetProperty("ManyModels");
+            var manyModels = manyProperty?.GetValue(Model.DisplayModel);
 
-        viewBagInfo.ParentModel = oneModel;
-        oneModel.ViewBagInfo = viewBagInfo;
-        @await Html.PartialAsync("_DisplayModel", oneModel)
-        <hr />
+            if (oneModel != null)
+            {
+                viewBagInfo.ParentModel = oneModel;
+                oneModel.ViewBagInfo = viewBagInfo;
+                @await Html.PartialAsync("_DisplayModel", oneModel)
+            }
+            <hr />
 
-        @if (viewBagInfo.Action.Equals(ActionMode.Delete.ToString()) == false && (viewBagInfo.CommandMode & CommandMode.CreateDetail) > 0)
-        {
-            <div class="row" style="margin-bottom: 1em;">
-                <div class="col-md-12 d-flex">
-                    <div class="ml-auto">
-                        <a asp-action="@nameof(CommandMode.CreateDetail)" asp-route-id="@oneModel.Id" class="btn btn-outline-primary" title="@viewBagInfo.TranslateFor("Create new detail...")"><i class="fa fa-plus" aria-hidden="true"></i></a>
+            @if (viewBagInfo.Action.Equals(ActionMode.Delete.ToString()) == false && (viewBagInfo.CommandMode & CommandMode.CreateDetail) > 0)
+            {
+                <div class="row" style="margin-bottom: 1em;">
+                    <div class="col-md-12 d-flex">
+                        <div class="ml-auto">
+                            <a asp-action="@nameof(CommandMode.CreateDetail)" asp-route-id="@oneModel?.Id" class="btn btn-outline-primary" title="@viewBagInfo.TranslateFor("Create new detail...")"><i class="fa fa-plus" aria-hidden="true"></i></a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        }
+            }
 
-        if (manyModels is IEnumerable<IdentityModel> details && details.Any())
-        {
-            var modelType = details.First().GetType();
-            var displayType = ViewBagWrapper.GetDisplayType(modelType);
-            var indexViewModel = ViewModelCreator.CreateIndexViewModel(viewBagInfo, details, modelType, displayType);
+            if (oneModel != null && manyModels is IEnumerable<IdentityModel> details && details.Any())
+            {
+                var modelType = details.First().GetType();
+                var displayType = ViewBagWrapper.GetDisplayType(modelType);
+                var indexViewModel = ViewModelCreator.CreateIndexViewModel(viewBagInfo, details, modelType, displayType);
 
-            viewBagInfo.HiddenNames.Add($"{oneModel.GetType().Name}Id");
-            viewBagInfo.IgnoreNames.Add($"{oneModel.GetType().Name}Id");
-            @await Html.PartialAsync("_CardList", indexViewModel)
+                viewBagInfo.HiddenNames.Add($"{oneModel.GetType().Name}Id");
+                viewBagInfo.IgnoreNames.Add($"{oneModel.GetType().Name}Id");
+                @await Html.PartialAsync("_CardList", indexViewModel)
+            }
         }
-    }
-    else if (Model.DisplayType.IsGenericTypeOf(typeof(CompositeModel<,,,,,>)))
-    {
-        var connectorProperty = Model.DisplayType.GetProperty("ConnectorModel");
-        var connectorModel = connectorProperty?.GetValue(Model.DisplayModel) as IdentityModel;
-        var oneProperty = Model.DisplayType.GetProperty("OneModel");
-        var oneModel = oneProperty?.GetValue(Model.DisplayModel) as IdentityModel;
-        var anotherProperty = Model.DisplayType.GetProperty("AnotherModel");
-        var anotherModel = anotherProperty?.GetValue(Model.DisplayModel) as IdentityModel;
+        else if (Model.DisplayType.IsGenericTypeOf(typeof(CompositeModel<,,,,,>)))
+        {
+            var connectorProperty = Model.DisplayType.GetProperty("ConnectorModel");
+            var connectorModel = connectorProperty?.GetValue(Model.DisplayModel) as IdentityModel;
+            var oneProperty = Model.DisplayType.GetProperty("OneModel");
+            var oneModel = oneProperty?.GetValue(Model.DisplayModel) as IdentityModel;
+            var anotherProperty = Model.DisplayType.GetProperty("AnotherModel");
+            var anotherModel = anotherProperty?.GetValue(Model.DisplayModel) as IdentityModel;
 
-        if (connectorModel != null)
-        {
-            connectorModel.ViewBagInfo = viewBagInfo;
-            @await Html.PartialAsync("_DisplayModel", connectorModel)
+            if (connectorModel != null)
+            {
+                connectorModel.ViewBagInfo = viewBagInfo;
+                @await Html.PartialAsync("_DisplayModel", connectorModel)
+            }
+            if (oneModel != null)
+            {
+                oneModel.ViewBagInfo = viewBagInfo;
+                @await Html.PartialAsync("_DisplayModel", oneModel)
+            }
+            if (anotherModel != null)
+            {
+                anotherModel.ViewBagInfo = viewBagInfo;
+                @await Html.PartialAsync("_DisplayModel", anotherModel)
+            }
         }
-        if (oneModel != null)
+        else
         {
-            oneModel.ViewBagInfo = viewBagInfo;
-            @await Html.PartialAsync("_DisplayModel", oneModel)
+            Model.DisplayModel.ViewBagInfo = viewBagInfo;
+            @await Html.PartialAsync("_DisplayModel", Model.DisplayModel)
+            <hr />
         }
-        if (anotherModel != null)
-        {
-            anotherModel.ViewBagInfo = viewBagInfo;
-            @await Html.PartialAsync("_DisplayModel", anotherModel)
-        }
-    }
-    else
-    {
-        Model.DisplayModel.ViewBagInfo = viewBagInfo;
-        @await Html.PartialAsync("_DisplayModel", Model.DisplayModel)
-        <hr />
     }
 }

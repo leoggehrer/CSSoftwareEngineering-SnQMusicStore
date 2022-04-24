@@ -16,22 +16,29 @@ namespace CommonBase.Helpers
             _dest = dest;
         }
 
-        public static Expression<Func<TConParam, TConReturn>> ConvertToObject<TParm, TReturn, TConParam, TConReturn>(Expression<Func<TParm, TReturn>> input)
+        public static Expression<Func<TConParam, TConReturn>>? ConvertToObject<TParm, TReturn, TConParam, TConReturn>(Expression<Func<TParm, TReturn>> input)
         {
             var parm = Expression.Parameter(typeof(TConParam));
             var castParm = Expression.Convert(parm, typeof(TParm));
             var body = ReplaceExpression(input.Body, input.Parameters[0], castParm);
-            body = Expression.Convert(body, typeof(TConReturn));
-            return Expression.Lambda<Func<TConParam, TConReturn>>(body, parm);
+            var result = default(Expression<Func<TConParam, TConReturn>>);
+
+            if (body != null)
+            {
+                body = Expression.Convert(body, typeof(TConReturn));
+                result = Expression.Lambda<Func<TConParam, TConReturn>>(body, parm);
+            }
+            return result;
         }
 
-        public static Expression ReplaceExpression(Expression body, Expression source, Expression dest)
+        public static Expression? ReplaceExpression(Expression body, Expression source, Expression dest)
         {
             var replacer = new ExpressionConverter(source, dest);
+
             return replacer.Visit(body);
         }
 
-        public override Expression Visit(Expression node)
+        public override Expression? Visit(Expression? node)
         {
             if (node == _source)
                 return _dest;

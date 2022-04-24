@@ -4,26 +4,32 @@
     @using SnQMusicStore.AspMvc.Modules.View
     @model EditViewModel
 
-    var viewBagInfo = Model.ViewBagInfo;
-    var property = viewBagInfo.DisplayProperty;
+    if (Model != null)
+    {
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var property = viewBagInfo.DisplayProperty;
 
-    <div class="row">
-        <div class="col-md-6">
-            @if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
-            {
-                <div class="form-check" style="margin-bottom: 0.5em;">
-                    @await Html.PartialAsync("_EditControl", Model)
-                    <label class="form-check-label" for="@property.Name">@viewBagInfo.TranslateFor(Model.GetLabel(property))</label>
+        if (property != null)
+        {
+            <div class="row">
+                <div class="col-md-6">
+                    @if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+                    {
+                        <div class="form-check" style="margin-bottom: 0.5em;">
+                            @await Html.PartialAsync("_EditControl", Model)
+                            <label class="form-check-label" for="@property.Name">@viewBagInfo.TranslateFor(Model.GetLabel(property))</label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-group">
+                            <label class="control-label" for="@property.Name">@viewBagInfo.TranslateFor(Model.GetLabel(property))</label>
+                            @await Html.PartialAsync("_EditControl", Model)
+                        </div>
+                    }
                 </div>
-            }
-            else
-            {
-                <div class="form-group">
-                    <label class="control-label" for="@property.Name">@viewBagInfo.TranslateFor(Model.GetLabel(property))</label>
-                    @await Html.PartialAsync("_EditControl", Model)
-                </div>
-            }
-        </div>
-    </div>
-    viewBagInfo.Handled = true;
+            </div>
+            viewBagInfo.Handled = true;
+        }
+    }
 }

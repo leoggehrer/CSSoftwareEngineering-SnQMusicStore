@@ -4,19 +4,22 @@
     @using SnQMusicStore.AspMvc.Modules.View
     @model IDisplayViewModel
 
-    var viewBagInfo = Model.ViewBagInfo;
-    var property = viewBagInfo.DisplayProperty;
-
-    @if (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?))
+    if (Model != null)
     {
-        var value = Model.GetValue(property);
-        var boolVal = value != null ? Convert.ToBoolean(value) : false;
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
+        var property = viewBagInfo.DisplayProperty;
 
-        @Html.CheckBox(Model.GetName(property), boolVal, new { @class="form-check-input", disabled="disabled", style="margin-left: 0.3em;" })
+        @if (property != null && (property.PropertyType == typeof(bool) || property.PropertyType == typeof(bool?)))
+        {
+            var value = Model.GetValue(property);
+            var boolVal = value != null ? Convert.ToBoolean(value) : false;
+
+            @Html.CheckBox(Model.GetName(property), boolVal, new { @class="form-check-input", disabled="disabled", style="margin-left: 0.3em;" })
+        }
+        else
+        {
+            @Model.GetDisplayValue(property)
+        }
+        viewBagInfo.Handled = true;
     }
-    else
-    {
-        @Model.GetDisplayValue(property)
-    }
-    viewBagInfo.Handled = true;
 }

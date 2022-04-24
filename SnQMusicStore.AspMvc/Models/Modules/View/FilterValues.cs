@@ -14,7 +14,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             {
                 if (item.Key.EndsWith($"{StaticLiterals.TypeOperationPostfix}") == false)
                 {
-                    if (TryGetValue($"{item.Key}", out FilterItem filterItem))
+                    if (TryGetValue($"{item.Key}", out FilterItem? filterItem))
                     {
                         if (result.Length > 0)
                         {
@@ -62,7 +62,7 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             {
                 result = $"{name} < {value}";
             }
-            return result;
+            return result ?? string.Empty;
         }
     }
 }

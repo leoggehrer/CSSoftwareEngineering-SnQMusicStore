@@ -74,7 +74,7 @@ namespace SnQMusicStore.Logic.Controllers.Business
             }
             return result;
         }
-        protected virtual PropertyInfo GetForeignKeyToOne()
+        protected virtual PropertyInfo? GetForeignKeyToOne()
         {
             return typeof(TMany).GetInterfaceProperty($"{typeof(TOneEntity).Name}Id");
         }
@@ -126,7 +126,7 @@ namespace SnQMusicStore.Logic.Controllers.Business
         #endregion Count
 
         #region Query
-        internal override async Task<E> ExecuteGetEntityByIdAsync(int id)
+        internal override async ValueTask<E?> ExecuteGetEntityByIdAsync(int id)
         {
             E result;
             var oneEntity = await OneEntityController.GetEntityByIdAsync(id).ConfigureAwait(false);
@@ -289,10 +289,6 @@ namespace SnQMusicStore.Logic.Controllers.Business
         #region Insert
         internal override async Task<E> ExecuteInsertEntityAsync(E entity)
         {
-            entity.CheckArgument(nameof(entity));
-            entity.OneEntity.CheckArgument(nameof(entity.OneEntity));
-            entity.ManyEntities.CheckArgument(nameof(entity.ManyEntities));
-
             entity.OneEntity = await OneEntityController.InsertEntityAsync(entity.OneEntity).ConfigureAwait(false);
 
             foreach (var item in entity.ManyEntities)
@@ -307,10 +303,6 @@ namespace SnQMusicStore.Logic.Controllers.Business
         #region Update
         internal override async Task<E> ExecuteUpdateEntityAsync(E entity)
         {
-            entity.CheckArgument(nameof(entity));
-            entity.OneEntity.CheckArgument(nameof(entity.OneEntity));
-            entity.ManyEntities.CheckArgument(nameof(entity.ManyEntities));
-
             var query = (await QueryDetailsAsync(entity.Id).ConfigureAwait(false)).ToList();
 
             //Delete all costs that are no longer included in the list.
@@ -358,10 +350,6 @@ namespace SnQMusicStore.Logic.Controllers.Business
         #region Delete
         internal override async Task<E> ExecuteDeleteEntityAsync(E entity)
         {
-            entity.CheckArgument(nameof(entity));
-            entity.OneEntity.CheckArgument(nameof(entity.OneEntity));
-            entity.ManyEntities.CheckArgument(nameof(entity.ManyEntities));
-
             foreach (var item in entity.ManyEntities)
             {
                 await ManyEntityController.DeleteEntityAsync(item).ConfigureAwait(false);

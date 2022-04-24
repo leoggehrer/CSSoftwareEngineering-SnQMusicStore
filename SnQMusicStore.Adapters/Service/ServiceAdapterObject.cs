@@ -28,6 +28,7 @@ namespace SnQMusicStore.Adapters.Service
         public ServiceAdapterObject(string baseUri)
         {
             Constructing();
+            SessionToken = string.Empty;
             BaseUri = baseUri;
             Constructed();
         }
@@ -57,11 +58,10 @@ namespace SnQMusicStore.Adapters.Service
             if (baseAddress.HasContent())
             {
                 if (baseAddress.EndsWith(@"/") == false
-                    || baseAddress.EndsWith(@"\") == false)
+                    && baseAddress.EndsWith(@"\") == false)
                 {
                     baseAddress += "/";
                 }
-
                 client.BaseAddress = new Uri(baseAddress);
             }
             client.DefaultRequestHeaders.Accept.Clear();
@@ -70,28 +70,9 @@ namespace SnQMusicStore.Adapters.Service
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaType));
             return client;
         }
-        protected static HttpClient GetClient(string baseAddress, string sessionToken)
-        {
-            return CreateClient(baseAddress, sessionToken);
-        }
         protected static HttpClient CreateClient(string baseAddress, string sessionToken)
         {
-            HttpClient client = new();
-
-            if (baseAddress.HasContent())
-            {
-                if (baseAddress.EndsWith(@"/") == false
-                    || baseAddress.EndsWith(@"\") == false)
-                {
-                    baseAddress += "/";
-                }
-
-                client.BaseAddress = new Uri(baseAddress);
-            }
-            client.DefaultRequestHeaders.Accept.Clear();
-
-            // Add an Accept header for JSON format.
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaType));
+            HttpClient client = CreateClient(baseAddress);
 
             if (sessionToken.HasContent())
             {

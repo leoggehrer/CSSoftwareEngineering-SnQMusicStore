@@ -30,7 +30,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void Constructing();
         partial void Constructed();
 
-        public IActionResult Logon(string returnUrl = null, string error = null)
+        public IActionResult Logon(string? returnUrl = null, string? error = null)
         {
             var handled = false;
             var viewName = nameof(Logon);
@@ -93,7 +93,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterDoLogon(viewModel, ref action, ref controller);
-            if (viewModel.ReturnUrl.HasContent())
+            if (viewModel.ReturnUrl != null)
             {
                 return Redirect(viewModel.ReturnUrl);
             }
@@ -102,7 +102,7 @@ namespace SnQMusicStore.AspMvc.Controllers
         partial void BeforeDoLogon(LogonViewModel model, ref bool handled);
         partial void AfterDoLogon(LogonViewModel model, ref string action, ref string controller);
 
-        public IActionResult LogonRemote(string returnUrl = null, string error = null)
+        public IActionResult LogonRemote(string? returnUrl = null, string? error = null)
         {
             var handled = false;
             var viewName = nameof(LogonRemote);
@@ -151,7 +151,7 @@ namespace SnQMusicStore.AspMvc.Controllers
                 }
             }
             AfterDoLogonRemote(viewModel, ref action, ref controller);
-            if (viewModel.ReturnUrl.HasContent())
+            if (viewModel.ReturnUrl != null)
             {
                 return Redirect(viewModel.ReturnUrl);
             }
@@ -321,16 +321,16 @@ namespace SnQMusicStore.AspMvc.Controllers
         private async Task ExecuteLogonRemoteAsync(LogonViewModel viewModel)
         {
             var intAccMngr = new AccountManager() { Adapter = Adapters.AdapterType.Controller };
-            var extAccMngr = new AccountManager() { Adapter = Adapters.AdapterType.Service, BaseUri = viewModel.IdentityUrl };
+            var extAccMngr = new AccountManager() { Adapter = Adapters.AdapterType.Service, BaseUri = viewModel.IdentityUrl ?? string.Empty };
             try
             {
                 var externLogin = await extAccMngr.LogonAsync(viewModel.Email, viewModel.Password).ConfigureAwait(false);
-                var internLogin = await intAccMngr.LogonAsync(externLogin.JsonWebToken).ConfigureAwait(false);
+                var internLogin = await intAccMngr.LogonAsync(externLogin?.JsonWebToken ?? string.Empty).ConfigureAwait(false);
                 var loginSession = new LoginSession();
 
                 loginSession.CopyProperties(internLogin);
                 SessionInfo.LoginSession = loginSession;
-                await extAccMngr.LogoutAsync(externLogin.SessionToken).ConfigureAwait(false);
+                await extAccMngr.LogoutAsync(externLogin?.SessionToken ?? string.Empty).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

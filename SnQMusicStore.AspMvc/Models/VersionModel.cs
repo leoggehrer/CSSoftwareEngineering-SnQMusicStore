@@ -7,7 +7,7 @@ namespace SnQMusicStore.AspMvc.Models
 {
     public class VersionModel : IdentityModel, Contracts.IVersionable
 	{
-		public byte[] RowVersion { get; set; }
+		public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         /// <summary>
         /// Gets and sets the the row stamp as string.
@@ -16,9 +16,9 @@ namespace SnQMusicStore.AspMvc.Models
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
 
-                if (this.RowVersion != null)
+                if (RowVersion != null)
                 {
                     foreach (var item in this.RowVersion)
                     {
@@ -41,7 +41,7 @@ namespace SnQMusicStore.AspMvc.Models
                     {
                         ts[i] = Convert.ToByte(data[i]);
                     }
-                    this.RowVersion = ts;
+                    RowVersion = ts;
                 }
             }
         }

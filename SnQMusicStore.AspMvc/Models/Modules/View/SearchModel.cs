@@ -16,9 +16,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public SearchModel(ISessionWrapper sessionInfo, IndexViewModel indexViewModel)
         {
-            sessionInfo.CheckArgument(nameof(sessionInfo));
-            indexViewModel.CheckArgument(nameof(indexViewModel));
-
             SessionInfo = sessionInfo;
             IndexViewModel = indexViewModel;
         }
@@ -70,8 +67,6 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
 
         public static string CreateTypePredicate(Type type, string value)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new StringBuilder();
 
             if (string.IsNullOrEmpty(value) == false)
@@ -92,9 +87,9 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
             }
             return result.ToString();
         }
-        public static string CreateInterfacePredicate(Type type, string value)
+        public static string CreateInterfacePredicate(Type? type, string value)
         {
-            type.CheckArgument(nameof(type));
+            _ = type ?? throw new ArgumentNullException(nameof(type));
 
             var result = new StringBuilder();
 
@@ -120,9 +115,10 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         public SelectList GetSearchItems()
         {
             var translate = ViewBagInfo.Translate;
-            var items = new List<SelectListItem>();
-
-            items.Add(new SelectListItem { Value = string.Empty, Text = translate("All") });
+            var items = new List<SelectListItem>
+            {
+                new SelectListItem { Value = string.Empty, Text = translate("All") }
+            };
             foreach (var property in IndexViewModel.GetDisplayProperties())
             {
                 if (property.PropertyType == typeof(string))

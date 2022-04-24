@@ -20,7 +20,7 @@ namespace CommonBase.Helpers
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            MethodInfo method = null;
+            MethodInfo? method = null;
             Type targetType = target.GetType();
 
             if (parameters.Length == 0)
@@ -57,7 +57,7 @@ namespace CommonBase.Helpers
                 throw new OperationNotFoundException(name);
             }
         }
-        public static object InvokeFunction(object target, string name, params object[] parameters)
+        public static object? InvokeFunction(object target, string name, params object[] parameters)
         {
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
@@ -65,8 +65,8 @@ namespace CommonBase.Helpers
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            object result = null;
-            MethodInfo method = null;
+            object? result = null;
+            MethodInfo? method = null;
             Type targetType = target.GetType();
 
             if (parameters.Length == 0)
@@ -105,7 +105,7 @@ namespace CommonBase.Helpers
             return result;
         }
 
-        public static Task InvokeActionAsync(object target, string name, params object[] parameters)
+        public static Task? InvokeActionAsync(object target, string name, params object[] parameters)
         {
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
@@ -113,7 +113,7 @@ namespace CommonBase.Helpers
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            MethodInfo method = null;
+            MethodInfo? method = null;
             Type targetType = target.GetType();
 
             if (parameters.Length == 0)
@@ -138,7 +138,7 @@ namespace CommonBase.Helpers
                 }
                 try
                 {
-                    return (Task)method.Invoke(target, parameters);
+                    return (Task?)method.Invoke(target, parameters);
                 }
                 catch (TargetInvocationException e)
                 {
@@ -150,7 +150,7 @@ namespace CommonBase.Helpers
                 throw new OperationNotFoundException(name);
             }
         }
-        public static Task<object> InvokeFunctionAsync(object target, string name, params object[] parameters)
+        public static Task<object>? InvokeFunctionAsync(object target, string name, params object[] parameters)
         {
             if (target == null)
                 throw new ArgumentNullException(nameof(target));
@@ -158,7 +158,7 @@ namespace CommonBase.Helpers
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException(nameof(name));
 
-            MethodInfo method = null;
+            MethodInfo? method = null;
             Type targetType = target.GetType();
 
             if (parameters.Length == 0)
@@ -183,7 +183,7 @@ namespace CommonBase.Helpers
                 }
                 try
                 {
-                    return (Task<object>)(method.Invoke(target, parameters));
+                    return (Task<object>?)method.Invoke(target, parameters);
                 }
                 catch (TargetInvocationException e)
                 {
@@ -196,11 +196,9 @@ namespace CommonBase.Helpers
             }
         }
 
-        public static object[] CallExtendedMethods(Assembly executingAssembly, string className, string methodName, params object[] parameters)
+        public static object?[] CallExtendedMethods(Assembly executingAssembly, string className, string methodName, params object[] parameters)
         {
-            executingAssembly.CheckArgument(nameof(executingAssembly));
-
-            var result = new List<object>();
+            var result = new List<object?>();
             bool chkClsExt(Type t, string n)
             {
                 return t.GetCustomAttributes<ClassExtensionAttribute>().Any(a => t.Name.Equals(n) || (string.IsNullOrEmpty(a.MappingName) == false && a.MappingName.Equals(n)));

@@ -2,7 +2,6 @@
 using SnQMusicStore.AspMvc.Models.Modules.Common;
 using SnQMusicStore.AspMvc.Models.Persistence.App;
 using SnQMusicStore.AspMvc.Modules.View;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,9 +17,20 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
                 using var albumCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IAlbum>(sessionToken);
 
                 model.Genres = await genreCtrl.GetAllAsync().ConfigureAwait(false);
-                model.Genre = model.Genres.FirstOrDefault(e => e.Id == model.GenreId);
+                var genre = model.Genres.FirstOrDefault(e => e.Id == model.GenreId);
+
+                if (genre != null)
+                {
+                    model.Genre = genre;
+                }
+
                 model.Albums = await albumCtrl.GetAllAsync().ConfigureAwait(false);
-                model.Album = model.Albums.FirstOrDefault(e => e.Id == model.AlbumId);
+                var album = model.Albums.FirstOrDefault(e => e.Id == model.AlbumId);
+
+                if (album != null)
+                {
+                    model.Album = album;
+                }
             }
             return model;
         }
@@ -34,8 +44,19 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
 
             foreach (var model in models)
             {
-                model.Genre = genres.FirstOrDefault(e => e.Id == model.GenreId);
-                model.Album = albums.FirstOrDefault(e => e.Id == model.AlbumId);
+                var genre = genres.FirstOrDefault(e => e.Id == model.GenreId);
+
+                if (genre != null)
+                {
+                    model.Genre = genre;
+                }
+
+                var album = albums.FirstOrDefault(e => e.Id == model.AlbumId);
+
+                if (album != null)
+                {
+                    model.Album = album;
+                }
                 result.Add(model);
             }
             return result;
@@ -49,7 +70,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
         }
         protected override async Task<IEnumerable<Track>> BeforeViewAsync(IEnumerable<Track> models, ActionMode action)
         {
-            var sessionToken = SessionInfo.LoginSession.SessionToken;
+            var sessionToken = SessionInfo.LoginSession?.SessionToken ?? string.Empty;
             var result = await LoadModelsReferencesAsync(sessionToken, models).ConfigureAwait(false);
 
             return await base.BeforeViewAsync(result, action).ConfigureAwait(false);
@@ -58,18 +79,18 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
         public override async Task<IActionResult> DetailsAsync(int id)
         {
             var viewBagWrapper = new ViewBagWrapper(ViewBag);
+            var sessionToken = SessionInfo.LoginSession?.SessionToken ?? string.Empty;
             using var ctrl = CreateController<Contracts.Business.App.ITrackAlbumGenre>();
             var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
             var model = Models.Business.App.TrackAlbumGenre.Create(entity);
 
             if (model != null)
             {
-                await LoadModelReferencesAsync(SessionInfo.LoginSession.SessionToken, model.ConnectorModel, ActionMode.Details).ConfigureAwait(false);
-                await AlbumsController.LoadModelReferencesAsync(SessionInfo.LoginSession.SessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
+                await LoadModelReferencesAsync(sessionToken, model.ConnectorModel, ActionMode.Details).ConfigureAwait(false);
+                await AlbumsController.LoadModelReferencesAsync(sessionToken, model.OneModel, ActionMode.Details).ConfigureAwait(false);
             }
-            viewBagWrapper.CommandMode = Models.Modules.Common.CommandMode.None;
+            viewBagWrapper.CommandMode = CommandMode.None;
             return View("Composite", model);
         }
-
     }
 }

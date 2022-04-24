@@ -18,9 +18,9 @@ namespace CSharpCodeGenerator.Logic.Models
         }
         public UnitType UnitType { get; }
         public ItemType ItemType { get; }
-        public string FullName { get; init; }
-        public string SubFilePath { get; init; }
-        public string FileExtension { get; init; }
+        public string FullName { get; init; } = string.Empty;
+        public string SubFilePath { get; init; } = string.Empty;
+        public string FileExtension { get; init; } = string.Empty;
         public IEnumerable<string> SourceCode => Source;
 
         public List<string> Source { get; } = new List<string>();

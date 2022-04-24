@@ -70,7 +70,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence.Account
             return await base.BeforeUpdateAsync(entity).ConfigureAwait(false);
         }
 
-        public Task<Identity> GetValidIdentityByEmail(string email)
+        public Task<Identity?> GetValidIdentityByEmail(string email)
 		{
             return QueryableSet().Include(e => e.IdentityXRoles)
                                  .ThenInclude(e => e.Role)

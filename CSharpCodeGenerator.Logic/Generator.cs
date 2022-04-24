@@ -21,7 +21,9 @@ namespace CSharpCodeGenerator.Logic
             var controllerGenerator = Factory.GetControllerGenerator(solutionName, contractsFilePath);
             var factoryGenerator = Factory.GetFactoryGenerator(solutionName, contractsFilePath);
             var transferGenerator = Factory.GetTransferGenerator(solutionName, contractsFilePath);
-            var aspMvcGenerator = Factory.GetAspMvcGenerator(solutionName, contractsFilePath);
+            var aspMvcAppGenerator = Factory.GetAspMvcAppGenerator(solutionName, contractsFilePath);
+            var blazorServerAppGenerator = Factory.GetBlazorServerAppGenerator(solutionName, contractsFilePath);
+            var telerikBlazorServerAppGenerator = Factory.GetTelerikBlazorServerAppGenerator(solutionName, contractsFilePath);
             var tasks = new List<Task>();
 
             #region Logic
@@ -118,27 +120,71 @@ namespace CSharpCodeGenerator.Logic
             }));
             #endregion WebApi
 
-            #region AspMvc
-            if ((appUnitTypes & Common.UnitType.AspMvc) > 0)
+            #region AspMvcApp
+            if ((appUnitTypes & Common.UnitType.AspMvcApp) > 0)
             {
                 tasks.Add(Task.Factory.StartNew(() =>
                 {
                     var generatedItems = new List<IGeneratedItem>();
 
-                    Console.WriteLine("Create AspMvc-Models...");
-                    generatedItems.AddRange(aspMvcGenerator.GenerateAll());
+                    Console.WriteLine("Create AspMvcApp-Models...");
+                    generatedItems.AddRange(aspMvcAppGenerator.GenerateAll());
                     result.AddRangeSafe(generatedItems);
                 }));
                 tasks.Add(Task.Factory.StartNew(() =>
                 {
                     var generatedItems = new List<IGeneratedItem>();
 
-                    Console.WriteLine("Create AspMvc-Controllers...");
+                    Console.WriteLine("Create AspMvcApp-Controllers...");
                     generatedItems.AddRange(controllerGenerator.CreateAspMvcControllers());
                     result.AddRangeSafe(generatedItems);
                 }));
             }
-            #endregion AspMvc
+            #endregion AspMvcApp
+
+            #region BlazorServerApp
+            if ((appUnitTypes & Common.UnitType.BlazorServerApp) > 0)
+            {
+                tasks.Add(Task.Factory.StartNew(() =>
+                {
+                    var generatedItems = new List<IGeneratedItem>();
+
+                    Console.WriteLine("Create BlazorServerApp-Models...");
+                    generatedItems.AddRange(blazorServerAppGenerator.GenerateAll());
+                    result.AddRangeSafe(generatedItems);
+                }));
+                //tasks.Add(Task.Factory.StartNew(() =>
+                //{
+                //    var generatedItems = new List<IGeneratedItem>();
+
+                //    Console.WriteLine("Create AspMvc-Controllers...");
+                //    generatedItems.AddRange(controllerGenerator.CreateAspMvcControllers());
+                //    result.AddRangeSafe(generatedItems);
+                //}));
+            }
+            #endregion BlazorServerApp
+
+            #region TelerikBlazorServerApp
+            if ((appUnitTypes & Common.UnitType.TelerikBlazorServerApp) > 0)
+            {
+                tasks.Add(Task.Factory.StartNew(() =>
+                {
+                    var generatedItems = new List<IGeneratedItem>();
+
+                    Console.WriteLine("Create TelerikBlazorServerApp-Models...");
+                    generatedItems.AddRange(telerikBlazorServerAppGenerator.GenerateAll());
+                    result.AddRangeSafe(generatedItems);
+                }));
+                //tasks.Add(Task.Factory.StartNew(() =>
+                //{
+                //    var generatedItems = new List<IGeneratedItem>();
+
+                //    Console.WriteLine("Create AspMvc-Controllers...");
+                //    generatedItems.AddRange(controllerGenerator.CreateAspMvcControllers());
+                //    result.AddRangeSafe(generatedItems);
+                //}));
+            }
+            #endregion TelerikBlazorServerApp
 
             Task.WaitAll(tasks.ToArray());
             return result;

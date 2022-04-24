@@ -15,7 +15,7 @@ namespace SnQMusicStore.Logic
 
         internal static DataContext.IContext CreateContext()
         {
-            return new DataContext.SnQMusicStoreDbContext();
+            return new DataContext.ProjectDbContext();
         }
 
         public static IControllerAccess<C> Create<C>()
@@ -24,7 +24,7 @@ namespace SnQMusicStore.Logic
             var result = default(IControllerAccess<C>);
 
             CreateController(ref result);
-            return result;
+            return result ?? throw new Modules.Exception.LogicException(Modules.Exception.ErrorType.InvalidControllerType);
         }
         public static IControllerAccess<C> Create<C>(object controllerObject)
             where C : Contracts.IIdentifiable
@@ -32,7 +32,7 @@ namespace SnQMusicStore.Logic
             var result = default(IControllerAccess<C>);
 
             CreateController(controllerObject, ref result);
-            return result;
+            return result ?? throw new Modules.Exception.LogicException(Modules.Exception.ErrorType.InvalidControllerType);
         }
 #if ACCOUNT_ON
         public static IControllerAccess<C> Create<C>(string sessionToken)
@@ -41,14 +41,14 @@ namespace SnQMusicStore.Logic
             var result = default(IControllerAccess<C>);
 
             CreateController(sessionToken, ref result);
-            return result;
+            return result ?? throw new Modules.Exception.LogicException(Modules.Exception.ErrorType.InvalidControllerType);
         }
 
         public static IAccountManager CreateAccountManager() => new Modules.Account.AccountManagerWrapper();
 #endif
-        static partial void CreateController<C>(ref IControllerAccess<C> controller)
+        static partial void CreateController<C>(ref IControllerAccess<C>? controller)
             where C : Contracts.IIdentifiable;
-        static partial void CreateController<C>(object sharedController, ref IControllerAccess<C> controller)
+        static partial void CreateController<C>(object sharedController, ref IControllerAccess<C>? controller)
             where C : Contracts.IIdentifiable;
     }
 }

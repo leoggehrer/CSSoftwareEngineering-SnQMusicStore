@@ -34,8 +34,6 @@ namespace CSharpCodeGenerator.Logic.Generation
 
         public string CreateModelsNamespace(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             return $"{AppModelsNameSpace}.{GeneratorObject.CreateSubNamespaceFromType(type)}";
         }
         protected virtual bool CanCreate(Type type)
@@ -84,16 +82,30 @@ namespace CSharpCodeGenerator.Logic.Generation
                     result.Add(CreateModelFromContract(type, UnitType, Common.ItemType.BusinessModel));
                     if (ContractHelper.HasOneToMany(type))
                     {
-                        var (one, _) = ContractHelper.GetOneToManyTypes(type);
+                        var (oneType, _) = ContractHelper.GetOneToManyTypes(type);
 
-                        result.Add(CreateDelegateProperties(type, one, StaticLiterals.OneItemName, UnitType, Common.ItemType.BusinessModel));
+                        if (oneType != null)
+                        {
+                            result.Add(CreateDelegateProperties(type, oneType, StaticLiterals.OneItemName, UnitType, Common.ItemType.BusinessModel));
+                        }
                     }
                     else if (ContractHelper.HasOneToAnother(type))
                     {
-                        var (one, another) = ContractHelper.GetOneToAnotherTypes(type);
+                        var (oneType, anotherType) = ContractHelper.GetOneToAnotherTypes(type);
 
-                        result.Add(CreateDelegateProperties(type, one, StaticLiterals.OneItemName, UnitType, Common.ItemType.BusinessModel));
-                        result.Add(CreateDelegateProperties(type, another, StaticLiterals.AnotherItemName, UnitType, Common.ItemType.BusinessModel));
+                        if (oneType != null)
+                        {
+                            result.Add(CreateDelegateProperties(type, oneType, StaticLiterals.OneItemName, UnitType, Common.ItemType.BusinessModel));
+                        }
+
+                        if (anotherType != null)
+                        {
+                            result.Add(CreateDelegateProperties(type, anotherType, StaticLiterals.AnotherItemName, UnitType, Common.ItemType.BusinessModel));
+                        }
+                    }
+                    else
+                    {
+                        result.Add(CreateEditModelFromContract(type, UnitType, Common.ItemType.BusinessModel));
                     }
                     result.Add(CreateBusinessModel(type, UnitType));
                 }
@@ -102,8 +114,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         protected virtual Contracts.IGeneratedItem CreateBusinessModel(Type type, Common.UnitType unitType)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(unitType, Common.ItemType.BusinessModel)
             {
                 FullName = CreateModelFullNameFromInterface(type),
@@ -135,8 +145,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         protected virtual Contracts.IGeneratedItem CreateModuleModel(Type type, Common.UnitType unitType)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(unitType, Common.ItemType.ModuleModel)
             {
                 FullName = CreateModelFullNameFromInterface(type),
@@ -163,15 +171,12 @@ namespace CSharpCodeGenerator.Logic.Generation
                     result.Add(CreateModelFromContract(type, UnitType, Common.ItemType.PersistenceModel));
                     result.Add(CreatePersistenceModel(type, UnitType));
                     result.Add(CreateEditModelFromContract(type, UnitType, Common.ItemType.PersistenceModel));
-                    //result.Add(CreateOverrideToString(type, UnitType));
                 }
             }
             return result;
         }
         protected virtual Contracts.IGeneratedItem CreatePersistenceModel(Type type, Common.UnitType unitType)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(unitType, Common.ItemType.PersistenceModel)
             {
                 FullName = CreateModelFullNameFromInterface(type),
@@ -204,8 +209,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         protected virtual Contracts.IGeneratedItem CreateShadowModel(Type type, Common.UnitType unitType)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(unitType, Common.ItemType.ShadowModel)
             {
                 FullName = CreateModelFullNameFromInterface(type),
@@ -238,8 +241,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         protected virtual Contracts.IGeneratedItem CreateThirdPartyModel(Type type, Common.UnitType unitType)
         {
-            type.CheckArgument(nameof(type));
-
             var result = new Models.GeneratedItem(unitType, Common.ItemType.ThridPartyModel)
             {
                 FullName = CreateModelFullNameFromInterface(type),
@@ -256,8 +257,6 @@ namespace CSharpCodeGenerator.Logic.Generation
 
         protected virtual Contracts.IGeneratedItem CreateModelFromContract(Type type, Common.UnitType unitType, Common.ItemType itemType)
         {
-            type.CheckArgument(nameof(type));
-
             var interfaces = GetInterfaces(type);
             var modelName = CreateModelNameFromInterface(type);
             var typeProperties = ContractHelper.GetAllProperties(type);
@@ -276,7 +275,7 @@ namespace CSharpCodeGenerator.Logic.Generation
 
             if (itemType == Common.ItemType.ShadowModel)
             {
-                generateProperties = ContractHelper.FilterShadowPropertiesForGeneration(type, typeProperties); 
+                generateProperties = ContractHelper.FilterShadowPropertiesForGeneration(type, typeProperties);
             }
             else
             {
@@ -302,8 +301,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
         protected virtual Contracts.IGeneratedItem CreateEditModelFromContract(Type type, Common.UnitType unitType, Common.ItemType itemType)
         {
-            type.CheckArgument(nameof(type));
-
             var interfaces = GetInterfaces(type);
             var modelName = CreateEditModelNameFromInterface(type);
             var typeProperties = ContractHelper.GetAllProperties(type);
@@ -329,19 +326,13 @@ namespace CSharpCodeGenerator.Logic.Generation
             {
                 generateProperties = ContractHelper.FilterPropertiesForGeneration(type, typeProperties);
             }
-            foreach (var item in generateProperties)
+            foreach (var item in generateProperties.Where(pi => pi.CanWrite))
             {
                 var propertyHelper = new ContractPropertyHelper(type, item);
 
                 CreateModelPropertyAttributes(propertyHelper, result.Source);
                 result.AddRange(CreateProperty(propertyHelper));
             }
-            result.AddRange(CreateCopyProperties(type, pi => ContractHelper.VersionProperties.Contains(pi.Name) == false));
-            foreach (var item in interfaces.Where(e => ContractHelper.HasCopyable(e)))
-            {
-                result.AddRange(CreateCopyProperties(item, pi => ContractHelper.VersionProperties.Contains(pi.Name) == false));
-            }
-            result.AddRange(CreateFactoryMethods(type, false));
             result.Add("}");
             result.EnvelopeWithANamespace(CreateModelsNamespace(type), "using System;");
             result.FormatCSharpCode();
@@ -350,9 +341,6 @@ namespace CSharpCodeGenerator.Logic.Generation
 
         private Contracts.IGeneratedItem CreateDelegateProperties(Type type, Type delegateType, string delegateObjectName, Common.UnitType unitType, Common.ItemType itemType)
         {
-            type.CheckArgument(nameof(type));
-            delegateType.CheckArgument(nameof(delegateType));
-
             var modelName = CreateModelNameFromInterface(type);
             var typeProperties = ContractHelper.GetAllProperties(delegateType);
             var result = new Models.GeneratedItem(unitType, itemType)
@@ -392,12 +380,10 @@ namespace CSharpCodeGenerator.Logic.Generation
 
         protected string GetBaseClassByContract(Type type)
         {
-            type.CheckArgument(nameof(type));
-
             var result = string.Empty;
             var typeHelper = new ContractHelper(type);
 
-            if (type.FullName.Contains(StaticLiterals.BusinessSubName))
+            if (type.FullName != null && type.FullName.Contains(StaticLiterals.BusinessSubName))
             {
                 result = IdentityModel;
                 var itfcs = type.GetInterfaces();
@@ -439,8 +425,23 @@ namespace CSharpCodeGenerator.Logic.Generation
                         result = $"{OneToManyModel}<{genericArgs[0].FullName}, {firstModel}, {genericArgs[1].FullName}, {secondModel}>";
                     }
                 }
+                else
+                {
+                    if (typeHelper.IsVersionable)
+                    {
+                        result = VersionModel;
+                    }
+                    else if (typeHelper.IsIdentifiable)
+                    {
+                        result = IdentityModel;
+                    }
+                    else
+                    {
+                        result = ModelObject;
+                    }
+                }
             }
-            else if (type.FullName.Contains(StaticLiterals.PersistenceSubName))
+            else if (type.FullName != null && type.FullName.Contains(StaticLiterals.PersistenceSubName))
             {
                 if (typeHelper.IsVersionable)
                 {
@@ -455,7 +456,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                     result = ModelObject;
                 }
             }
-            else if (type.FullName.Contains(StaticLiterals.ShadowSubName))
+            else if (type.FullName != null && type.FullName.Contains(StaticLiterals.ShadowSubName))
             {
                 result = ShadowModel;
             }
@@ -467,7 +468,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             {
                 result = IdentityModel;
             }
-            else if (type.FullName.Contains(StaticLiterals.ModulesSubName))
+            else if (type.FullName != null && type.FullName.Contains(StaticLiterals.ModulesSubName))
             {
                 result = ModuleModel;
             }
@@ -479,15 +480,13 @@ namespace CSharpCodeGenerator.Logic.Generation
 
             var modelName = CreateModelNameFromInterface(type);
             var subNamespace = $"{AppPostfix}.{(ModelsFolder.HasContent() ? $"{ModelsFolder}." : string.Empty)}";
-            var result = type.FullName.Replace(type.Name, modelName);
+            var result = type?.FullName?.Replace(type.Name, modelName);
 
-            return result.Replace(".Contracts.", subNamespace);
+            return result?.Replace(".Contracts.", subNamespace) ?? string.Empty;
         }
 
         protected virtual Contracts.IGeneratedItem CreateModelReferenceItems(Type type, IEnumerable<Type> types, Common.UnitType unitType, Common.ItemType itemType)
         {
-            type.CheckArgument(nameof(type));
-
             var contractHelper = new ContractHelper(type);
             var masters = contractHelper.GetMasterTypes(types);
             var modelName = CreateModelNameFromInterface(type);
@@ -501,10 +500,10 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.Add($"public partial class {modelName}");
             result.Add("{");
 
-			foreach (var item in masters)
-			{
+            foreach (var item in masters)
+            {
                 result.Add($"public string {item.Name}String " + "{ get; set; }");
-			}
+            }
             result.Add("}");
             result.EnvelopeWithANamespace(CreateModelsNamespace(type), "using System;");
             result.FormatCSharpCode();

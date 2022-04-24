@@ -7,7 +7,7 @@
 
     if (Model is Role role)
     {
-        var viewBagInfo = Model.ViewBagInfo;
+        var viewBagInfo = Model.ViewBagInfo ?? new ViewBagWrapper(ViewBag);
         var property = viewBagInfo.DisplayProperty;
         var displayViewModel = ViewModelCreator.CreateDisplayViewModel(viewBagInfo, Model);
 

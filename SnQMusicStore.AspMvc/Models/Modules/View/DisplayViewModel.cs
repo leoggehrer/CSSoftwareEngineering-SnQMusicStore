@@ -16,31 +16,24 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         static partial void ClassConstructing();
         static partial void ClassConstructed();
 
-        private ModelObject model;
-        private ModelObject displayModel;
-        private IEnumerable<PropertyInfo> displayProperties;
+        private ModelObject? displayModel;
+        private IEnumerable<PropertyInfo>? displayProperties;
 
-        public ModelObject Model
-        {
-            get => model;
-            set => model = value ?? model;
-        }
+        public ModelObject Model { get; set; }
         public ModelObject DisplayModel
         {
-            get => displayModel ?? model;
+            get => displayModel ?? Model;
             set => displayModel = value;
         }
         public IEnumerable<PropertyInfo> DisplayProperties
         {
-            get => displayProperties;
+            get => displayProperties ?? Array.Empty<PropertyInfo>();
             set => displayProperties = value ?? displayProperties;
         }
 
         public DisplayViewModel(ViewBagWrapper viewBagInfo, ModelObject model, Type modelType, Type displayType)
             : base(viewBagInfo, modelType, displayType)
         {
-            model.CheckArgument(nameof(model));
-
             Constructing();
             Model = model;
             Constructed();
@@ -56,13 +49,13 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         {
             return displayProperties ??= GetDisplayProperties(DisplayType);
         }
-        public virtual object GetValue(PropertyInfo propertyInfo)
+        public virtual object? GetValue(PropertyInfo? propertyInfo)
         {
-            return GetValue(Model, propertyInfo);
+            return propertyInfo != null ? GetValue(Model, propertyInfo) : null;
         }
-        public virtual string GetDisplayValue(PropertyInfo propertyInfo)
+        public virtual string GetDisplayValue(PropertyInfo? propertyInfo)
         {
-            return GetDisplayValue(Model, propertyInfo);
+            return propertyInfo != null ? GetDisplayValue(Model, propertyInfo) : string.Empty;
         }
     }
 }

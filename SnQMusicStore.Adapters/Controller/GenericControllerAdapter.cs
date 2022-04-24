@@ -51,7 +51,7 @@ namespace SnQMusicStore.Adapters.Controller
             return controller.CountByAsync(predicate);
         }
 
-        public Task<TContract> GetByIdAsync(int id)
+        public ValueTask<TContract?> GetByIdAsync(int id)
         {
             return controller.GetByIdAsync(id);
         }
@@ -148,8 +148,7 @@ namespace SnQMusicStore.Adapters.Controller
 
         public void Dispose()
         {
-            controller?.Dispose();
-            controller = null;
+            controller.Dispose();
         }
     }
 }

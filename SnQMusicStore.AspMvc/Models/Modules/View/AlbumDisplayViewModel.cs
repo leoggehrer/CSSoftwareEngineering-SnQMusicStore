@@ -12,19 +12,22 @@ namespace SnQMusicStore.AspMvc.Models.Modules.View
         {
         }
 
-        public override string GetDisplayValue(PropertyInfo propertyInfo)
+        public override string GetDisplayValue(PropertyInfo? propertyInfo)
         {
-            string result;
+            string? result = null;
 
-            if (propertyInfo.Name.Equals(nameof(Album.ArtistId)))
+            if (propertyInfo != null)
             {
-                result = ((Album)Model).Artist?.Name;
+                if (propertyInfo.Name.Equals(nameof(Album.ArtistId)))
+                {
+                    result = ((Album)Model).Artist?.Name;
+                }
+                else
+                {
+                    result = base.GetDisplayValue(propertyInfo);
+                }
             }
-            else
-            {
-                result = base.GetDisplayValue(propertyInfo);
-            }
-            return result;
+            return result ?? string.Empty;
         }
     }
 }

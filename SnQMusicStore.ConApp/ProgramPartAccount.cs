@@ -37,7 +37,7 @@ namespace SnQMusicStore.ConApp
         {
             var accMngr = new AccountManager();
             var login = await accMngr.LogonAsync(loginEmail, loginPwd, string.Empty).ConfigureAwait(false);
-            using var ctrl = Factory.Create<Contracts.Business.Account.IAppAccess>(login.SessionToken);
+            using var ctrl = Factory.Create<Contracts.Business.Account.IAppAccess>(login?.SessionToken);
             var entity = await ctrl.CreateAsync();
 
             entity.OneItem.Name = user;
@@ -53,11 +53,11 @@ namespace SnQMusicStore.ConApp
                 entity.AddManyItem(role);
             }
             var identity = await ctrl.InsertAsync(entity).ConfigureAwait(false);
-            await accMngr.LogoutAsync(login.SessionToken).ConfigureAwait(false);
+            await accMngr.LogoutAsync(login?.SessionToken ?? string.Empty).ConfigureAwait(false);
             return identity;
         }
 
-        private static Contracts.Persistence.Account.ILoginSession Login { get; set; }
+        private static Contracts.Persistence.Account.ILoginSession? Login { get; set; }
         private static Contracts.Client.IAdapterAccess<C> Create<C>()
         {
             if (Login == null)
@@ -69,7 +69,7 @@ namespace SnQMusicStore.ConApp
                     Login = await accMngr.LogonAsync(AppEmail, AppPwd);
                 }).Wait();
             }
-            return Factory.Create<C>(Login.SessionToken);
+            return Factory.Create<C>(Login?.SessionToken);
         }
 #else
         private static Contracts.Client.IAdapterAccess<C> Create<C>()
@@ -97,17 +97,17 @@ namespace SnQMusicStore.ConApp
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error in {MethodBase.GetCurrentMethod().Name}: {ex.Message}");
+                    Console.WriteLine($"Error in {MethodBase.GetCurrentMethod()?.Name}: {ex.Message}");
                 }
             }
             ).Wait();
 #endif
             Task.Run(async () =>
             {
-                Console.Write("Start: Import csv:  ");
+                Console.Write("Start: Import:  ");
                 Console.WriteLine(DateTime.Now);
                 await ImportDataAsync();
-                Console.Write("Finish: Import csv: ");
+                Console.Write("Finish: Import: ");
                 Console.WriteLine(DateTime.Now);
             }).Wait();
         }

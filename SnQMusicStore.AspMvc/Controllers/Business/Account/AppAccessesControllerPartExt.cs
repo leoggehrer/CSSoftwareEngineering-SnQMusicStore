@@ -13,7 +13,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.Account
 {
     partial class AppAccessesController
     {
-        private IEnumerable<Role> roles = null;
+        private IEnumerable<Role>? roles = null;
         protected override async Task<AppAccess> BeforeViewAsync(AppAccess model, ActionMode action)
         {
             var viewBagInfo = new ViewBagWrapper(ViewBag);
@@ -48,8 +48,6 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.Account
         #region Helpers
         private async Task<IEnumerable<Role>> LoadRolesAsync(AppAccess model)
         {
-            model.CheckArgument(nameof(model));
-
             using var ctrlRole = Adapters.Factory.Create<Contracts.Persistence.Account.IRole>(SessionInfo.SessionToken);
             var roles = await ctrlRole.GetAllAsync().ConfigureAwait(false);
             var result = new List<Role>();

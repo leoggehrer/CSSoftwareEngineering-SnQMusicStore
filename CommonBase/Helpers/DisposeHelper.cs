@@ -17,8 +17,6 @@ namespace CommonBase.Helpers
         }
         public static void DisposeFields(object owner)
         {
-            owner.CheckArgument(nameof(owner));
-
             var disposeFields = owner.GetType()
                                      .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                                      .Where(p => p.GetCustomAttributes<Attributes.DisposeFieldAttribute>()
@@ -35,8 +33,6 @@ namespace CommonBase.Helpers
         }
         public static void DisposeProperties(object owner)
         {
-            owner.CheckArgument(nameof(owner));
-
             var disposeFields = owner.GetType()
                                      .GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
                                      .Where(p => p.GetCustomAttributes<Attributes.DisposePropertyAttribute>()

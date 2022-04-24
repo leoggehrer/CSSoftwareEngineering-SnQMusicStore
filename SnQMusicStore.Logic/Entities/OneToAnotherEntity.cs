@@ -1,6 +1,8 @@
 ﻿//@CodeCopy
 //MdStart
 
+using System;
+
 namespace SnQMusicStore.Logic.Entities
 {
     internal abstract partial class OneToAnotherEntity<TOne, TOneEntity, TAnother, TAnotherEntity> : IdentityEntity
@@ -25,7 +27,7 @@ namespace SnQMusicStore.Logic.Entities
                 if (OneEntity is VersionEntity ve)
                     result = ve.RowVersion;
 
-                return result;
+                return result ?? Array.Empty<byte>();
             }
             set
             {
