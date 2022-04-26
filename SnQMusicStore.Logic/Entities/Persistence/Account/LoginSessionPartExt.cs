@@ -9,7 +9,7 @@ namespace SnQMusicStore.Logic.Entities.Persistence.Account
 {
     partial class LoginSession
     {
-#region Identity members
+        #region Identity members
         partial void OnIdentityIdReading()
         {
             if (Identity != null)
@@ -42,39 +42,25 @@ namespace SnQMusicStore.Logic.Entities.Persistence.Account
                 _timeOutInMinutes = Authorization.DefaultTimeOutInMinutes;
             }
         }
-        private byte[] passwordHash;
         internal byte[] PasswordHash
         {
-            get
-            {
-                if (Identity != null)
-                {
-                    passwordHash = Identity.PasswordHash;
-                }
-                return passwordHash;
-            }
+            get => Identity != null ? Identity.PasswordHash : Array.Empty<byte>();
             set
             {
-                passwordHash = value;
+                if (Identity != null)
+                    Identity.PasswordHash = value;
             }
         }
-        private byte[] passwordSalt;
         internal byte[] PasswordSalt
         {
-            get
-            {
-                if (Identity != null)
-                {
-                    passwordSalt = Identity.PasswordSalt;
-                }
-                return passwordSalt;
-            }
+            get => Identity != null ? Identity.PasswordSalt : Array.Empty<byte>();
             set
             {
-                passwordSalt = value;
+                if (Identity != null)
+                    Identity.PasswordSalt = value;
             }
         }
-#endregion Identity members
+        #endregion Identity members
 
         partial void OnOriginReading()
         {
@@ -93,7 +79,7 @@ namespace SnQMusicStore.Logic.Entities.Persistence.Account
             handled = true;
         }
 
-#region Ignore properties
+        #region Ignore properties
         internal bool IsActive => IsTimeout == false;
         internal bool IsTimeout
         {
@@ -106,7 +92,7 @@ namespace SnQMusicStore.Logic.Entities.Persistence.Account
         }
         internal bool HasChanged { get; set; }
         internal List<Role> Roles { get; } = new List<Role>();
-#endregion Ignore properties
+        #endregion Ignore properties
 
         partial void AfterCopyProperties(ILoginSession other)
         {

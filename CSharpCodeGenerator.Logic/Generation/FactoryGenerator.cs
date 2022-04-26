@@ -54,7 +54,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             };
             result.Add("public static partial class Factory");
             result.Add("{");
-            result.Add("static partial void CreateController<C>(ref Contracts.Client.IControllerAccess<C> controller) where C : Contracts.IIdentifiable");
+            result.Add("static partial void CreateController<C>(ref Contracts.Client.IControllerAccess<C>? controller) where C : Contracts.IIdentifiable");
             result.Add("{");
             foreach (var type in contractHelpers.Where(ch => ch.HasLogicAccess && CanCreateLogicAccess(ch.Type)).Select(ch => ch.Type))
             {
@@ -83,7 +83,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             }
             result.Add("}");
 
-            result.Add("static partial void CreateController<C>(object sharedController, ref Contracts.Client.IControllerAccess<C> controller) where C : Contracts.IIdentifiable");
+            result.Add("static partial void CreateController<C>(Logic.Controllers.ControllerObject sharedController, ref Contracts.Client.IControllerAccess<C>? controller) where C : Contracts.IIdentifiable");
             result.Add("{");
             first = true;
             foreach (var type in contractHelpers.Where(ch => ch.HasLogicAccess && CanCreateLogicAccess(ch.Type)).Select(ch => ch.Type))
@@ -100,7 +100,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                     result.Add($"else if (typeof(C) == typeof({type.FullName}))");
                 }
                 result.Add("{");
-                result.Add($"controller = new {controllerNameSpace}.{entityName}Controller(sharedController as Controllers.ControllerObject) as Contracts.Client.IControllerAccess<C>;");
+                result.Add($"controller = new {controllerNameSpace}.{entityName}Controller(sharedController) as Contracts.Client.IControllerAccess<C>;");
                 result.Add("}");
                 first = false;
             }
@@ -114,7 +114,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.Add("}");
 
             result.Add("#if ACCOUNT_ON");
-            result.Add("public static void CreateController<C>(string sessionToken, ref Contracts.Client.IControllerAccess<C> controller) where C : Contracts.IIdentifiable");
+            result.Add("public static void CreateController<C>(string sessionToken, ref Contracts.Client.IControllerAccess<C>? controller) where C : Contracts.IIdentifiable");
             result.Add("{");
             first = true;
             foreach (var type in contractHelpers.Where(ch => ch.HasLogicAccess && CanCreateLogicAccess(ch.Type)).Select(ch => ch.Type))
@@ -173,7 +173,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.Add("{");
             result.Add("public static Contracts.Client.IAdapterAccess<C> Create<C>()");
             result.Add("{");
-            result.Add("Contracts.Client.IAdapterAccess<C> result = null;");
+            result.Add("Contracts.Client.IAdapterAccess<C>? result = null;");
             result.Add("if (Adapter == AdapterType.Controller)");
             result.Add("{");
             foreach (var type in contractHelpers.Where(ch => ch.HasWebApiAccess && CanCreateLogicAccess(ch.Type) && CanCreateAdapterAccess(ch.Type)).Select(ch => ch.Type))
@@ -215,19 +215,18 @@ namespace CSharpCodeGenerator.Logic.Generation
                     result.Add($"else if (typeof(C) == typeof({type.FullName}))");
                 }
                 result.Add("{");
-                result.Add($"result = new Service.GenericServiceAdapter<{type.FullName}, {modelNameSpace}.{modelName}>(BaseUri, \"{extUri}\")");
-                result.Add(" as Contracts.Client.IAdapterAccess<C>;");
+                result.Add($"result = new Service.GenericServiceAdapter<{type.FullName}, {modelNameSpace}.{modelName}>(BaseUri, \"{extUri}\") as Contracts.Client.IAdapterAccess<C>;");
                 result.Add("}");
                 first = false;
             }
             result.Add("}");
-            result.Add("return result;");
+            result.Add("return result ?? throw new Logic.Modules.Exception.LogicException(Logic.Modules.Exception.ErrorType.InvalidControllerType);");
             result.Add("}");
 
             result.Add("#if ACCOUNT_ON");
             result.Add("public static Contracts.Client.IAdapterAccess<C> Create<C>(string sessionToken)");
             result.Add("{");
-            result.Add("Contracts.Client.IAdapterAccess<C> result = null;");
+            result.Add("Contracts.Client.IAdapterAccess<C>? result = null;");
             result.Add("if (Adapter == AdapterType.Controller)");
             result.Add("{");
 
@@ -275,7 +274,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                 first = false;
             }
             result.Add("}");
-            result.Add("return result;");
+            result.Add("return result ?? throw new Logic.Modules.Exception.LogicException(Logic.Modules.Exception.ErrorType.InvalidControllerType);");
             result.Add("}");
             result.Add("#endif");
 
@@ -301,7 +300,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             result.Add("{");
             result.Add("public static Contracts.Client.IAdapterAccess<C> CreateThridParty<C>(string baseUri)");
             result.Add("{");
-            result.Add("Contracts.Client.IAdapterAccess<C> result = null;");
+            result.Add("Contracts.Client.IAdapterAccess<C>? result = null;");
 
             first = true;
             foreach (var type in contractsProject.ThirdPartyTypes.Where(t => CanCreateLogicAccess(t) && CanCreateAdapterAccess(t)))
@@ -325,12 +324,12 @@ namespace CSharpCodeGenerator.Logic.Generation
                 result.Add("}");
                 first = false;
             }
-            result.Add("return result;");
+            result.Add("return result ?? throw new Logic.Modules.Exception.LogicException(Logic.Modules.Exception.ErrorType.InvalidControllerType);");
             result.Add("}");
 
             result.Add("public static Contracts.Client.IAdapterAccess<C> Create<C>(string baseUri, string sessionToken)");
             result.Add("{");
-            result.Add("Contracts.Client.IAdapterAccess<C> result = null;");
+            result.Add("Contracts.Client.IAdapterAccess<C>? result = null;");
 
             first = true;
             foreach (var type in contractsProject.ThirdPartyTypes.Where(t => CanCreateLogicAccess(t) && CanCreateAdapterAccess(t)))
@@ -353,7 +352,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                 result.Add("}");
                 first = false;
             }
-            result.Add("return result;");
+            result.Add("return result ?? throw new Logic.Modules.Exception.LogicException(Logic.Modules.Exception.ErrorType.InvalidControllerType);");
             result.Add("}");
 
             result.Add("}");

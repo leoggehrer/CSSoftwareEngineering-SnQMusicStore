@@ -10,12 +10,20 @@ namespace SnQMusicStore.Logic.Controllers.Persistence.Account
 {
     partial class IdentityXRoleController
 	{
-		public Task<Role[]> QueryIdentityRolesAsync(int identityId)
+		public async Task<Role[]> QueryIdentityRolesAsync(int identityId)
 		{
-			return QueryableSet().Where(e => e.IdentityId == identityId)
-								 .Include(e => e.Role)
-								 .Select(e => e.Role)
-								 .ToArrayAsync();
+			var result = new List<Role>();
+			var roles = await QueryableSet().Where(e => e.IdentityId == identityId)
+											.Include(e => e.Role)
+											.Select(e => e.Role)
+											.ToArrayAsync();
+
+            foreach (var role in roles)
+            {
+				if (role != null)
+					result.Add(role);
+            }
+			return result.ToArray();
 		}
 	}
 }

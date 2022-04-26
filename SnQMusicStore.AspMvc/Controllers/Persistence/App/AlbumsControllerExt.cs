@@ -16,7 +16,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             {
                 using var artistCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IArtist>(sessionToken);
 
-                model.Artists = await artistCtrl.GetAllAsync().ConfigureAwait(false);
+                model.Artists = (await artistCtrl.GetAllAsync().ConfigureAwait(false)).ToList();
 
                 var artist = model.Artists.FirstOrDefault(e => e.Id == model.ArtistId);
 
@@ -68,7 +68,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             var sessionToken = SessionInfo.LoginSession?.SessionToken ?? string.Empty;
             using var ctrl = CreateController<Contracts.Business.App.IAlbumTracks>();
             var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
-            var model = Models.Business.App.AlbumTracks.Create(entity);
+            var model = Models.Business.App.AlbumTracks.Create(entity!);
             var modelType = model.GetType();
             var displayType = modelType;
 

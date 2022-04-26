@@ -31,7 +31,14 @@ namespace SnQMusicStore.Logic
         {
             var result = default(IControllerAccess<C>);
 
-            CreateController(controllerObject, ref result);
+            if (controllerObject is Controllers.ControllerObject sharedControllerObject)
+            {
+                CreateController(sharedControllerObject, ref result);
+            }
+            else
+            {
+                throw new Modules.Exception.LogicException(Modules.Exception.ErrorType.InvalidControllerObject);
+            }
             return result ?? throw new Modules.Exception.LogicException(Modules.Exception.ErrorType.InvalidControllerType);
         }
 #if ACCOUNT_ON
@@ -48,7 +55,7 @@ namespace SnQMusicStore.Logic
 #endif
         static partial void CreateController<C>(ref IControllerAccess<C>? controller)
             where C : Contracts.IIdentifiable;
-        static partial void CreateController<C>(object sharedController, ref IControllerAccess<C>? controller)
+        static partial void CreateController<C>(Controllers.ControllerObject sharedController, ref IControllerAccess<C>? controller)
             where C : Contracts.IIdentifiable;
     }
 }

@@ -25,7 +25,7 @@ namespace SnQMusicStore.Logic.Controllers.Shadow
         static partial void ClassConstructing();
         static partial void ClassConstructed();
 
-        protected abstract GenericController<TSourceContract, TSourceEntity> SourceEntityController { get; set; }
+        protected abstract GenericController<TSourceContract, TSourceEntity> SourceEntityController { get; }
 
         public override bool IsTransient => false;
 

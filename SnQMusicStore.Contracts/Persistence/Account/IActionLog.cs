@@ -10,8 +10,11 @@ namespace SnQMusicStore.Contracts.Persistence.Account
     {
         int IdentityId { get; set; }
         DateTime Time { get; set; }
+        [ContractPropertyInfo(MaxLength = 256, DefaultValue = "string.Empty")]
         string Subject { get; set; }
+        [ContractPropertyInfo(MaxLength = 128, DefaultValue = "string.Empty")]
         string Action { get; set; }
+        [ContractPropertyInfo(DefaultValue = "string.Empty")]
         string Info { get; set; }
     }
 }

@@ -75,7 +75,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                 string subNameSpace = CreateSubNamespaceFromType(type);
                 string entityNameSet = $"{entityName}Set";
 
-                result.Add($"protected DbSet<Entities.{subNameSpace}.{entityName}> {entityNameSet}" + " { get; set; }");
+                result.Add($"protected DbSet<Entities.{subNameSpace}.{entityName}>? {entityNameSet}" + " { get; set; }");
             }
 
             result.AddRange(CreateSetMethode());
@@ -96,7 +96,7 @@ namespace CSharpCodeGenerator.Logic.Generation
             var contractsProject = ContractsProject.Create(SolutionProperties);
 
             #region Generate DbSet<E> Set<I, E>()
-            result.Add("partial void GetDbSet<C, E>(ref DbSet<E> dbSet) where E : class");
+            result.Add("partial void GetDbSet<C, E>(ref DbSet<E>? dbSet) where E : class");
             result.Add("{");
 
             foreach (var type in contractsProject.PersistenceTypes)

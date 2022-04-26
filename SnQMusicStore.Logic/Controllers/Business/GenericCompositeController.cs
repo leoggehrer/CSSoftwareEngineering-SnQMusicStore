@@ -31,9 +31,9 @@ namespace SnQMusicStore.Logic.Controllers.Business
         static partial void ClassConstructing();
         static partial void ClassConstructed();
 
-        protected abstract GenericController<TConnectorContract, TConnectorEntity> ConnectorEntityController { get; set; }
-        protected abstract GenericController<TOneContract, TOneEntity> OneEntityController { get; set; }
-        protected abstract GenericController<TAnotherContract, TAnotherEntity> AnotherEntityController { get; set; }
+        protected abstract GenericController<TConnectorContract, TConnectorEntity> ConnectorEntityController { get; }
+        protected abstract GenericController<TOneContract, TOneEntity> OneEntityController { get; }
+        protected abstract GenericController<TAnotherContract, TAnotherEntity> AnotherEntityController { get; }
 
         public override bool IsTransient => true;
 

@@ -11,7 +11,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             var viewBagInfo = new ViewBagWrapper(ViewBag);
             using var ctrl = CreateController<Contracts.Business.App.IArtistAlbums>();
             var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
-            var model = Models.Business.App.ArtistAlbums.Create(entity);
+            var model = Models.Business.App.ArtistAlbums.Create(entity!);
             var modelType = model.GetType();
             var displayType = modelType;
 

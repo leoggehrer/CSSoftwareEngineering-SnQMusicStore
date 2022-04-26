@@ -223,7 +223,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                             var otherFullName = GeneratorObject.CreateEntityFullNameFromInterface(other);
                             var navigationName = $"{otherName}s";
 
-                            result.Add(($"public System.Collections.Generic.ICollection<{otherFullName}> {navigationName} " + "{ get; set; }"));
+                            result.Add(($"public System.Collections.Generic.List<{otherFullName}> {navigationName.CreatePluralWord()} " + "{ get; set; } = new();"));
                         }
                     }
                 }
@@ -258,7 +258,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                                 var navigationName = propHelper.NavigationName.GetValueOrDefault(otherName);
 
                                 result.Add(($"[System.ComponentModel.DataAnnotations.Schema.ForeignKey(\"{pi.Name}\")]"));
-                                result.Add(($"public {otherFullName} {navigationName} " + "{ get; set; }"));
+                                result.Add(($"public {otherFullName}? {navigationName} " + "{ get; set; }"));
                             }
                             else if (pi.Name.StartsWith($"{otherName}Id_"))
                             {
@@ -271,7 +271,7 @@ namespace CSharpCodeGenerator.Logic.Generation
                                     var navigationName = propHelper.NavigationName.GetValueOrDefault(data[1]);
 
                                     result.Add(($"[System.ComponentModel.DataAnnotations.Schema.ForeignKey(\"{pi.Name}\")]"));
-                                    result.Add(($"public {otherFullName} {navigationName} " + "{ get; set; }"));
+                                    result.Add(($"public {otherFullName}? {navigationName} " + "{ get; set; }"));
                                 }
                             }
                         }
@@ -325,8 +325,13 @@ namespace CSharpCodeGenerator.Logic.Generation
                 delegateType = interfaceTypes.Single(e => e.IsGenericType && e.Name.Equals(StaticLiterals.IShadowName)).GetGenericArguments()[0];
                 delegateEntityType = $"{CreateEntityFullNameFromInterface(delegateType)}";
 
-                result.Add($"public {delegateEntityType} {delegateSourceName}" + " { get; set; }");
-                result.Add($"public override void SetSource(object source) => {delegateSourceName} = source as {delegateEntityType};");
+                result.Add($"private {delegateEntityType}? source;");
+                result.Add($"public {delegateEntityType} {delegateSourceName}");
+                result.Add("{");
+                result.Add($"get => source ??= new {delegateEntityType}();");
+                result.Add("set => source = value;");
+                result.Add("}");
+                result.Add($"public override void SetSource(object source) => {delegateSourceName} = (source as {delegateEntityType}) ?? throw new ArgumentException(\"Source is not from type '{delegateEntityType}'\");");
 
                 result.Add($"public override int Id ");
                 result.Add("{");

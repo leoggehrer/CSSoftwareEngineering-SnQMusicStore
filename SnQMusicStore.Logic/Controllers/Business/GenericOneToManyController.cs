@@ -30,8 +30,8 @@ namespace SnQMusicStore.Logic.Controllers.Business
 
         public override bool IsTransient => true;
 
-        protected abstract GenericController<TOne, TOneEntity> OneEntityController { get; set; }
-        protected abstract GenericController<TMany, TManyEntity> ManyEntityController { get; set; }
+        protected abstract GenericController<TOne, TOneEntity> OneEntityController { get; }
+        protected abstract GenericController<TMany, TManyEntity> ManyEntityController { get; }
 
         public GenericOneToManyController(DataContext.IContext context) : base(context)
         {

@@ -9,9 +9,9 @@ namespace SnQMusicStore.Contracts.Persistence.Account
     {
         [ContractPropertyInfo(IsUnique = true)]
         int IdentityId { get; set; }
-        [ContractPropertyInfo(MaxLength = 64)]
+        [ContractPropertyInfo(MaxLength = 64, DefaultValue = "string.Empty")]
         string Firstname { get; set; }
-        [ContractPropertyInfo(MaxLength = 64)]
+        [ContractPropertyInfo(MaxLength = 64, DefaultValue = "string.Empty")]
         string Lastname { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace SnQMusicStore.Logic.Entities
 {
     internal abstract partial class EntityObject
     {
-        protected static bool IsEqualsWith(object obj1, object obj2)
+        protected static bool IsEqualsWith(object? obj1, object? obj2)
         {
             bool result = false;
 

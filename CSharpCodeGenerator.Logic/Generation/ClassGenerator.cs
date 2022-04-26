@@ -412,11 +412,6 @@ namespace CSharpCodeGenerator.Logic.Generation
             {
                 $"public void CopyProperties({copyType} other)",
                 "{",
-                "if (other == null)",
-                "{",
-                "throw new System.ArgumentNullException(nameof(other));",
-                "}",
-                string.Empty,
                 "bool handled = false;",
                 "BeforeCopyProperties(other, ref handled);",
                 "if (handled == false)",
@@ -522,7 +517,7 @@ namespace CSharpCodeGenerator.Logic.Generation
 
             if (filteredProperties.Any())
             {
-                result.Add($"public override bool Equals(object obj)");
+                result.Add($"public override bool Equals(object? obj)");
                 result.Add("{");
                 result.Add($"if (obj is not {type.FullName} instance)");
                 result.Add("{");
@@ -533,10 +528,6 @@ namespace CSharpCodeGenerator.Logic.Generation
                 result.Add(string.Empty);
                 result.Add($"protected bool Equals({type.FullName} other)");
                 result.Add("{");
-                result.Add("if (other == null)");
-                result.Add("{");
-                result.Add("return false;");
-                result.Add("}");
 
                 foreach (var pi in filteredProperties)
                 {

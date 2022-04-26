@@ -7,9 +7,9 @@ namespace SnQMusicStore.Contracts.Persistence.App
     {
         int AlbumId { get; set; }
         int GenreId { get; set; }
-        [ContractPropertyInfo(Required = true, MinLength = 2, MaxLength = 1024, HasIndex = true)]
+        [ContractPropertyInfo(Required = true, MinLength = 2, MaxLength = 1024, HasIndex = true, DefaultValue = "string.Empty")]
         string Title { get; set; }
-        [ContractPropertyInfo(MaxLength = 512)]
+        [ContractPropertyInfo(MaxLength = 512, DefaultValue = "string.Empty")]
         string Composer { get; set; }
         long Milliseconds { get; set; }
         long Bytes { get; set; }

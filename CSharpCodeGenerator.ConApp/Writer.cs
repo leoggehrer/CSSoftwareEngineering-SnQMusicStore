@@ -525,7 +525,7 @@ namespace CSharpCodeGenerator.ConApp
                     Directory.CreateDirectory(directory);
                 }
 
-                sourceLines.Insert(0, $"{StaticLiterals.NullableDisableLabel}");
+                //sourceLines.Insert(0, $"{StaticLiterals.NullableDisableLabel}");
                 sourceLines.Insert(0, $"//{StaticLiterals.GeneratedCodeLabel}");
                 File.WriteAllLines(fullFilePath, sourceLines);
             }
@@ -537,7 +537,7 @@ namespace CSharpCodeGenerator.ConApp
                 var sourceLines = new List<string>(item.SourceCode);
                 var filePath = Path.Combine(projectPath, item.SubFilePath);
 
-                sourceLines.Insert(0, $"{StaticLiterals.NullableDisableLabel}");
+                //sourceLines.Insert(0, $"{StaticLiterals.NullableDisableLabel}");
                 sourceLines.Insert(0, $"//{StaticLiterals.GeneratedCodeLabel}");
                 WriteCodeFile(filePath, sourceLines);
             }

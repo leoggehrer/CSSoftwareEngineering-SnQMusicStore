@@ -12,17 +12,17 @@ namespace SnQMusicStore.Contracts.Persistence.Account
         int IdentityId { get; }
         [ContractPropertyInfo(NotMapped = true)]
         bool IsRemoteAuth { get; }
-        [ContractPropertyInfo(NotMapped = true, IsAutoProperty = false)]
+        [ContractPropertyInfo(NotMapped = true, IsAutoProperty = false, DefaultValue = "string.Empty")]
         string Origin { get; }
-        [ContractPropertyInfo(NotMapped = true, IsAutoProperty = false)]
+        [ContractPropertyInfo(NotMapped = true, IsAutoProperty = false, DefaultValue = "string.Empty")]
         string Name { get; }
-        [ContractPropertyInfo(NotMapped = true, IsAutoProperty = false)]
+        [ContractPropertyInfo(NotMapped = true, IsAutoProperty = false, DefaultValue = "string.Empty")]
         string Email { get; }
         [ContractPropertyInfo(NotMapped = true, IsAutoProperty = false)]
         int TimeOutInMinutes { get; }
-        [ContractPropertyInfo(NotMapped = true)]
+        [ContractPropertyInfo(NotMapped = true, DefaultValue = "string.Empty")]
         string JsonWebToken { get; }
-        [ContractPropertyInfo(Required = true, MaxLength = 128)]
+        [ContractPropertyInfo(Required = true, MaxLength = 128, DefaultValue = "string.Empty")]
         string SessionToken { get; }
         [ContractPropertyInfo()]
         DateTime LoginTime { get; }
@@ -30,7 +30,7 @@ namespace SnQMusicStore.Contracts.Persistence.Account
         DateTime LastAccess { get; }
         [ContractPropertyInfo(IsAutoProperty = false)]
         DateTime? LogoutTime { get; }
-        [ContractPropertyInfo(MaxLength = 4096)]
+        [ContractPropertyInfo(MaxLength = 4096, DefaultValue = "string.Empty")]
         string OptionalInfo { get; set; }
     }
 }

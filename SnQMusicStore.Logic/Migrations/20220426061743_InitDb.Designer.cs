@@ -12,7 +12,7 @@ using SnQMusicStore.Logic.DataContext;
 namespace SnQMusicStore.Logic.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    [Migration("20220424203102_InitDb")]
+    [Migration("20220426061743_InitDb")]
     partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,6 +41,7 @@ namespace SnQMusicStore.Logic.Migrations
                         .HasColumnType("nvarchar(512)");
 
                     b.Property<string>("Value")
+                        .IsRequired()
                         .HasMaxLength(4096)
                         .HasColumnType("nvarchar(max)");
 
@@ -63,12 +64,15 @@ namespace SnQMusicStore.Logic.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Action")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<int>("IdentityId")
                         .HasColumnType("int");
 
                     b.Property<string>("Info")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("RowVersion")
@@ -78,7 +82,9 @@ namespace SnQMusicStore.Logic.Migrations
                         .HasColumnType("rowversion");
 
                     b.Property<string>("Subject")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<DateTime>("Time")
                         .HasColumnType("datetime2");
@@ -200,6 +206,7 @@ namespace SnQMusicStore.Logic.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("OptionalInfo")
+                        .IsRequired()
                         .HasMaxLength(4096)
                         .HasColumnType("nvarchar(max)");
 
@@ -230,6 +237,7 @@ namespace SnQMusicStore.Logic.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -261,6 +269,7 @@ namespace SnQMusicStore.Logic.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Firstname")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
@@ -268,6 +277,7 @@ namespace SnQMusicStore.Logic.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Lastname")
+                        .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
@@ -359,6 +369,7 @@ namespace SnQMusicStore.Logic.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Composer")
+                        .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
 
@@ -423,7 +434,7 @@ namespace SnQMusicStore.Logic.Migrations
             modelBuilder.Entity("SnQMusicStore.Logic.Entities.Persistence.Account.Access", b =>
                 {
                     b.HasOne("SnQMusicStore.Logic.Entities.Persistence.Account.Identity", "Identity")
-                        .WithMany("Accesss")
+                        .WithMany("Accessses")
                         .HasForeignKey("IdentityId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -515,7 +526,7 @@ namespace SnQMusicStore.Logic.Migrations
 
             modelBuilder.Entity("SnQMusicStore.Logic.Entities.Persistence.Account.Identity", b =>
                 {
-                    b.Navigation("Accesss");
+                    b.Navigation("Accessses");
 
                     b.Navigation("ActionLogs");
 

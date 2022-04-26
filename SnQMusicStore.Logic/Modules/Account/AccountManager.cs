@@ -394,7 +394,7 @@ namespace SnQMusicStore.Logic.Modules.Account
                     {
                         Identity = identity
                     };
-                    session.Roles.AddRange(identity.IdentityXRoles.Select(e => Role.Create(e.Role)));
+                    session.Roles.AddRange(identity.IdentityXRoles.Select(e => Role.Create(e.Role!)));
                     session.JsonWebToken = JsonWebToken.GenerateToken(new Claim[]
                     {
                         new Claim(ClaimTypes.Email, identity.Email),

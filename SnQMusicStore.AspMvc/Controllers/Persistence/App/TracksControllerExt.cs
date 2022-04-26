@@ -16,7 +16,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
                 using var genreCtrl = Adapters.Factory.Create<Contracts.Persistence.MasterData.IGenre>(sessionToken);
                 using var albumCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IAlbum>(sessionToken);
 
-                model.Genres = await genreCtrl.GetAllAsync().ConfigureAwait(false);
+                model.Genres = (await genreCtrl.GetAllAsync().ConfigureAwait(false)).ToList();
                 var genre = model.Genres.FirstOrDefault(e => e.Id == model.GenreId);
 
                 if (genre != null)
@@ -24,7 +24,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
                     model.Genre = genre;
                 }
 
-                model.Albums = await albumCtrl.GetAllAsync().ConfigureAwait(false);
+                model.Albums = (await albumCtrl.GetAllAsync().ConfigureAwait(false)).ToList();
                 var album = model.Albums.FirstOrDefault(e => e.Id == model.AlbumId);
 
                 if (album != null)
@@ -82,7 +82,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Persistence.App
             var sessionToken = SessionInfo.LoginSession?.SessionToken ?? string.Empty;
             using var ctrl = CreateController<Contracts.Business.App.ITrackAlbumGenre>();
             var entity = await ctrl.GetByIdAsync(id).ConfigureAwait(false);
-            var model = Models.Business.App.TrackAlbumGenre.Create(entity);
+            var model = Models.Business.App.TrackAlbumGenre.Create(entity!);
 
             if (model != null)
             {

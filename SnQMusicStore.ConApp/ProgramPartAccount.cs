@@ -37,7 +37,7 @@ namespace SnQMusicStore.ConApp
         {
             var accMngr = new AccountManager();
             var login = await accMngr.LogonAsync(loginEmail, loginPwd, string.Empty).ConfigureAwait(false);
-            using var ctrl = Factory.Create<Contracts.Business.Account.IAppAccess>(login?.SessionToken);
+            using var ctrl = Factory.Create<Contracts.Business.Account.IAppAccess>(login?.SessionToken ?? string.Empty);
             var entity = await ctrl.CreateAsync();
 
             entity.OneItem.Name = user;
@@ -69,7 +69,7 @@ namespace SnQMusicStore.ConApp
                     Login = await accMngr.LogonAsync(AppEmail, AppPwd);
                 }).Wait();
             }
-            return Factory.Create<C>(Login?.SessionToken);
+            return Factory.Create<C>(Login?.SessionToken ?? string.Empty);
         }
 #else
         private static Contracts.Client.IAdapterAccess<C> Create<C>()

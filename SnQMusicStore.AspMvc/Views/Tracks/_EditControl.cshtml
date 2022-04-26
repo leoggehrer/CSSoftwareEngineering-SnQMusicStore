@@ -6,7 +6,7 @@
     var viewBagInfo = Model.ViewBagInfo;
     var property = viewBagInfo.DisplayProperty;
 
-    if (property.Name.Equals("GenreId"))
+    if (property != null && property.Name.Equals("GenreId"))
     {
         @if (Model.DisplayModel is SnQMusicStore.AspMvc.Models.Persistence.App.Track track)
         {
@@ -14,7 +14,7 @@
         }
         Model.ViewBagInfo.Handled = true;
     }
-    else if (property.Name.Equals("AlbumId"))
+    else if (property != null && property.Name.Equals("AlbumId"))
     {
         @if (Model.DisplayModel is SnQMusicStore.AspMvc.Models.Persistence.App.Track track)
         {

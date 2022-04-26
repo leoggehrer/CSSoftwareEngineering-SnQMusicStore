@@ -309,7 +309,10 @@ namespace SnQMusicStore.AspMvc.Controllers
                 var internLogin = await intAccMngr.LogonAsync(viewModel.Email, viewModel.Password).ConfigureAwait(false);
                 var loginSession = new LoginSession();
 
-                loginSession.CopyProperties(internLogin);
+                if (internLogin != null)
+                {
+                    loginSession.CopyProperties(internLogin);
+                }
                 SessionInfo.LoginSession = loginSession;
             }
             catch (Exception ex)
@@ -328,7 +331,10 @@ namespace SnQMusicStore.AspMvc.Controllers
                 var internLogin = await intAccMngr.LogonAsync(externLogin?.JsonWebToken ?? string.Empty).ConfigureAwait(false);
                 var loginSession = new LoginSession();
 
-                loginSession.CopyProperties(internLogin);
+                if (internLogin != null)
+                {
+                    loginSession.CopyProperties(internLogin);
+                }
                 SessionInfo.LoginSession = loginSession;
                 await extAccMngr.LogoutAsync(externLogin?.SessionToken ?? string.Empty).ConfigureAwait(false);
             }

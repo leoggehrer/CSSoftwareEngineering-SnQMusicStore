@@ -27,6 +27,7 @@ namespace SnQMusicStore.Logic.Modules.Exception
         InvalidEntityContent,
 
         InvalidControllerType,
+        InvalidControllerObject,
         InvalidOperation,
     }
 }

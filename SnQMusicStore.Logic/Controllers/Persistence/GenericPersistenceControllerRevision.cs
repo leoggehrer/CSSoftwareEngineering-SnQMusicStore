@@ -78,7 +78,7 @@ namespace SnQMusicStore.Logic.Controllers.Persistence
                     ActionTime = item.ActionTime,
                     SubjectName = item.Entity.GetType().Name,
                     SubjectId = item.Entity.Id,
-                    JsonData = item.JsonData,
+                    JsonData = item.JsonData ?? string.Empty,
                 };
                 _ = await ctrl.Context.InsertAsync<Contracts.Persistence.Revision.IHistory, Entities.Persistence.Revision.History>(history).ConfigureAwait(false);
             }

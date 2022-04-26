@@ -40,7 +40,19 @@ namespace SnQMusicStore.ConApp
             var trackData = File.ReadAllLines("Data\\Track.csv", Encoding.Default).Skip(1).Select(l =>
             {
                 var data = l.Split(';');
-                return new { Data = data, Id = Int32.Parse(data[0]), Entity = new Track { Title = data[1], AlbumId = Int32.Parse(data[2]), GenreId = Int32.Parse(data[3]), Composer = data[4].Equals("<NULL>") ? null : data[4], Milliseconds = Int32.Parse(data[5]), Bytes = Int32.Parse(data[6]), UnitPrice = Double.Parse(data[7]) } };
+                return new { 
+                    Data = data, Id = Int32.Parse(data[0]), 
+                    Entity = new Track 
+                    {
+                        Title = data[1], 
+                        AlbumId = Int32.Parse(data[2]), 
+                        GenreId = Int32.Parse(data[3]), 
+                        Composer = (data[4].Equals("<NULL>") ? null : data[4]) ?? string.Empty, 
+                        Milliseconds = Int32.Parse(data[5]), 
+                        Bytes = Int32.Parse(data[6]), 
+                        UnitPrice = Double.Parse(data[7]) 
+                    } 
+                };
             });
             var genres = new List<Contracts.Persistence.MasterData.IGenre>();
 

@@ -14,7 +14,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.App
             {
                 using var artistCtrl = Adapters.Factory.Create<Contracts.Persistence.App.IArtist>(sessionToken);
 
-                model.OneModel.Artists = await artistCtrl.GetAllAsync().ConfigureAwait(false);
+                model.OneModel.Artists = (await artistCtrl.GetAllAsync().ConfigureAwait(false)).ToList();
 
                 var artist = model.OneModel.Artists.FirstOrDefault(e => e.Id == model.ArtistId);
 

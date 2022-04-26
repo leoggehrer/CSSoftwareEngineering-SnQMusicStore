@@ -79,7 +79,7 @@ namespace SnQMusicStore.Logic.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Designation = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
@@ -119,7 +119,7 @@ namespace SnQMusicStore.Logic.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdentityId = table.Column<int>(type: "int", nullable: false),
                     Key = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: true)
+                    Value = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -142,9 +142,9 @@ namespace SnQMusicStore.Logic.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdentityId = table.Column<int>(type: "int", nullable: false),
                     Time = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Subject = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Action = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Info = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Subject = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    Info = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
@@ -171,7 +171,7 @@ namespace SnQMusicStore.Logic.Migrations
                     LoginTime = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastAccess = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LogoutTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    OptionalInfo = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: true),
+                    OptionalInfo = table.Column<string>(type: "nvarchar(max)", maxLength: 4096, nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
@@ -194,8 +194,8 @@ namespace SnQMusicStore.Logic.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdentityId = table.Column<int>(type: "int", nullable: false),
-                    Firstname = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
-                    Lastname = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
+                    Firstname = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    Lastname = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
@@ -250,7 +250,7 @@ namespace SnQMusicStore.Logic.Migrations
                     AlbumId = table.Column<int>(type: "int", nullable: false),
                     GenreId = table.Column<int>(type: "int", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(1024)", maxLength: 1024, nullable: false),
-                    Composer = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
+                    Composer = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     Milliseconds = table.Column<long>(type: "bigint", nullable: false),
                     Bytes = table.Column<long>(type: "bigint", nullable: false),
                     UnitPrice = table.Column<double>(type: "float", nullable: false),

@@ -40,7 +40,7 @@ namespace SnQMusicStore.AspMvc.Controllers.Business.Account
         {
             if (action == ActionMode.CreateDetail && roles != null && model.Detail is Role role)
             {
-                role.AssignedRoles = roles.Where(r => r.Assigned == false).OrderBy(e => e.Designation).ToArray();
+                role.AssignedRoles = roles.Where(r => r.Assigned == false).OrderBy(e => e.Designation).ToList();
             }
             return base.BeforeViewMasterDetail(model, action);
         }

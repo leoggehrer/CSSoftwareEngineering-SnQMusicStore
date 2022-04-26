@@ -12,17 +12,21 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
 {
     internal partial class AppAccessController
     {
-        [Attributes.ControllerManagedProperty]
-        private IdentityXRoleController IdentityXRoleController { get; set; }
+        [Attributes.ControllerManagedField]
+        private IdentityXRoleController? identityXRoleController;
 
+        partial void Constructed()
+        {
+            identityXRoleController = new IdentityXRoleController(this);
+        }
         protected override async Task LoadDetailsAsync(AppAccess entity, int masterId)
         {
             entity.ClearManyItems();
 
-            var query = await IdentityXRoleController.QueryableSet()
-                                                     .Where(p => p.IdentityId == masterId)
-                                                     .ToArrayAsync()
-                                                     .ConfigureAwait(false);
+            var query = await identityXRoleController!.QueryableSet()
+                                                      .Where(p => p.IdentityId == masterId)
+                                                      .ToArrayAsync()
+                                                      .ConfigureAwait(false);
 
             foreach (var item in query)
             {
@@ -80,7 +84,7 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
                     }
                     joinRole.RoleId = role.Id;
                 }
-                await IdentityXRoleController.InsertEntityAsync(joinRole).ConfigureAwait(false);
+                await identityXRoleController!.InsertEntityAsync(joinRole).ConfigureAwait(false);
                 result.AddManyItem(role);
             }
             return result;
@@ -109,10 +113,10 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
             }
 
             //Delete all costs that are no longer included in the list.
-            var identityXRoles = await IdentityXRoleController.QueryableSet()
-                                                              .Where(e => e.IdentityId == entity.Id)
-                                                              .ToArrayAsync()
-                                                              .ConfigureAwait(false);
+            var identityXRoles = await identityXRoleController!.QueryableSet()
+                                                               .Where(e => e.IdentityId == entity.Id)
+                                                               .ToArrayAsync()
+                                                               .ConfigureAwait(false);
 
             foreach (var item in identityXRoles)
             {
@@ -120,7 +124,7 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
 
                 if (stillHasTheRole == false)
                 {
-                    await IdentityXRoleController.DeleteAsync(item.Id).ConfigureAwait(false);
+                    await identityXRoleController.DeleteAsync(item.Id).ConfigureAwait(false);
                 }
             }
 
@@ -155,7 +159,7 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
 
                 if (identityXRole == null)
                 {
-                    await IdentityXRoleController.InsertAsync(joinRole).ConfigureAwait(false);
+                    await identityXRoleController.InsertAsync(joinRole).ConfigureAwait(false);
                 }
                 result.AddManyItem(role);
             }
@@ -164,14 +168,14 @@ namespace SnQMusicStore.Logic.Controllers.Business.Account
         internal override async Task DeleteEntityAsync(AppAccess entity)
         {
             //Delete all costs that are no longer included in the list.
-            var identXRoles = await IdentityXRoleController.QueryableSet()
-                                                           .Where(e => e.IdentityId == entity.Id)
-                                                           .ToArrayAsync()
-                                                           .ConfigureAwait(false);
+            var identXRoles = await identityXRoleController!.QueryableSet()
+                                                            .Where(e => e.IdentityId == entity.Id)
+                                                            .ToArrayAsync()
+                                                            .ConfigureAwait(false);
 
             foreach (var item in identXRoles)
             {
-                await IdentityXRoleController.DeleteAsync(item.Id).ConfigureAwait(false);
+                await identityXRoleController.DeleteAsync(item.Id).ConfigureAwait(false);
             }
             await OneEntityController.DeleteAsync(entity.Id).ConfigureAwait(false);
         }

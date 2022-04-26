@@ -4,6 +4,7 @@ using CSharpCodeGenerator.Logic.Contracts;
 using CSharpCodeGenerator.Logic.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
@@ -430,11 +431,6 @@ namespace CSharpCodeGenerator.Logic.Generation
         }
 
         #region Property-Helpers
-        public static bool IsNullable(Type type)
-        {
-            return Nullable.GetUnderlyingType(type) != null;
-        }
-
         /// <summary>
         /// Diese Methode konvertiert den Eigenschaftstyp in eine Zeichenfolge.
         /// </summary>
@@ -442,8 +438,13 @@ namespace CSharpCodeGenerator.Logic.Generation
         /// <returns>Der Eigenschaftstyp als Zeichenfolge.</returns>
         public static string GetPropertyType(PropertyInfo propertyInfo)
         {
-            var result = propertyInfo.PropertyType.GetCodeDefinition();
+            var nullable = propertyInfo.IsNullable();
+            var result = $"{propertyInfo.PropertyType.GetCodeDefinition()}";
 
+            if (nullable && result.EndsWith('?') == false)
+            {
+                result += '?';
+            }
             return result;
         }
         /// <summary>
